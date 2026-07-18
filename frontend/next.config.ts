@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  reactStrictMode: true,
+  // Pins the project root explicitly. Without this, Next.js can mistakenly
+  // infer a different workspace root if it finds another lockfile higher up
+  // the filesystem (e.g. in a Downloads or home folder), which breaks
+  // Tailwind's ability to resolve its `content` globs correctly.
+  outputFileTracingRoot: path.join(__dirname),
 };
 
 export default nextConfig;

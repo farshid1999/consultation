@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ذهن‌آورد — Sports Psychology Landing Page
 
-## Getting Started
+A single-page, RTL, Persian-language marketing site for a premium sports-psychology
+consultation practice. Built with Next.js 15 (App Router), React 19, TypeScript,
+Tailwind CSS and Framer Motion.
 
-First, run the development server:
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> This project was authored and verified in an offline sandbox: `npm install` and
+> `next build` were run successfully against the real dependency versions, with the
+> Google Font call temporarily stubbed only because the sandbox has no outbound access
+> to fonts.googleapis.com. In your own environment (with normal internet access) the
+> Vazirmatn font will load automatically — no changes needed.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Structure
 
-## Learn More
+```
+src/
+├── app/                 # App Router entry: layout.tsx (SEO/metadata), page.tsx, globals.css
+├── components/
+│   ├── background/      # Canvas-based ambient neural particle field
+│   ├── layout/           # Navbar, Footer, SectionDivider
+│   ├── sections/         # Hero, Why, Services, Process, Benefits, Stats, Testimonials, FAQ, CTA
+│   ├── providers/        # React Query provider
+│   └── ui/               # Button, GlassCard, RevealOnScroll (shared primitives)
+├── forms/                # BookingForm (React Hook Form + Zod + React Query)
+├── schemas/              # Zod validation schemas
+├── services/             # API-call functions (mocked)
+├── hooks/                # useMagnetic, useReducedMotion
+├── data/                 # Real Persian copy for every section
+└── types/                # Shared TypeScript interfaces
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Design system
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Color (60/30/10):** deep petroleum teal (`#0B2622`) dominates; warm cream
+  (`#F5F1E7`) provides contrast surfaces and text; luxury gold (`#C9A24D`) is
+  reserved strictly for accents — CTAs, icons, dividers, highlighted numerals.
+- **Type:** Vazirmatn (variable Persian typeface) carries the entire scale —
+  hierarchy comes from weight (400–800), size and letter-spacing rather than
+  mixing families, since it is the most complete, production-safe Persian
+  webfont available.
+- **Signature motif:** a breathing concentric "pulse ring" behind the hero's
+  center brain icon — a heartbeat crossed with a brainwave — echoed later in
+  the stats counters and the FAQ's plus/rotate micro-interaction.
+- **Motion:** staggered page-load reveal on the hero, scroll-linked reveals
+  (fade/slide/scale/blur) per section, parallax on the "Why" portrait, a
+  scroll-progress spine on the process timeline, and an animated diagonal
+  wave divider before the footer. `prefers-reduced-motion` is respected
+  throughout (see `useReducedMotion` and the CSS in `globals.css`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Accessibility & SEO
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Semantic landmarks, `aria-*` attributes on icon-only controls, visible
+  focus rings, keyboard-operable accordion (FAQ) with proper `aria-expanded`/
+  `aria-controls` wiring.
+- `next/font` for zero layout shift, `Metadata` API with OpenGraph/Twitter
+  tags, and a `MedicalBusiness` JSON-LD block for structured data.
