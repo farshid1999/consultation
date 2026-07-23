@@ -31,7 +31,7 @@ export default function HomePage() {
         <Testimonials />
         <FAQ />
         <CTA />
-        <SectionDivider />
+        {/*<SectionDivider />*/}
         <Footer />
       </div>
     </main>
