@@ -14,7 +14,7 @@ const siteUrl = "https://zehnavard.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "ذهن‌آورد | مشاوره‌ی تخصصی روان‌شناسی ورزشی",
+  title: "سفیران اوج آرامش | مشاوره‌ی تخصصی روان‌شناسی ورزشی",
   description:
     "پلتفرم تخصصی روان‌شناسی ورزشی برای ورزشکاران حرفه‌ای و آماتور؛ مدیریت اضطراب رقابتی، تقویت تمرکز و اعتمادبه‌نفس، و همراهی ذهنی تا روز مسابقه.",
   keywords: [
@@ -24,20 +24,20 @@ export const metadata: Metadata = {
     "تقویت تمرکز ورزشکاران",
     "روان‌شناس ورزشی",
   ],
-  authors: [{ name: "ذهن‌آورد" }],
+  authors: [{ name: "سفیران اوج آرامش" }],
   openGraph: {
     type: "website",
     locale: "fa_IR",
     url: siteUrl,
-    siteName: "ذهن‌آورد",
-    title: "ذهن‌آورد | مشاوره‌ی تخصصی روان‌شناسی ورزشی",
+    siteName: "سفیران اوج آرامش",
+    title: "سفیران اوج آرامش | مشاوره‌ی تخصصی روان‌شناسی ورزشی",
     description:
       "ذهنی که برای قهرمانی آماده می‌شود. مشاوره‌ی تخصصی روان‌شناسی ورزشی، متناسب با رشته و اهداف شما.",
-    images: [{ url: "/og-cover.jpg", width: 1200, height: 630, alt: "ذهن‌آورد" }],
+    images: [{ url: "/og-cover.jpg", width: 1200, height: 630, alt: "سفیران اوج آرامش" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ذهن‌آورد | مشاوره‌ی تخصصی روان‌شناسی ورزشی",
+    title: "سفیران اوج آرامش | مشاوره‌ی تخصصی روان‌شناسی ورزشی",
     description: "ذهنی که برای قهرمانی آماده می‌شود.",
     images: ["/og-cover.jpg"],
   },
@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "MedicalBusiness",
-    name: "ذهن‌آورد",
+    name: "سفیران اوج آرامش",
     description: "مشاوره‌ی تخصصی روان‌شناسی ورزشی برای ورزشکاران حرفه‌ای و آماتور",
     url: siteUrl,
     medicalSpecialty: "Sports Psychology",

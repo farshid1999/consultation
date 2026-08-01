@@ -1,4 +1,3 @@
-import { PiBrainDuotone } from "react-icons/pi";
 import { FiInstagram, FiLinkedin, FiMail, FiPhone } from "react-icons/fi";
 import { navLinks } from "@/data/content";
 
@@ -8,9 +7,13 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 border-t border-cream/10 pt-14 md:grid-cols-[1.2fr_1fr_1fr]">
           <div>
-            <div className="flex items-center gap-2.5">
-              <span className="text-h3 font-extrabold text-cream">ذهن‌آورد</span>
-              <PiBrainDuotone className="text-2xl text-gold" aria-hidden="true" />
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.webp"
+                alt="لوگو سفیران اوج آرامش"
+                className="h-12 w-12 rounded-full object-cover ring-1 ring-gold/30"
+              />
+              <span className="text-h3 font-extrabold text-cream">سفیران اوج آرامش</span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-cream/50">
               مشاوره‌ی تخصصی روان‌شناسی ورزشی؛ همراه ورزشکاران حرفه‌ای و آماتور در مسیر رسیدن به
@@ -59,15 +62,14 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2.5">
                 <FiMail className="text-gold" aria-hidden="true" />
-                info@zehnavard.com
+                info@serenityambassadors.com
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-cream/10 pt-8 text-xs text-cream/40 md:flex-row">
-          <p>© {new Date().getFullYear()} ذهن‌آورد. تمامی حقوق محفوظ است.</p>
-          <p>طراحی و توسعه با تمرکز بر تجربه‌ی کاربری آرام و حرفه‌ای</p>
+          <p>© {new Date().getFullYear()} سفیران اوج آرامش. تمامی حقوق محفوظ است.</p>
         </div>
       </div>
     </footer>
