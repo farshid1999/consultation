@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     "celery",
 
     'accounts',
+    'core',
+    "message"
 ]
 
 MIDDLEWARE = [
