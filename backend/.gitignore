@@ -52,8 +52,8 @@ staticfiles/
 # Migrations (اختیاری)
 # اگر میخوای migration ها داخل git باشند این قسمت رو حذف کن
 # ==========================================
-# */migrations/*
-# !*/migrations/__init__.py
+ */migrations/*
+ !*/migrations/__init__.py
 
 # ==========================================
 # IDE
