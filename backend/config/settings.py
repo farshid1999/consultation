@@ -117,7 +117,7 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ],
 
-    "DEFAULT_PAGINATION_CLASS": "",
+    "DEFAULT_PAGINATION_CLASS": "core.paginations.DefaultPagination",
 
     "PAGE_SIZE": 10,
 }

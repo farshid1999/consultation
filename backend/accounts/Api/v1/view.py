@@ -5,7 +5,20 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 
-from accounts.Api.v1.serializer import PasswordLoginSerializer
+from accounts.Api.v1.serializer import PasswordLoginSerializer, RoleSerializer, RoleUpdateSerializer, \
+    RoleCreateSerializer, UserCreateSerializer, UserUpdateSerializer, UserDetailSerializer, StaffUpdateSerializer, \
+    StaffCreateSerializer, StaffListSerializer
+from django.core.cache import cache
+from django.shortcuts import get_object_or_404
+
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import filters, status
+from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
+
+from accounts.models import Role, User, Staff
+from core.permissions import IsAdminOrSuperUser
 
 
 def get_tokens_for_user(user):
@@ -128,3 +141,731 @@ class LogoutView(APIView):
         )
 
         return response
+
+
+
+
+class RoleListAPIView(GenericAPIView):
+
+    queryset = Role.objects.all()
+
+    serializer_class = RoleSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+    search_fields = (
+        "name",
+        "description",
+    )
+
+    ordering_fields = (
+        "id",
+        "name",
+    )
+
+    ordering = (
+        "-id",
+    )
+
+
+    def get(self, request):
+
+        cache_key = f"roles:{request.get_full_path()}"
+
+        cached = cache.get(cache_key)
+
+        if cached:
+            return Response(cached)
+
+
+        queryset = self.filter_queryset(
+            self.get_queryset()
+        )
+
+        page = self.paginate_queryset(queryset)
+
+        serializer = self.get_serializer(
+            page,
+            many=True,
+        )
+
+        response = self.get_paginated_response(
+            serializer.data
+        )
+
+        cache.set(
+            cache_key,
+            response.data,
+            timeout=300,
+        )
+
+        return response
+
+
+class RoleDetailAPIView(GenericAPIView):
+
+    serializer_class = RoleSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def get(self, request, pk):
+
+        cache_key = f"role:{pk}"
+
+        cached = cache.get(cache_key)
+
+        if cached:
+            return Response(cached)
+
+
+        role = get_object_or_404(
+            Role,
+            pk=pk,
+        )
+
+        serializer = self.get_serializer(
+            role
+        )
+
+        cache.set(
+            cache_key,
+            serializer.data,
+            timeout=300,
+        )
+
+        return Response(
+            serializer.data
+        )
+
+
+class RoleCreateAPIView(GenericAPIView):
+
+    serializer_class = RoleCreateSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def post(self, request):
+
+        serializer = self.get_serializer(
+            data=request.data,
+        )
+
+        serializer.is_valid(
+            raise_exception=True,
+        )
+
+        role = serializer.save()
+
+        cache.clear()
+
+        return Response(
+            RoleSerializer(role).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+
+class RoleUpdateAPIView(GenericAPIView):
+
+    serializer_class = RoleUpdateSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def patch(self, request, pk):
+
+        role = get_object_or_404(
+            Role,
+            pk=pk,
+        )
+
+        serializer = self.get_serializer(
+            role,
+            data=request.data,
+            partial=True,
+        )
+
+        serializer.is_valid(
+            raise_exception=True,
+        )
+
+        serializer.save()
+
+        cache.delete(f"role:{pk}")
+        cache.clear()
+
+        return Response(
+            RoleSerializer(role).data
+        )
+
+
+class RoleDeleteAPIView(GenericAPIView):
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def delete(self, request, pk):
+
+        role = get_object_or_404(
+            Role,
+            pk=pk,
+        )
+
+        role.delete()
+
+        cache.delete(
+            f"role:{pk}"
+        )
+
+        cache.clear()
+
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
+
+class UserCreateAPIView(GenericAPIView):
+
+    serializer_class = UserCreateSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+    def post(self, request):
+
+        serializer = self.get_serializer(
+            data=request.data
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        user = serializer.save()
+
+        return Response(
+            UserDetailSerializer(
+                user,
+                context=self.get_serializer_context()
+            ).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class UserUpdateAPIView(GenericAPIView):
+
+    serializer_class = UserUpdateSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def get_object(self):
+
+        return get_object_or_404(
+            User,
+            pk=self.kwargs["pk"]
+        )
+
+
+    def patch(self, request, pk):
+
+        user = self.get_object()
+
+        serializer = self.get_serializer(
+            user,
+            data=request.data,
+            partial=True
+        )
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+        user = serializer.save()
+
+        return Response(
+            UserDetailSerializer(
+                user,
+                context=self.get_serializer_context()
+            ).data
+        )
+
+
+
+class UserListAPIView(GenericAPIView):
+
+    serializer_class = UserListSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    queryset = User.objects.select_related(
+        "club",
+        "address",
+    ).all()
+
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+
+    search_fields = (
+        "username",
+        "first_name",
+        "last_name",
+        "email",
+        "phone_number",
+    )
+
+
+    ordering_fields = (
+        "id",
+        "username",
+        "first_name",
+        "last_name",
+        "created_at",
+    )
+
+
+    ordering = (
+        "-id",
+    )
+
+
+    def get(self, request):
+
+        cache_key = (
+            f"users:list:{request.get_full_path()}"
+        )
+
+
+        cached_data = cache.get(
+            cache_key
+        )
+
+
+        if cached_data:
+
+            return Response(
+                cached_data
+            )
+
+
+        queryset = self.filter_queryset(
+            self.get_queryset()
+        )
+
+
+        page = self.paginate_queryset(
+            queryset
+        )
+
+
+        serializer = self.get_serializer(
+            page,
+            many=True
+        )
+
+
+        response = self.get_paginated_response(
+            serializer.data
+        )
+
+
+        cache.set(
+            cache_key,
+            response.data,
+            timeout=300
+        )
+
+
+        return response
+
+
+
+class UserDetailAPIView(GenericAPIView):
+
+    serializer_class = UserDetailSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def get(self, request, pk):
+
+        cache_key = f"user:detail:{pk}"
+
+
+        cached_data = cache.get(
+            cache_key
+        )
+
+
+        if cached_data:
+
+            return Response(
+                cached_data
+            )
+
+
+        user = get_object_or_404(
+            User.objects.select_related(
+                "club",
+                "address",
+            ).prefetch_related(
+                "informations",
+            ),
+            pk=pk
+        )
+
+
+        serializer = self.get_serializer(
+            user
+        )
+
+
+        cache.set(
+            cache_key,
+            serializer.data,
+            timeout=300
+        )
+
+
+        return Response(
+            serializer.data
+        )
+
+
+class UserDeleteAPIView(GenericAPIView):
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def delete(self, request, pk):
+
+        user = get_object_or_404(
+            User,
+            pk=pk
+        )
+
+
+        user_id = user.id
+
+
+        user.delete()
+
+
+        # invalidate cache
+        cache.delete(
+            f"user:detail:{user_id}"
+        )
+
+
+        return Response(
+            {
+                "message": "کاربر با موفقیت حذف شد."
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class StaffCreateAPIView(GenericAPIView):
+
+    serializer_class = StaffCreateSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def post(self, request):
+
+        serializer = self.get_serializer(
+            data=request.data
+        )
+
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+
+        staff = serializer.save()
+
+
+        return Response(
+            StaffUpdateSerializer(
+                staff,
+                context=self.get_serializer_context()
+            ).data,
+            status=status.HTTP_201_CREATED
+        )
+
+
+class StaffUpdateAPIView(GenericAPIView):
+
+    serializer_class = StaffUpdateSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def patch(self, request, pk):
+
+        staff = get_object_or_404(
+            Staff,
+            pk=pk
+        )
+
+
+        serializer = self.get_serializer(
+            staff,
+            data=request.data,
+            partial=True
+        )
+
+
+        serializer.is_valid(
+            raise_exception=True
+        )
+
+
+        staff = serializer.save()
+
+
+        return Response(
+            StaffUpdateSerializer(
+                staff,
+                context=self.get_serializer_context()
+            ).data,
+            status=status.HTTP_200_OK
+        )
+
+
+
+class StaffListAPIView(GenericAPIView):
+
+    serializer_class = StaffListSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    queryset = Staff.objects.select_related(
+        "user",
+        "user__club",
+        "user__address",
+    ).prefetch_related(
+        "user__user_roles__role"
+    )
+
+
+    filter_backends = (
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    )
+
+
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "user__phone_number",
+        "employee_code",
+        "position",
+    )
+
+
+    ordering_fields = (
+        "id",
+        "employee_code",
+        "hire_date",
+        "position",
+    )
+
+
+    ordering = (
+        "-id",
+    )
+
+
+    def get(self, request):
+
+        cache_key = (
+            f"staff:list:{request.get_full_path()}"
+        )
+
+
+        cached = cache.get(
+            cache_key
+        )
+
+
+        if cached:
+
+            return Response(
+                cached
+            )
+
+
+        queryset = self.filter_queryset(
+            self.get_queryset()
+        )
+
+
+        page = self.paginate_queryset(
+            queryset
+        )
+
+
+        serializer = self.get_serializer(
+            page,
+            many=True
+        )
+
+
+        response = self.get_paginated_response(
+            serializer.data
+        )
+
+
+        cache.set(
+            cache_key,
+            response.data,
+            timeout=300
+        )
+
+
+        return response
+
+
+
+class StaffDetailAPIView(GenericAPIView):
+
+    serializer_class = StaffDetailSerializer
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def get(self, request, pk):
+
+        cache_key = f"staff:detail:{pk}"
+
+
+        cached = cache.get(
+            cache_key
+        )
+
+
+        if cached:
+
+            return Response(
+                cached
+            )
+
+
+        staff = get_object_or_404(
+            Staff.objects.select_related(
+                "user",
+                "user__club",
+                "user__address",
+            ).prefetch_related(
+                "user__user_roles__role",
+                "user__informations",
+            ),
+            pk=pk
+        )
+
+
+        serializer = self.get_serializer(
+            staff
+        )
+
+
+        cache.set(
+            cache_key,
+            serializer.data,
+            timeout=300
+        )
+
+
+        return Response(
+            serializer.data
+        )
+
+
+class StaffDeleteAPIView(GenericAPIView):
+
+    permission_classes = (
+        IsAdminOrSuperUser,
+    )
+
+
+    def delete(self, request, pk):
+
+        staff = get_object_or_404(
+            Staff.objects.select_related(
+                "user"
+            ),
+            pk=pk
+        )
+
+
+        staff_id = staff.id
+        user_id = staff.user.id
+
+
+        staff.delete()
+
+
+        # Clear cache
+        cache.delete(
+            f"staff:detail:{staff_id}"
+        )
+
+        cache.delete(
+            f"user:detail:{user_id}"
+        )
+
+
+        return Response(
+            {
+                "message": "کارمند با موفقیت حذف شد."
+            },
+            status=status.HTTP_200_OK
+        )

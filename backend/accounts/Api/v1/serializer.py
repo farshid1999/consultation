@@ -35,6 +35,16 @@ class RoleCreateSerializer(serializers.ModelSerializer):
             "description",
         )
 
+class RoleUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = (
+            "id",
+            "name",
+            "description",
+        )
+
+        read_only_fields = ("id",)
 
 class StaffAssignRoleSerializer(serializers.Serializer):
     staff_id = serializers.PrimaryKeyRelatedField(
@@ -217,8 +227,6 @@ class ClubSerializer(serializers.ModelSerializer):
         )
 
 
-
-
 class UserCreateSerializer(serializers.ModelSerializer):
 
     address = AddressSerializer(
@@ -339,20 +347,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
         if club_data:
 
-            club_address = club_data.pop(
-                "address"
-            )
-
-
-            address = Address.objects.create(
-                **club_address
-            )
-
-
-            club = Club.objects.create(
-                address=address,
-                **club_data
-            )
+            club = ClubSerializer().create(club_data)
 
 
             user.club = club
@@ -745,23 +740,13 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 
 class StaffListSerializer(serializers.ModelSerializer):
-    full_name = serializers.CharField(
-        source="user.get_full_name",
-        read_only=True
-    )
+
     roles = UserRoleSerializer(
         source="user.user_roles",
         many=True,
         read_only=True,
     )
-
-    username = serializers.CharField(
-        source="user.username",
-        read_only=True
-    )
-
-    phone_number = serializers.CharField(
-        source="user.phone_number",
+    user = UserListSerializer(
         read_only=True
     )
 
@@ -772,9 +757,32 @@ class StaffListSerializer(serializers.ModelSerializer):
             "employee_code",
             "position",
             "hire_date",
-            "username",
-            "full_name",
-            "phone_number",
+            "roles",
+            "user"
+        )
+
+
+class StaffDetailSerializer(serializers.ModelSerializer):
+
+    user = UserDetailSerializer(
+        read_only=True
+    )
+    roles = UserRoleSerializer(
+        source="user.user_roles",
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+
+        model = Staff
+
+        fields = (
+            "id",
+            "employee_code",
+            "position",
+            "hire_date",
+            "user",
             "roles"
         )
 
