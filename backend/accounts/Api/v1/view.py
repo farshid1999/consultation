@@ -5,9 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 
-from accounts.Api.v1.serializer import PasswordLoginSerializer, RoleSerializer, RoleUpdateSerializer, \
-    RoleCreateSerializer, UserCreateSerializer, UserUpdateSerializer, UserDetailSerializer, StaffUpdateSerializer, \
-    StaffCreateSerializer, StaffListSerializer
+from accounts.Api.v1.serializer import *
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 
