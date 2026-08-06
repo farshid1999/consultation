@@ -202,6 +202,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+CSRF_TRUSTED_ORIGINS = [
+
+    "http://api.serenityambassadors.org",
+
+]
+
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
@@ -216,3 +223,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+
+
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+#
+# SECURE_SSL_REDIRECT = True
+#
+# SESSION_COOKIE_SECURE = True
+#
+# CSRF_COOKIE_SECURE = True
+#
+# SECURE_BROWSER_XSS_FILTER = True
+#
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+#
+# X_FRAME_OPTIONS = "DENY"

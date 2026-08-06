@@ -1,29 +1,6 @@
 from django.urls import path, include
 
-from accounts.Api.v1.views import (
-    LoginView,
-    RefreshTokenView,
-    VerifyTokenView,
-    LogoutView,
-
-    RoleListAPIView,
-    RoleDetailAPIView,
-    RoleCreateAPIView,
-    RoleUpdateAPIView,
-    RoleDeleteAPIView,
-
-    UserListAPIView,
-    UserDetailAPIView,
-    UserCreateAPIView,
-    UserUpdateAPIView,
-    UserDeleteAPIView,
-
-    StaffListAPIView,
-    StaffDetailAPIView,
-    StaffCreateAPIView,
-    StaffUpdateAPIView,
-    StaffDeleteAPIView,
-)
+from accounts.Api.v1.view import *
 
 
 
