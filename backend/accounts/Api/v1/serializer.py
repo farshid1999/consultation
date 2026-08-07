@@ -1,6 +1,5 @@
 import random
 from datetime import timedelta
-
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import transaction
 from rest_framework import serializers
@@ -760,6 +759,8 @@ class StaffListSerializer(serializers.ModelSerializer):
             "roles",
             "user"
         )
+
+
 
 
 class StaffDetailSerializer(serializers.ModelSerializer):

@@ -81,9 +81,9 @@ class Address(BaseModel):
     city = models.CharField(max_length=100)
 
     street = models.CharField(max_length=255)
-    postal_code = models.CharField(max_length=20, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True,null=True)
 
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True,null=True)
 
     def __str__(self):
         return f"{self.country} - {self.city}"
@@ -94,8 +94,10 @@ class Club(BaseModel):
 
     address = models.ForeignKey(
         Address,
-        on_delete=models.PROTECT,
-        related_name="clubs"
+        on_delete=models.CASCADE,
+        related_name="clubs",
+        blank=True,
+        null=True
     )
 
     def __str__(self):
@@ -106,40 +108,46 @@ class User(AbstractUser):
 
     phone_number = models.CharField(
         max_length=20,
-        blank=True
     )
 
     land_line = models.CharField(
         max_length=20,
-        blank=True
+        blank=True,
+        null=True
     )
 
     is_student = models.BooleanField(
-        default=False
+        default=False,
+
     )
 
     degree = models.CharField(
         max_length=100,
+        null=True,
         blank=True
     )
 
     job = models.CharField(
         max_length=100,
+        null=True,
         blank=True
     )
 
     sport_discipline = models.CharField(
         max_length=100,
-        blank=True
+        blank=True,
+        null=True
     )
 
     professional_background = models.TextField(
-        blank=True
+        blank=True,
+        null=True
     )
 
     referral_code = models.CharField(
         max_length=100,
-        blank=True
+        blank=True,
+        null=True
     )
 
     address = models.ForeignKey(
@@ -161,7 +169,7 @@ class User(AbstractUser):
     informations = models.ManyToManyField(
         Information,
         blank=True,
-        related_name="users"
+        related_name="users",
     )
 
     avatar = models.ImageField(
@@ -171,7 +179,8 @@ class User(AbstractUser):
     )
 
     bio = models.TextField(
-        blank=True
+        blank=True,
+        null=True
     )
 
     birth_date = models.DateField(
