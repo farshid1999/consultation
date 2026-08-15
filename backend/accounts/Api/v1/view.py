@@ -14,6 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 
 from accounts.models import Role, User, Staff
 from core.permissions import IsAdminOrSuperUser
@@ -867,3 +868,31 @@ class StaffDeleteAPIView(GenericAPIView):
             },
             status=status.HTTP_200_OK
         )
+        
+class RegisterView(GenericAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = (
+        AllowAny,
+    )
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        tokens = get_tokens_for_user(user)
+
+        response = Response(
+            {"access": tokens["access"]},
+            status=status.HTTP_201_CREATED
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=tokens["refresh"],
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+            max_age=7 * 24 * 60 * 60
+        )
+
+        return response

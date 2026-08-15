@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Count
 from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from .models import (
     OTPCode,
@@ -174,44 +175,13 @@ class OTPCodeAdmin(BaseAdmin):
     @admin.display(description="Used")
     def used_status(self, obj):
         if obj.is_used:
-            return format_html(
-                '<span style="'
-                'background:#198754;'
-                'color:white;'
-                'padding:4px 9px;'
-                'border-radius:12px;'
-                'font-size:11px;'
-                'font-weight:600;'
-                '">Used</span>'
-            )
-
-        return format_html(
-            '<span style="'
-            'background:#fd7e14;'
-            'color:white;'
-            'padding:4px 9px;'
-            'border-radius:12px;'
-            'font-size:11px;'
-            'font-weight:600;'
-            '">Unused</span>'
-        )
-
+            return mark_safe('<span style="background:#198754;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Used</span>')
+        return mark_safe('<span style="background:#fd7e14;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Unused</span>')
     @admin.display(description="Expiration")
     def expiration_status(self, obj):
         if obj.is_expired():
-            return format_html(
-                '<span style="'
-                'color:#dc3545;'
-                'font-weight:700;'
-                '">Expired</span>'
-            )
-
-        return format_html(
-            '<span style="'
-            'color:#198754;'
-            'font-weight:700;'
-            '">Valid</span>'
-        )
+            return mark_safe('<span style="color:#dc3545;font-weight:700;">Expired</span>')
+        return mark_safe('<span style="color:#198754;font-weight:700;">Valid</span>')
 
 
 # ============================================================
@@ -679,7 +649,6 @@ class CustomUserAdmin(UserAdmin):
         "is_staff",
         "is_superuser",
         "is_student",
-        "gender",
         "club",
         "date_joined",
         "last_login",
@@ -791,45 +760,15 @@ class CustomUserAdmin(UserAdmin):
     @admin.display(description="Staff")
     def staff_status(self, obj):
         if hasattr(obj, "staff"):
-            return format_html(
-                '<span style="'
-                'background:#198754;'
-                'color:white;'
-                'padding:4px 9px;'
-                'border-radius:12px;'
-                'font-size:11px;'
-                'font-weight:600;'
-                '">Staff</span>'
-            )
-
-        return format_html(
-            '<span style="color:#6c757d;">User</span>'
-        )
+            return mark_safe('<span style="background:#198754;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Staff</span>')
+        return mark_safe('<span style="color:#6c757d;">User</span>')
 
     @admin.display(description="Status")
     def active_status(self, obj):
         if obj.is_active:
-            return format_html(
-                '<span style="'
-                'background:#198754;'
-                'color:white;'
-                'padding:4px 9px;'
-                'border-radius:12px;'
-                'font-size:11px;'
-                'font-weight:600;'
-                '">Active</span>'
-            )
+            return mark_safe('<span style="background:#198754;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Active</span>')
+        return mark_safe('<span style="background:#dc3545;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Inactive</span>')
 
-        return format_html(
-            '<span style="'
-            'background:#dc3545;'
-            'color:white;'
-            'padding:4px 9px;'
-            'border-radius:12px;'
-            'font-size:11px;'
-            'font-weight:600;'
-            '">Inactive</span>'
-        )
 
 
 # ============================================================
