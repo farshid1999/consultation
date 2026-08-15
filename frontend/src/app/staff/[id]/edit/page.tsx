@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useStaffDetail } from "@/hooks/useStaff";
-import StaffEditForm from "@/components/staff/StaffEditForm";
+import StaffEditForm from "@/forms/staff/StaffEditForm";
 
 export default function StaffEditPage() {
   const params = useParams<{ id: string }>();

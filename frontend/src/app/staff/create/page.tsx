@@ -1,6 +1,6 @@
 "use client";
 
-import StaffCreateForm from "@/components/staff/StaffCreateForm";
+import StaffCreateForm from "@/forms/staff/StaffCreateForm";
 
 export default function StaffCreatePage() {
   return (
