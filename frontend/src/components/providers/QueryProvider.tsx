@@ -5,6 +5,16 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 
 export default function QueryProvider({ children }: { children: ReactNode }) {
-  const [client] = useState(() => new QueryClient());
+  const [client] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000,
+            retry: 1,
+          },
+        },
+      })
+  );
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }

@@ -679,7 +679,6 @@ class CustomUserAdmin(UserAdmin):
         "is_staff",
         "is_superuser",
         "is_student",
-        "gender",
         "club",
         "date_joined",
         "last_login",

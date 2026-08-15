@@ -17,8 +17,8 @@ import { cookieService } from "@/lib/storage/cookies";
  * logout action to call `tokenService.clearTokens()`.
  */
 
-const ACCESS_TOKEN_KEY = "access_token";
-const REFRESH_TOKEN_KEY = "refresh_token";
+const ACCESS_TOKEN_KEY = "ravan_varzesh_access_token";
+const REFRESH_TOKEN_KEY = "ravan_varzesh_refresh_token";
 const ACCESS_TOKEN_COOKIE_DAYS = 1;
 
 export const tokenService = {
