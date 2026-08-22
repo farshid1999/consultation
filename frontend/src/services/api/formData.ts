@@ -14,60 +14,56 @@ export function containsFile(value: unknown): boolean {
 }
 
 /**
- * Flattens an arbitrarily nested object (objects, arrays, files) into a
- * `FormData` instance using bracket notation — e.g.
- * `user[address][city]`, `user[informations][0][children][1][title]` —
- * which is the conventional way nested multipart data is represented for
- * a Django/DRF backend able to reconstruct nested structures from
- * `request.data` (a QueryDict-backed multipart parser, or a nested-writable
- * serializer set up to expect this).
+ * Builds a `FormData` payload for requests that contain at least one
+ * File/Blob anywhere in a (possibly deeply nested) object.
  *
- * If your backend's default JSON parser doesn't reconstruct bracket-style
- * multipart keys into nested dicts/lists automatically, you'll need a
- * small custom parser on the Django side (several open-source snippets
- * exist for this, commonly named something like
- * `NestedMultiPartParser`) — this is a backend detail this client can't
- * fully guarantee without seeing your parser configuration.
+ * multipart/form-data has no standard wire format for nested objects, so
+ * rather than relying on the backend to reconstruct bracket-notation keys
+ * (e.g. `user[informations][0][file]`) into nested dicts — which plain
+ * Django/DRF does NOT do automatically — we instead:
+ *
+ *   1. Walk the object and replace every File/Blob with a placeholder
+ *      string ("__FILE__0", "__FILE__1", ...), remembering each
+ *      placeholder's bracket-notation "path".
+ *   2. Serialize the resulting (file-free) object to JSON and send it
+ *      under a single "data" field.
+ *   3. Append each real File/Blob under its own path as a normal
+ *      multipart field (e.g. "user[informations][0][file]").
+ *
+ * The backend parses `data` as JSON, then walks it looking for
+ * "__FILE__N" placeholders and swaps in the matching `request.FILES[path]`
+ * — no custom multipart parser required, just a small recursive helper
+ * (see `_inject_files` on the Django view).
  */
-export function buildFormData(
-  data: Record<string, unknown>,
-  formData: FormData = new FormData(),
-  parentKey?: string
-): FormData {
-  Object.entries(data).forEach(([key, value]) => {
-    const formKey = parentKey ? `${parentKey}[${key}]` : key;
-    appendValue(formData, formKey, value);
-  });
+export function buildFormData(data: Record<string, unknown>): FormData {
+  const formData = new FormData();
+  const files: { path: string; file: File | Blob }[] = [];
+
+  function extractFiles(value: unknown, path: string): unknown {
+    if (value instanceof File || value instanceof Blob) {
+      const placeholder = `__FILE__${files.length}`;
+      files.push({ path, file: value });
+      return placeholder;
+    }
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+    if (Array.isArray(value)) {
+      return value.map((item, i) => extractFiles(item, `${path}[${i}]`));
+    }
+    if (value && typeof value === "object") {
+      const result: Record<string, unknown> = {};
+      Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
+        result[key] = extractFiles(val, path ? `${path}[${key}]` : key);
+      });
+      return result;
+    }
+    return value;
+  }
+
+  const cleaned = extractFiles(data, "");
+  formData.append("data", JSON.stringify(cleaned));
+  files.forEach(({ path, file }) => formData.append(path, file));
+
   return formData;
-}
-
-function appendValue(formData: FormData, key: string, value: unknown): void {
-  if (value === undefined) return;
-
-  if (value === null) {
-    formData.append(key, "");
-    return;
-  }
-
-  if (value instanceof File || value instanceof Blob) {
-    formData.append(key, value);
-    return;
-  }
-
-  if (value instanceof Date) {
-    formData.append(key, value.toISOString());
-    return;
-  }
-
-  if (Array.isArray(value)) {
-    value.forEach((item, index) => appendValue(formData, `${key}[${index}]`, item));
-    return;
-  }
-
-  if (typeof value === "object") {
-    buildFormData(value as Record<string, unknown>, formData, key);
-    return;
-  }
-
-  formData.append(key, String(value));
 }

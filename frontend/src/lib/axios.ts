@@ -17,7 +17,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://loca
  * Not specified in the provided URLconf, so this is a best-guess default
  * (SimpleJWT's own docs use this exact path by convention).
  */
-const REFRESH_ENDPOINT = "/accounts/token/refresh/";
+const REFRESH_ENDPOINT = "/accounts/auth/refresh/";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
