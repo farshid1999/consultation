@@ -12,55 +12,55 @@ line_urls = [
     path(
         "",
         LineListAPIView.as_view(),
-        name="line-list",
+        name="lines-list",
     ),
 
     path(
-        "<int:pk>/",
+        "<str:pk>/",
         LineDetailAPIView.as_view(),
-        name="line-detail",
+        name="lines-detail",
     ),
 
     path(
         "my/",
         MyLineListAPIView.as_view(),
-        name="my-line-list",
+        name="my-lines-list",
     ),
 
     path(
         "<int:line_id>/members/",
         LineMemberListView.as_view(),
-        name="line-members",
+        name="lines-members",
     ),
 
     path(
         "<int:line_id>/members/add/",
         LineAddMembersView.as_view(),
-        name="line-add-members",
+        name="lines-add-members",
     ),
 
     path(
         "<int:line_id>/members/remove/",
         LineRemoveMembersView.as_view(),
-        name="line-remove-members",
+        name="lines-remove-members",
     ),
 
     path(
         "<int:line_id>/staff/",
         LineStaffListView.as_view(),
-        name="line-staff",
+        name="lines-staff",
     ),
 
     path(
         "<int:line_id>/staff/add/",
         LineAddStaffView.as_view(),
-        name="line-add-staff",
+        name="lines-add-staff",
     ),
 
     path(
         "<int:line_id>/staff/remove/",
         LineRemoveStaffView.as_view(),
-        name="line-remove-staff",
+        name="lines-remove-staff",
     ),
 
 ]
@@ -194,7 +194,7 @@ admin_assignment_submission_urls = [
 
 conversation_urls = [
 
-    # Member creates / gets conversation with line
+    # Member creates / gets conversation with lines
     path(
         "",
         MemberConversationCreateAPIView.as_view(),

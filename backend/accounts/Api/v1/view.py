@@ -603,7 +603,7 @@ class StaffCreateAPIView(GenericAPIView):
     serializer_class = StaffCreateSerializer
 
     permission_classes = (
-        AllowAny,
+        IsAdminOrSuperUser,
     )
 
     parser_classes = (JSONParser, MultiPartParser, FormParser)

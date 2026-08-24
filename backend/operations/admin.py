@@ -375,7 +375,7 @@ class LineMemberAdmin(BaseAdmin):
 
     list_select_related = (
         "user",
-        "line",
+        "lines",
     )
 
 
@@ -411,7 +411,7 @@ class StaffLineAdmin(BaseAdmin):
 
     list_select_related = (
         "staff",
-        "line",
+        "lines",
     )
 
 
@@ -551,7 +551,7 @@ class AssignmentAdmin(BaseAdmin):
     )
 
     list_select_related = (
-        "line",
+        "lines",
         "parent",
     )
 
@@ -865,7 +865,7 @@ class ConversationAdmin(BaseAdmin):
     )
 
     list_select_related = (
-        "line",
+        "lines",
     )
 
     def get_queryset(self, request):
@@ -1087,7 +1087,7 @@ class ConsultationFormAdmin(BaseAdmin):
     date_hierarchy = "created_at"
 
     list_select_related = (
-        "line",
+        "lines",
     )
 
     @admin.display(description="File")
@@ -1119,7 +1119,7 @@ class AppointmentAdminForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        line = cleaned_data.get("line")
+        line = cleaned_data.get("lines")
         member = cleaned_data.get("member")
 
         if line and member:
@@ -1128,7 +1128,7 @@ class AppointmentAdminForm(forms.ModelForm):
                     {
                         "member": (
                             "The selected member does not belong "
-                            "to the selected line."
+                            "to the selected lines."
                         )
                     }
                 )
@@ -1177,7 +1177,7 @@ class AppointmentAdmin(BaseAdmin):
     date_hierarchy = "appointment_time"
 
     list_select_related = (
-        "line",
+        "lines",
         "member",
         "member__user",
         "staff",
@@ -1270,7 +1270,7 @@ class FeatureAdmin(BaseAdmin):
     date_hierarchy = "created_at"
 
     list_select_related = (
-        "line",
+        "lines",
         "parent",
         "media",
     )
@@ -1341,14 +1341,13 @@ class ContentAdmin(BaseAdmin):
     raw_id_fields = (
         "line",
         "parent",
-        "member",
         "media",
     )
 
     date_hierarchy = "created_at"
 
     list_select_related = (
-        "line",
+        "lines",
         "parent",
         "member",
         "member__user",

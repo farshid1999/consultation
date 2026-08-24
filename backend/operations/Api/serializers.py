@@ -108,7 +108,7 @@ class AddLineMembersSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        line = self.context["line"]
+        line = self.context["lines"]
         users = attrs["user_ids"]
 
         existing_user_ids = set(
@@ -121,14 +121,14 @@ class AddLineMembersSerializer(serializers.Serializer):
         if existing_user_ids:
             raise serializers.ValidationError({
                 "user_ids": (
-                    "Some users are already members of this line."
+                    "Some users are already members of this lines."
                 )
             })
 
         return attrs
 
     def create(self, validated_data):
-        line = self.context["line"]
+        line = self.context["lines"]
         users = validated_data["user_ids"]
 
         memberships = [
@@ -150,7 +150,7 @@ class RemoveLineMembersSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        line = self.context["line"]
+        line = self.context["lines"]
         users = attrs["user_ids"]
 
         existing_user_ids = set(
@@ -167,7 +167,7 @@ class RemoveLineMembersSerializer(serializers.Serializer):
         if not_members:
             raise serializers.ValidationError({
                 "user_ids": (
-                    f"These users are not members of this line: "
+                    f"These users are not members of this lines: "
                     f"{sorted(not_members)}"
                 )
             })
@@ -200,7 +200,7 @@ class AddLineStaffSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        line = self.context["line"]
+        line = self.context["lines"]
         staff_members = attrs["staff_ids"]
 
         existing_ids = set(
@@ -213,14 +213,14 @@ class AddLineStaffSerializer(serializers.Serializer):
         if existing_ids:
             raise serializers.ValidationError({
                 "staff_ids": (
-                    "Some staff members are already assigned to this line."
+                    "Some staff members are already assigned to this lines."
                 )
             })
 
         return attrs
 
     def create(self, validated_data):
-        line = self.context["line"]
+        line = self.context["lines"]
         staff_members = validated_data["staff_ids"]
 
         staff_lines = [
@@ -242,7 +242,7 @@ class RemoveLineStaffSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        line = self.context["line"]
+        line = self.context["lines"]
         staff_members = attrs["staff_ids"]
 
         requested_ids = {staff.id for staff in staff_members}
@@ -259,7 +259,7 @@ class RemoveLineStaffSerializer(serializers.Serializer):
         if not_members:
             raise serializers.ValidationError({
                 "staff_ids": (
-                    f"These staff are not assigned to this line: "
+                    f"These staff are not assigned to this lines: "
                     f"{sorted(not_members)}"
                 )
             })
@@ -318,7 +318,7 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, attrs):
-        line = attrs["line"]
+        line = attrs["lines"]
         members = attrs.get("members", [])
 
         request = self.context["request"]
@@ -329,7 +329,7 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
 
         if staff is None:
             raise serializers.ValidationError({
-                "line": "شما Staff نیستید."
+                "lines": "شما Staff نیستید."
             })
 
         # آیا Staff به این Line دسترسی دارد؟
@@ -340,7 +340,7 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
 
         if not has_access:
             raise serializers.ValidationError({
-                "line": "شما به این Line دسترسی ندارید."
+                "lines": "شما به این Line دسترسی ندارید."
             })
 
         # آیا همه Memberها متعلق به همین Line هستند؟
@@ -441,11 +441,11 @@ class AssignmentUpdateSerializer(serializers.ModelSerializer):
                 "detail": "شما Staff نیستید."
             })
 
-        # اگر line در request آمده باشد،
+        # اگر lines در request آمده باشد،
         # همان Line جدید را بررسی می‌کنیم.
         # در غیر این صورت Line فعلی Assignment ملاک است.
         line = attrs.get(
-            "line",
+            "lines",
             self.instance.line,
         )
 
@@ -455,7 +455,7 @@ class AssignmentUpdateSerializer(serializers.ModelSerializer):
             line=line,
         ).exists():
             raise serializers.ValidationError({
-                "line": "شما به این Line دسترسی ندارید."
+                "lines": "شما به این Line دسترسی ندارید."
             })
 
         # اگر member_ids ارسال شده باشد،
@@ -851,7 +851,7 @@ class MemberConversationCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request = self.context["request"]
-        line = attrs["line"]
+        line = attrs["lines"]
 
         member = LineMember.objects.filter(
             user=request.user,
@@ -860,7 +860,7 @@ class MemberConversationCreateSerializer(serializers.ModelSerializer):
 
         if not member:
             raise serializers.ValidationError({
-                "line": "You are not a member of this line."
+                "lines": "You are not a member of this lines."
             })
 
         attrs["member"] = member
@@ -871,7 +871,7 @@ class MemberConversationCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context["request"]
 
-        line = validated_data["line"]
+        line = validated_data["lines"]
         member = validated_data["member"]
 
         conversation, created = (
@@ -915,7 +915,7 @@ class StaffConversationCreateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         request = self.context["request"]
 
-        line = attrs["line"]
+        line = attrs["lines"]
         member = attrs["member"]
 
         # Staff عضو این Line هست؟
@@ -924,13 +924,13 @@ class StaffConversationCreateSerializer(serializers.ModelSerializer):
             line=line,
         ).exists():
             raise serializers.ValidationError({
-                "line": "You are not a staff member of this line."
+                "lines": "You are not a staff member of this lines."
             })
 
         # Member عضو همین Line هست؟
         if member.line_id != line.id:
             raise serializers.ValidationError({
-                "member": "Selected member does not belong to this line."
+                "member": "Selected member does not belong to this lines."
             })
 
         return attrs
@@ -939,7 +939,7 @@ class StaffConversationCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context["request"]
 
-        line = validated_data["line"]
+        line = validated_data["lines"]
         member = validated_data["member"]
 
         conversation, created = (
@@ -1029,7 +1029,7 @@ class ConversationJoinSerializer(serializers.Serializer):
             line=conversation.line,
         ).exists():
             raise serializers.ValidationError(
-                "You are not a staff member of this line."
+                "You are not a staff member of this lines."
             )
 
         participant, created = (
@@ -1123,14 +1123,14 @@ class ContentCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request = self.context["request"]
-        line = attrs["line"]
+        line = attrs["lines"]
         members = attrs.get("members", [])
 
         staff = getattr(request.user, "staff", None)
 
         if not staff:
             raise serializers.ValidationError({
-                "line": "Only staff members can create content."
+                "lines": "Only staff members can create content."
             })
 
         if not StaffLine.objects.filter(
@@ -1138,7 +1138,7 @@ class ContentCreateSerializer(serializers.ModelSerializer):
                 line=line,
         ).exists():
             raise serializers.ValidationError({
-                "line": "You are not a staff member of this line."
+                "lines": "You are not a staff member of this lines."
             })
 
         invalid_members = [
@@ -1150,7 +1150,7 @@ class ContentCreateSerializer(serializers.ModelSerializer):
         if invalid_members:
             raise serializers.ValidationError({
                 "member_ids": (
-                    "Selected members must belong to the selected line."
+                    "Selected members must belong to the selected lines."
                 )
             })
 
@@ -1217,7 +1217,7 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
 
         line = attrs.get(
-            "line",
+            "lines",
             self.instance.line,
         )
 
@@ -1243,7 +1243,7 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
             line=line,
         ).exists():
             raise serializers.ValidationError({
-                "line": "You are not a staff member of this line."
+                "lines": "You are not a staff member of this lines."
             })
 
         # --------------------------------
@@ -1260,7 +1260,7 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
             if invalid_members:
                 raise serializers.ValidationError({
                     "member_ids": (
-                        "Selected members must belong to the selected line."
+                        "Selected members must belong to the selected lines."
                     )
                 })
 

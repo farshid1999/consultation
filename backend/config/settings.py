@@ -52,7 +52,8 @@ INSTALLED_APPS = [
 
     'accounts',
     'core',
-    "message"
+    "message",
+    "operations"
 ]
 
 MIDDLEWARE = [

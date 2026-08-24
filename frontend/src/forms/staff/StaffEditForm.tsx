@@ -136,20 +136,26 @@ export default function StaffEditForm({ staff }: { staff: StaffDetail }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} dir="rtl" noValidate className="flex flex-col gap-6">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+
+      {/* نمایش تصویر فعلی پروفایل */}
       {staff.user.avatar && (
-        <div className="flex items-center gap-3 rounded-2xl border border-cream/10 bg-deep-2/30 p-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={staff.user.avatar} alt={staff.user.username} className="h-14 w-14 rounded-full object-cover" />
-          <p className="text-xs text-cream/45">
-            تصویر فعلی — برای تغییر، تصویر جدیدی را در بخش «اطلاعات شخصی» بارگذاری کنید.
+        <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          {/* eslint-disable-next-lines @next/next/no-img-element */}
+          <img src={staff.user.avatar} alt={staff.user.username} className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm" />
+          <p className="text-xs text-slate-500">
+            تصویر فعلی پروفایل — برای تغییر، در بخش «اطلاعات شخصی» تصویر جدید بارگذاری کنید.
           </p>
         </div>
       )}
 
-      <div className="rounded-2xl border border-gold/20 bg-gold/[0.04] p-4 text-xs leading-relaxed text-cream/60">
-        توجه: بخش «اطلاعات تکمیلی» در ویرایش به‌طور کامل جایگزین می‌شود. اگر برای موردی که قبلاً فایل داشته، فایل
-        جدیدی انتخاب نکنید، فایل قبلی آن حذف خواهد شد.
+      {/* باکس هشدار زرد رنگ با استایل روشن */}
+      <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 text-xs leading-relaxed text-amber-800 flex gap-3 items-start">
+        <span className="shrink-0 mt-0.5 text-amber-500">⚠️</span>
+        <p>
+          توجه: بخش «اطلاعات تکمیلی» در ویرایش به‌طور کامل جایگزین می‌شود. اگر برای موردی که قبلاً فایل داشته، فایل
+          جدیدی انتخاب نکنید، فایل قبلی آن حذف خواهد شد.
+        </p>
       </div>
 
       <StaffFormFields
@@ -160,22 +166,32 @@ export default function StaffEditForm({ staff }: { staff: StaffDetail }) {
         initialShowClub={Boolean(staff.user.club)}
       />
 
-      <div className="flex items-center justify-end gap-3 border-t border-cream/10 pt-6">
+      {/* دکمه‌های عملیات */}
+      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6 mt-4">
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-full border border-cream/20 px-6 py-3 text-sm text-cream/70 transition-colors hover:border-cream/40"
+          className="rounded-xl border border-slate-200 px-6 py-3 text-sm font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
         >
           انصراف
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-full bg-gradient-to-b from-gold-soft to-gold px-8 py-3 text-sm font-bold text-deep shadow-gold transition-opacity disabled:opacity-60"
+          className="rounded-xl bg-gradient-to-br from-[#c9a24d] to-[#d4af37] px-8 py-3 text-sm font-bold text-white shadow-[0_4px_12px_rgba(201,162,77,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(201,162,77,0.4)] hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
-          {isSubmitting ? "در حال ذخیره..." : "ذخیره‌ی تغییرات"}
+          {isSubmitting ? (
+            <span className="flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+              در حال ذخیره...
+            </span>
+          ) : (
+            "ذخیره‌ی تغییرات"
+          )}
         </button>
       </div>
     </form>
   );
 }
+
+

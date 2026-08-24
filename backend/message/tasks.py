@@ -24,7 +24,7 @@ def send_bulk_sms(
     Args:
         mobiles: List of mobile numbers.
         message_text: SMS text.
-        line_number: Sender line number.
+        line_number: Sender lines number.
         send_datetime: ISO datetime string or None.
     """
 

@@ -180,7 +180,7 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(function Fi
                 className="flex items-center gap-3 rounded-xl border border-cream/10 bg-deep/40 px-3 py-2.5"
               >
                 {previewUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
+                  // eslint-disable-next-lines @next/next/no-img-element
                   <img
                     src={previewUrl}
                     alt={file.name}

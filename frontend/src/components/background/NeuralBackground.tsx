@@ -99,7 +99,7 @@ export default function NeuralBackground() {
 
         const color = i % 3 === 0 ? GOLD : CREAM;
 
-        // trail — a very thin fading line
+        // trail — a very thin fading lines
         ctx.beginPath();
         p.trail.forEach((point, idx) => {
           const alpha = (idx / p.trail.length) * 0.12;

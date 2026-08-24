@@ -90,7 +90,7 @@ class LineDetailAPIView(generics.RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         line_id = kwargs["pk"]
 
-        cache_key = f"line:detail:{line_id}"
+        cache_key = f"lines:detail:{line_id}"
 
         cached_data = cache.get(cache_key)
 
@@ -114,7 +114,7 @@ class LineDetailAPIView(generics.RetrieveAPIView):
 
 class MyLineListAPIView(generics.ListAPIView):
     serializer_class = LineListSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     filter_backends = (
         SearchFilter,
@@ -126,6 +126,15 @@ class MyLineListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+
+        if user.is_superuser or user.user_roles.filter(role__name="admin").exists():
+            return (
+                Line.objects
+                .all()
+                .select_related("parent")
+                .prefetch_related("children")
+                .distinct()
+            )
 
         return (
             Line.objects
@@ -183,7 +192,7 @@ class LineAddMembersView(GenericAPIView):
             data=request.data,
             context={
                 "request": request,
-                "line": line,
+                "lines": line,
             },
         )
 
@@ -192,7 +201,7 @@ class LineAddMembersView(GenericAPIView):
 
         return Response(
             {
-                "detail": "Users added to line successfully.",
+                "detail": "Users added to lines successfully.",
                 "count": len(memberships),
             },
             status=status.HTTP_201_CREATED,
@@ -210,7 +219,7 @@ class LineRemoveMembersView(GenericAPIView):
             data=request.data,
             context={
                 "request": request,
-                "line": line,
+                "lines": line,
             },
         )
 
@@ -228,7 +237,7 @@ class LineRemoveMembersView(GenericAPIView):
 
         return Response(
             {
-                "detail": "Users removed from line successfully.",
+                "detail": "Users removed from lines successfully.",
                 "count": deleted_count,
             },
             status=status.HTTP_200_OK,
@@ -247,7 +256,7 @@ class LineAddStaffView(GenericAPIView):
             data=request.data,
             context={
                 "request": request,
-                "line": line,
+                "lines": line,
             },
         )
 
@@ -256,7 +265,7 @@ class LineAddStaffView(GenericAPIView):
 
         return Response(
             {
-                "detail": "Staff added to line successfully.",
+                "detail": "Staff added to lines successfully.",
                 "count": len(staff_lines),
             },
             status=status.HTTP_201_CREATED,
@@ -273,7 +282,7 @@ class LineRemoveStaffView(GenericAPIView):
             data=request.data,
             context={
                 "request": request,
-                "line": line,
+                "lines": line,
             },
         )
 
@@ -291,7 +300,7 @@ class LineRemoveStaffView(GenericAPIView):
 
         return Response(
             {
-                "detail": "Staff removed from line successfully.",
+                "detail": "Staff removed from lines successfully.",
                 "count": deleted_count,
             },
             status=status.HTTP_200_OK,
@@ -778,7 +787,7 @@ class StaffAssignmentSubmissionListAPIView(
         cache_key = (
             f"staff-assignment-submissions:"
             f"assignment:{assignment_id}:"
-            f"line:{line_id}:"
+            f"lines:{line_id}:"
             f"user:{request.user.id}:"
             f"search:{search}:"
             f"ordering:{ordering}:"
@@ -901,7 +910,7 @@ class MemberAssignmentSubmissionListAPIView(
         cache_key = (
             f"member-assignment-submissions:"
             f"assignment:{assignment_id}:"
-            f"line:{line_id}:"
+            f"lines:{line_id}:"
             f"user:{request.user.id}:"
             f"search:{search}:"
             f"ordering:{ordering}:"
@@ -1002,7 +1011,7 @@ class StaffAssignmentSubmissionDetailAPIView(
     def retrieve(self, request, *args, **kwargs):
         cache_key = (
             f"staff-assignment-submission-detail:"
-            f"line:{kwargs['line_id']}:"
+            f"lines:{kwargs['line_id']}:"
             f"assignment:{kwargs['assignment_id']}:"
             f"submission:{kwargs['submission_id']}:"
             f"user:{request.user.id}"
@@ -1056,7 +1065,7 @@ class MemberAssignmentSubmissionDetailAPIView(
     def retrieve(self, request, *args, **kwargs):
         cache_key = (
             f"member-assignment-submission-detail:"
-            f"line:{kwargs['line_id']}:"
+            f"lines:{kwargs['line_id']}:"
             f"assignment:{kwargs['assignment_id']}:"
             f"submission:{kwargs['submission_id']}:"
             f"user:{request.user.id}"
