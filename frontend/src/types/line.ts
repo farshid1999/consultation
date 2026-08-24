@@ -6,7 +6,6 @@ export interface LineListParams {
   // ordering?: string;
 }
 
-// types/line.ts
 
 export interface Media {
   id: string | number; // تغییر به union type
