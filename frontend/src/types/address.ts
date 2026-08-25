@@ -10,4 +10,7 @@ export interface Address {
 }
 
 /** Payload shape for creating/updating an address (id is server-assigned). */
-export type AddressInput = Omit<Address, "id">;
+export type AddressInput = Omit<Address, "id"> & {
+  postal_code?: string;
+  description?: string | null;
+};

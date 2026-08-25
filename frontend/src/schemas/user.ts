@@ -8,7 +8,7 @@ export const addressSchema = z.object({
   city: z.string().min(1, "شهر الزامی است"),
   street: z.string().min(1, "آدرس الزامی است"),
   postal_code: z.string().optional(),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
 });
 
 export const clubSchema = z.object({

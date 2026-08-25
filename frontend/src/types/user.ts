@@ -1,6 +1,7 @@
 import type { Address, AddressInput } from "./address";
 import type { Club, ClubInput } from "./club";
 import type { InformationInput, InformationRead } from "./information";
+import type { CreateUserFormValues, UpdateUserFormValues } from "@/schemas/user";
 
 /** Mirrors UserListSerializer — used inside StaffListSerializer. */
 export interface UserListItem {
@@ -50,31 +51,11 @@ export interface UserDetail {
 }
 
 /** Mirrors UserCreateSerializer exactly. */
-export interface UserCreateInput {
-  username: string;
-  password: string;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  phone_number: string;
-  land_line?: string;
-  is_student?: boolean;
-  degree?: string;
-  job?: string;
-  sport_discipline?: string;
-  professional_background?: string;
-  referral_code?: string;
-  address?: AddressInput;
-  club?: ClubInput;
-  avatar?: File | null;
-  bio?: string;
-  birth_date?: string | null;
-  /** The recursive "many" informations tree — any number of root nodes, each with any number of children. */
-  informations?: InformationInput[];
-}
+
 
 /**
  * Mirrors UserUpdateSerializer — identical field list to create, but every
  * field is optional (partial update) and password is optional too.
  */
-export type UserUpdateInput = Partial<UserCreateInput>;
+export type UserCreateInput = CreateUserFormValues;
+export type UserUpdateInput = UpdateUserFormValues;

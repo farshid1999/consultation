@@ -85,7 +85,7 @@ export default function UsersPage() {
                         <img src={user.avatar} className="w-8 h-8 rounded-full object-cover" />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold text-xs font-bold">
-                          {user.first_name?.[0] ?? user.username[0].toUpperCase()}
+                          {user.first_name?.[0] ?? user.username?.[0]?.toUpperCase()}
                         </div>
                       )}
                       <div>
@@ -120,7 +120,7 @@ export default function UsersPage() {
                         <FiEdit2 size={14} />
                       </Link>
                       <button
-                        onClick={() => handleDelete(user.id, user.username)}
+                        onClick={() => handleDelete(user.id, user.username ?? "")}
                         className="p-1.5 rounded-lg text-cream/40 hover:text-red-400 hover:bg-red-400/10 transition-colors"
                       >
                         <FiTrash2 size={14} />

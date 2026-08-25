@@ -1,31 +1,31 @@
-import { accountApi } from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
+import type { UserListItem, UserDetail, UserCreateInput, UserUpdateInput } from "@/types";
+import type { Paginated, ListQueryParams } from "@/types";
 
-const BASE = "users";
-
-const handleRequest = async <T>(requestPromise: Promise<{ data: T }>, errorContext = "API Error"): Promise<T> => {
-  try {
-    const res = await requestPromise;
-    return res.data;
-  } catch (err: any) {
-    if (err.code === "ECONNABORTED") return null as T;
-    console.error(`${errorContext}:`, err);
-    throw err.response?.data || err;
-  }
-};
+const BASE = "v1/users";
 
 export const users = {
-  getUsers: (params?: Record<string, string>) =>
-    handleRequest(accountApi.get(`${BASE}/`, { params }), "getUsers"),
+  getUsers: async (params?: ListQueryParams): Promise<Paginated<UserListItem>> => {
+    const res = await apiClient.get<Paginated<UserListItem>>(`${BASE}/`, { params });
+    return res.data;
+  },
 
-  getUser: (id: number) =>
-    handleRequest(accountApi.get(`${BASE}/${id}/`), "getUser"),
+  getUser: async (id: number): Promise<UserDetail> => {
+    const res = await apiClient.get<UserDetail>(`${BASE}/${id}/`);
+    return res.data;
+  },
 
-  createUser: (data: unknown) =>
-    handleRequest(accountApi.post(`${BASE}/create/`, data), "createUser"),
+  createUser: async (data: UserCreateInput): Promise<UserDetail> => {
+    const res = await apiClient.post<UserDetail>(`${BASE}/create/`, data);
+    return res.data;
+  },
 
-  updateUser: (id: number, data: unknown) =>
-    handleRequest(accountApi.patch(`${BASE}/${id}/update/`, data), "updateUser"),
+  updateUser: async (id: number, data: UserUpdateInput): Promise<UserDetail> => {
+    const res = await apiClient.patch<UserDetail>(`${BASE}/${id}/update/`, data);
+    return res.data;
+  },
 
-  deleteUser: (id: number) =>
-    handleRequest(accountApi.delete(`${BASE}/${id}/delete/`), "deleteUser"),
+  deleteUser: async (id: number): Promise<void> => {
+    await apiClient.delete(`${BASE}/${id}/delete/`);
+  },
 };
