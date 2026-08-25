@@ -189,68 +189,68 @@ export default function StaffFormFields({
               <Input label="مدرک تحصیلی" {...field} value={field.value ?? ""} error={fieldState.error?.message} />
             )}
           />
-          <Controller
-            name="user.job"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Input label="شغل" {...field} value={field.value ?? ""} error={fieldState.error?.message} />
-            )}
-          />
-          <Controller
-            name="user.sport_discipline"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Input label="رشته‌ی ورزشی" {...field} value={field.value ?? ""} error={fieldState.error?.message} />
-            )}
-          />
-          <Controller
-            name="user.referral_code"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Input label="کد معرف" {...field} value={field.value ?? ""} error={fieldState.error?.message} />
-            )}
-          />
-          <Controller
-            name="user.is_student"
-            control={control}
-            render={({ field }) => (
-              <Switch
-                label="دانشجو است؟"
-                checked={Boolean(field.value)}
-                onChange={(e) => field.onChange(e.target.checked)}
-              />
-            )}
-          />
+          {/*<Controller*/}
+          {/*  name="user.job"*/}
+          {/*  control={control}*/}
+          {/*  render={({ field, fieldState }) => (*/}
+          {/*    <Input label="شغل" {...field} value={field.value ?? ""} error={fieldState.error?.message} />*/}
+          {/*  )}*/}
+          {/*/>*/}
+          {/*<Controller*/}
+          {/*  name="user.sport_discipline"*/}
+          {/*  control={control}*/}
+          {/*  render={({ field, fieldState }) => (*/}
+          {/*    <Input label="رشته‌ی ورزشی" {...field} value={field.value ?? ""} error={fieldState.error?.message} />*/}
+          {/*  )}*/}
+          {/*/>*/}
+          {/*<Controller*/}
+          {/*  name="user.referral_code"*/}
+          {/*  control={control}*/}
+          {/*  render={({ field, fieldState }) => (*/}
+          {/*    <Input label="کد معرف" {...field} value={field.value ?? ""} error={fieldState.error?.message} />*/}
+          {/*  )}*/}
+          {/*/>*/}
+          {/*<Controller*/}
+          {/*  name="user.is_student"*/}
+          {/*  control={control}*/}
+          {/*  render={({ field }) => (*/}
+          {/*    <Switch*/}
+          {/*      label="دانشجو است؟"*/}
+          {/*      checked={Boolean(field.value)}*/}
+          {/*      onChange={(e) => field.onChange(e.target.checked)}*/}
+          {/*    />*/}
+          {/*  )}*/}
+          {/*/>*/}
         </div>
 
-        <Controller
-          name="user.professional_background"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Textarea
-              label="سوابق حرفه‌ای"
-              wrapperClassName="mt-4"
-              {...field}
-              value={field.value ?? ""}
-              error={fieldState.error?.message}
-            />
-          )}
-        />
-        <Controller
-          name="user.bio"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Textarea
-              label="بیوگرافی"
-              showCounter
-              maxLength={500}
-              wrapperClassName="mt-4"
-              {...field}
-              value={field.value ?? ""}
-              error={fieldState.error?.message}
-            />
-          )}
-        />
+        {/*<Controller*/}
+        {/*  name="user.professional_background"*/}
+        {/*  control={control}*/}
+        {/*  render={({ field, fieldState }) => (*/}
+        {/*    <Textarea*/}
+        {/*      label="سوابق حرفه‌ای"*/}
+        {/*      wrapperClassName="mt-4"*/}
+        {/*      {...field}*/}
+        {/*      value={field.value ?? ""}*/}
+        {/*      error={fieldState.error?.message}*/}
+        {/*    />*/}
+        {/*  )}*/}
+        {/*/>*/}
+        {/*<Controller*/}
+        {/*  name="user.bio"*/}
+        {/*  control={control}*/}
+        {/*  render={({ field, fieldState }) => (*/}
+        {/*    <Textarea*/}
+        {/*      label="بیوگرافی"*/}
+        {/*      showCounter*/}
+        {/*      maxLength={500}*/}
+        {/*      wrapperClassName="mt-4"*/}
+        {/*      {...field}*/}
+        {/*      value={field.value ?? ""}*/}
+        {/*      error={fieldState.error?.message}*/}
+        {/*    />*/}
+        {/*  )}*/}
+        {/*/>*/}
 
         <Controller
           name="user.avatar"
@@ -286,17 +286,17 @@ export default function StaffFormFields({
       </FormSection>
 
       {/* --- Club (optional nested object with its own required address) --- */}
-      <FormSection
-        title="عضویت باشگاه"
-        description="اختیاری — در صورت نیاز فعال کنید"
-        action={<Switch checked={showClub} onChange={(e) => setShowClub(e.target.checked)} aria-label="فعال‌سازی باشگاه" />}
-      >
-        {showClub ? (
-          <ClubFields control={control} name="user.club" />
-        ) : (
-          <p className="text-xs text-cream/35">باشگاهی ثبت نشده است.</p>
-        )}
-      </FormSection>
+      {/*<FormSection*/}
+      {/*  title="عضویت باشگاه"*/}
+      {/*  description="اختیاری — در صورت نیاز فعال کنید"*/}
+      {/*  action={<Switch checked={showClub} onChange={(e) => setShowClub(e.target.checked)} aria-label="فعال‌سازی باشگاه" />}*/}
+      {/*>*/}
+      {/*  {showClub ? (*/}
+      {/*    <ClubFields control={control} name="user.club" />*/}
+      {/*  ) : (*/}
+      {/*    <p className="text-xs text-cream/35">باشگاهی ثبت نشده است.</p>*/}
+      {/*  )}*/}
+      {/*</FormSection>*/}
 
       {/* --- Informations: the recursive "many" tree --- */}
       <FormSection

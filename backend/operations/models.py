@@ -44,7 +44,6 @@ class LineMember(BaseModel):
         on_delete=models.CASCADE,
         related_name="line_memberships",
     )
-
     line = models.ForeignKey(
         Line,
         on_delete=models.CASCADE,
@@ -53,15 +52,15 @@ class LineMember(BaseModel):
 
     class Meta:
         constraints = [
+            # مطمئن شوید نام فیلدها دقیقاً همان چیزی است که بالا تعریف کردید
             models.UniqueConstraint(
-                fields=["user", "line"],
-                name="unique_user_line_membership",
+                fields=['user', 'line'],
+                name='unique_user_line_membership'
             )
         ]
 
     def __str__(self):
         return f"{self.user} - {self.line}"
-
 
 
 class StaffLine(BaseModel):
@@ -70,7 +69,6 @@ class StaffLine(BaseModel):
         on_delete=models.CASCADE,
         related_name="line_memberships",
     )
-
     line = models.ForeignKey(
         Line,
         on_delete=models.CASCADE,
@@ -79,15 +77,15 @@ class StaffLine(BaseModel):
 
     class Meta:
         constraints = [
+            # اینجا هم نام فیلدها باید دقیق باشد
             models.UniqueConstraint(
-                fields=["staff", "line"],
-                name="unique_staff_line",
+                fields=['staff', 'line'],
+                name='unique_staff_line'
             )
         ]
 
     def __str__(self):
         return f"{self.staff} - {self.line}"
-
 
 class Media(BaseModel):
     text = models.TextField(

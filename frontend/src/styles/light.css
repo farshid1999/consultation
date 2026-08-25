@@ -1,0 +1,215 @@
+/* styles/admin-theme.css */
+
+/*
+  1. حذف بک‌گراند متحرک سایت اصلی
+  استفاده از :has برای بررسی وجود کلاس تم در هر نقطه از صفحه
+*/
+:root:has(.theme-light-admin) canvas.pointer-events-none,
+:root:has(.theme-light-admin) canvas[aria-hidden="true"] {
+  display: none !important;
+}
+
+/* --- تعریف متغیرهای تم روشن --- */
+.theme-light-admin {
+  --bg-base: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-main: #0f172a; /* slate-900 */
+  --text-muted: #64748b; /* slate-500 */
+  --border-light: #e2e8f0; /* slate-200 */
+  --gold: #c9a24d;
+  --gold-hover: #b08d3e;
+
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+/* --- Typography & Headings --- */
+.theme-light-admin h1,
+.theme-light-admin h2,
+.theme-light-admin h3,
+.theme-light-admin h4 {
+  color: var(--text-main) !important;
+  font-weight: 700;
+}
+
+.theme-light-admin p,
+.theme-light-admin span,
+.theme-light-admin div {
+  /* رنگ پیش‌فرض متن‌ها */
+  color: var(--text-muted);
+}
+
+/* اصلاح رنگ لیبل‌ها و توضیحات فرم */
+.theme-light-admin label,
+.theme-light-admin [class*="text-cream/60"],
+.theme-light-admin [class*="text-cream/75"] {
+  color: #334155 !important; /* slate-700 - خوانا تر روی سفید */
+  font-weight: 500;
+}
+
+.theme-light-admin [class*="text-cream/45"],
+.theme-light-admin [class*="text-cream/35"] {
+  color: #94a3b8 !important; /* slate-400 */
+}
+
+/* --- Inputs, Selects, Textareas --- */
+.theme-light-admin input:not([type="checkbox"]):not([type="radio"]),
+.theme-light-admin textarea,
+.theme-light-admin select {
+  background-color: white !important;
+  border: 1px solid var(--border-light) !important;
+  color: var(--text-main) !important;
+  border-radius: 0.75rem !important;
+  transition: all 0.2s;
+}
+
+.theme-light-admin input::placeholder,
+.theme-light-admin textarea::placeholder {
+  color: #cbd5e1 !important;
+}
+
+.theme-light-admin input:focus,
+.theme-light-admin textarea:focus,
+.theme-light-admin select:focus {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(201, 162, 77, 0.15) !important;
+  outline: none;
+}
+
+/* آیکون‌های داخل اینپوت (مثل چشم پسورد یا تقویم) */
+.theme-light-admin button[class*="absolute"] svg,
+.theme-light-admin span[class*="absolute"] svg {
+  color: #94a3b8 !important;
+}
+.theme-light-admin button[class*="absolute"]:hover svg {
+  color: var(--gold) !important;
+}
+
+/* --- Sections & Cards (FormSection) --- */
+/* تبدیل کارت‌های تیره به کارت‌های سفید با سایه نرم */
+.theme-light-admin section,
+.theme-light-admin [class*="bg-deep"],
+.theme-light-admin [class*="bg-cream/"],
+.theme-light-admin .card {
+  background-color: white !important;
+  border: 1px solid var(--border-light) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+  border-radius: 1.5rem !important;
+}
+
+/* تیترهای داخل سکشن‌ها */
+.theme-light-admin section h3 {
+  color: var(--text-main) !important;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Buttons --- */
+/* دکمه اصلی (Submit) */
+.theme-light-admin button[type="submit"],
+.theme-light-admin button[class*="from-gold"] {
+  background: linear-gradient(135deg, var(--gold) 0%, #d4af37 100%) !important;
+  color: white !important;
+  border: none;
+  box-shadow: 0 4px 12px rgba(201, 162, 77, 0.25);
+}
+.theme-light-admin button[type="submit"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(201, 162, 77, 0.35);
+}
+
+/* دکمه ثانویه (Cancel) */
+.theme-light-admin button:not([type="submit"]):not([class*="from-gold"]) {
+  background-color: white !important;
+  border: 1px solid var(--border-light) !important;
+  color: var(--text-muted) !important;
+}
+.theme-light-admin button:not([type="submit"]):hover {
+  border-color: var(--gold) !important;
+  color: var(--gold) !important;
+  background-color: #fffbeb !important;
+}
+
+/* --- Dropdowns & Popovers (DatePicker, MultiSelect) --- */
+.theme-light-admin [role="dialog"],
+.theme-light-admin [role="listbox"],
+.theme-light-admin [class*="backdrop-blur"] {
+  background-color: white !important;
+  border: 1px solid var(--border-light) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  backdrop-filter: none !important; /* حذف مات شدگی برای تم سفید خالص */
+}
+
+/* آیتم‌های داخل دراپ‌داون */
+.theme-light-admin [role="option"],
+.theme-light-admin [role="listbox"] button {
+  color: var(--text-main) !important;
+}
+.theme-light-admin [role="option"]:hover,
+.theme-light-admin [role="listbox"] button:hover {
+  background-color: #f1f5f9 !important;
+}
+.theme-light-admin [aria-selected="true"] {
+  background-color: rgba(201, 162, 77, 0.1) !important;
+  color: var(--gold) !important;
+}
+
+/* --- File Uploader --- */
+.theme-light-admin [role="button"][class*="border-dashed"] {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+.theme-light-admin [role="button"][class*="border-dashed"]:hover {
+  border-color: var(--gold) !important;
+  background-color: #fffbeb !important;
+}
+.theme-light-admin [role="button"][class*="border-dashed"] svg {
+  color: var(--gold) !important;
+}
+
+/* --- Switches & Checkboxes --- */
+.theme-light-admin input[type="checkbox"] + span,
+.theme-light-admin input[type="radio"] + span {
+  background-color: #e2e8f0 !important;
+  border: none;
+}
+.theme-light-admin input[type="checkbox"]:checked + span,
+.theme-light-admin input[type="radio"]:checked + span {
+  background-color: var(--gold) !important;
+}
+/* دایره سفید داخل سوئیچ */
+.theme-light-admin input[type="checkbox"] + span span,
+.theme-light-admin input[type="radio"] + span span {
+  background-color: white !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* --- Audio Recorder --- */
+.theme-light-admin [class*="AudioRecorder"] > div {
+  background-color: white !important;
+  border: 1px solid var(--border-light) !important;
+}
+.theme-light-admin [class*="AudioRecorder"] button {
+  background-color: #f1f5f9 !important;
+  color: var(--text-main) !important;
+}
+.theme-light-admin [class*="AudioRecorder"] button:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* --- Scrollbar (برای زیبایی بیشتر در فرم‌های طولانی) --- */
+.theme-light-admin ::-webkit-scrollbar {
+  width: 8px;
+}
+.theme-light-admin ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.theme-light-admin ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.theme-light-admin ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

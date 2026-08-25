@@ -1,5 +1,6 @@
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -597,7 +598,7 @@ class UserDeleteAPIView(GenericAPIView):
             status=status.HTTP_200_OK
         )
 
-
+import json
 class StaffCreateAPIView(GenericAPIView):
 
     serializer_class = StaffCreateSerializer
@@ -606,29 +607,34 @@ class StaffCreateAPIView(GenericAPIView):
         IsAdminOrSuperUser,
     )
 
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     def post(self, request):
+        if "data" in request.data:
+            payload = json.loads(request.data["data"])
+            self._inject_files(payload, request.FILES, "")
+        else:
+            payload = request.data
 
-        serializer = self.get_serializer(
-            data=request.data
-        )
-
-
-        serializer.is_valid(
-            raise_exception=True
-        )
-
-
+        serializer = self.get_serializer(data=payload)
+        serializer.is_valid(raise_exception=True)
         staff = serializer.save()
-
-
         return Response(
-            StaffUpdateSerializer(
-                staff,
-                context=self.get_serializer_context()
-            ).data,
+            StaffDetailSerializer(staff, context=self.get_serializer_context()).data,
             status=status.HTTP_201_CREATED
         )
+
+    def _inject_files(self, obj, files_dict, path):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                new_path = f"{path}[{key}]" if path else key
+                if isinstance(value, str) and value.startswith("__FILE__") and new_path in files_dict:
+                    obj[key] = files_dict[new_path]
+                else:
+                    self._inject_files(value, files_dict, new_path)
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                self._inject_files(item, files_dict, f"{path}[{i}]")
 
 
 class StaffUpdateAPIView(GenericAPIView):
@@ -639,47 +645,24 @@ class StaffUpdateAPIView(GenericAPIView):
         IsAdminOrSuperUser,
     )
 
-
     def patch(self, request, pk):
 
-        staff = get_object_or_404(
-            Staff,
-            pk=pk
-        )
+        staff = get_object_or_404(Staff, pk=pk)
 
-
-        serializer = self.get_serializer(
-            staff,
-            data=request.data,
-            partial=True
-        )
-
-
-        serializer.is_valid(
-            raise_exception=True
-        )
-
-
+        serializer = self.get_serializer(staff, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
         staff = serializer.save()
 
-
         return Response(
-            StaffUpdateSerializer(
-                staff,
-                context=self.get_serializer_context()
-            ).data,
+            StaffDetailSerializer(staff, context=self.get_serializer_context()).data,
             status=status.HTTP_200_OK
         )
-
-
 
 class StaffListAPIView(GenericAPIView):
 
     serializer_class = StaffListSerializer
 
-    permission_classes = (
-        IsAdminOrSuperUser,
-    )
+    permission_classes = [IsAdminOrSuperUser]
 
 
     queryset = Staff.objects.select_related(
