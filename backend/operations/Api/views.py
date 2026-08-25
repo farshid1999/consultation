@@ -126,7 +126,6 @@ class MyLineListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-
         if user.is_superuser or user.user_roles.filter(role__name="admin").exists():
             return (
                 Line.objects

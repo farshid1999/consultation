@@ -6,3 +6,4 @@ export * from "./role";
 export * from "./staff";
 export * from "./user";
 export * from "./line";
+export * from "./lineMember"

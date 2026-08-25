@@ -16,7 +16,12 @@ export const STAFF_ENDPOINTS = {
 
 // اضافه کردن اندپوینت‌های لاین
 export const LINE_ENDPOINTS = {
+  myList: "operations/lines/my/",
   list: "operations/lines/",
   // اگر در آینده نیاز به جزئیات یا حذف بود، اینجا تعریف می‌شود
   detail: (id: number | string) => `operations/lines/${id}/`,
+};
+
+export const LINE_MEMBER_ENDPOINTS = {
+  list: (lineId: string | number) => `operations/lines/${lineId}/members/`,
 };

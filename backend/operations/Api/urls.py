@@ -16,49 +16,50 @@ line_urls = [
     ),
 
     path(
-        "<str:pk>/",
-        LineDetailAPIView.as_view(),
-        name="lines-detail",
-    ),
-
-    path(
         "my/",
         MyLineListAPIView.as_view(),
         name="my-lines-list",
     ),
 
     path(
-        "<int:line_id>/members/",
+        "<str:pk>/",
+        LineDetailAPIView.as_view(),
+        name="lines-detail",
+    ),
+
+
+    path(
+        "<str:line_id>/members/",
         LineMemberListView.as_view(),
         name="lines-members",
     ),
 
     path(
-        "<int:line_id>/members/add/",
+        "<str:line_id>/members/add/",
         LineAddMembersView.as_view(),
         name="lines-add-members",
     ),
 
     path(
-        "<int:line_id>/members/remove/",
+        "<str:line_id>/members/remove/",
         LineRemoveMembersView.as_view(),
         name="lines-remove-members",
     ),
 
     path(
-        "<int:line_id>/staff/",
+        "<str:line_id>/staff/",
         LineStaffListView.as_view(),
         name="lines-staff",
     ),
 
     path(
-        "<int:line_id>/staff/add/",
+        "<str:line_id>/staff/add/",
         LineAddStaffView.as_view(),
         name="lines-add-staff",
     ),
 
     path(
-        "<int:line_id>/staff/remove/",
+        "<str:line_id>/staff/remove/",
         LineRemoveStaffView.as_view(),
         name="lines-remove-staff",
     ),
@@ -102,25 +103,25 @@ assignment_urls = [
 staff_assignment_urls = [
 
     path(
-        "lines/<int:line_id>/",
+        "lines/<str:line_id>/",
         StaffAssignmentListAPIView.as_view(),
         name="staff-assignment-list",
     ),
 
     path(
-        "lines/<int:line_id>/<int:assignment_id>/",
+        "lines/<str:line_id>/<int:assignment_id>/",
         StaffAssignmentDetailAPIView.as_view(),
         name="staff-assignment-detail",
     ),
 
     path(
-        "lines/<int:line_id>/<int:assignment_id>/submissions/",
+        "lines/<str:line_id>/<int:assignment_id>/submissions/",
         StaffAssignmentSubmissionListAPIView.as_view(),
         name="staff-assignment-submission-list",
     ),
 
     path(
-        "lines/<int:line_id>/<int:assignment_id>/submissions/<int:submission_id>/",
+        "lines/<str:line_id>/<int:assignment_id>/submissions/<int:submission_id>/",
         StaffAssignmentSubmissionDetailAPIView.as_view(),
         name="staff-assignment-submission-detail",
     ),
@@ -135,13 +136,13 @@ staff_assignment_urls = [
 member_assignment_urls = [
 
     path(
-        "lines/<int:line_id>/",
+        "lines/<str:line_id>/",
         MemberAssignmentListAPIView.as_view(),
         name="member-assignment-list",
     ),
 
     path(
-        "lines/<int:line_id>/<int:assignment_id>/",
+        "lines/<str:line_id>/<int:assignment_id>/",
         MemberAssignmentDetailAPIView.as_view(),
         name="member-assignment-detail",
     ),
@@ -159,13 +160,13 @@ member_assignment_urls = [
     ),
 
     path(
-        "lines/<int:line_id>/<int:assignment_id>/submissions/",
+        "lines/<str:line_id>/<int:assignment_id>/submissions/",
         MemberAssignmentSubmissionListAPIView.as_view(),
         name="member-assignment-submission-list",
     ),
 
     path(
-        "lines/<int:line_id>/<int:assignment_id>/submissions/<int:submission_id>/",
+        "lines/<str:line_id>/<int:assignment_id>/submissions/<int:submission_id>/",
         MemberAssignmentSubmissionDetailAPIView.as_view(),
         name="member-assignment-submission-detail",
     ),
