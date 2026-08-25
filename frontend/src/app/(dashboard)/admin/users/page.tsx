@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 export default function UsersPage() {
   const [search, setSearch] = useState("");
   const { data, isLoading } = useUsers(search ? { search } : undefined);
+  console.log("users data:", data);
   const { mutate: deleteUser } = useDeleteUser();
 
   const handleDelete = (id: number, username: string) => {
@@ -24,7 +25,7 @@ export default function UsersPage() {
         <div>
           <h1 className="text-2xl font-semibold text-cream">کاربران</h1>
           <p className="text-cream/40 text-sm mt-1">
-            {data?.count ?? 0} کاربر ثبت‌شده
+            {data?.pagination?.count ?? 0} کاربر ثبت‌شده
           </p>
         </div>
         <Link

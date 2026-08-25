@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { users } from "@/services/user";
-import type { UserListItem, UserDetail, UserCreateInput, UserUpdateInput } from "@/types";
+import type {
+  UserListItem,
+  UserDetail,
+  UserCreateInput,
+  UserUpdateInput,
+} from "@/types";
 import type { Paginated, ListQueryParams } from "@/types";
 
 const KEYS = {
@@ -13,6 +18,7 @@ export const useUsers = (params?: ListQueryParams) =>
   useQuery<Paginated<UserListItem>>({
     queryKey: KEYS.list(params),
     queryFn: () => users.getUsers(params),
+    staleTime: 0,
   });
 
 export const useUser = (id: number) =>

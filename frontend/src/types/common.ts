@@ -56,9 +56,16 @@ export interface NavLink {
  * what `self.get_paginated_response(...)` in StaffListAPIView returns.
  */
 export interface Paginated<T> {
-  count: number;
-  next: string | null;
-  previous: string | null;
+  pagination: {
+    count: number;
+    has_next: boolean;
+    has_previous: boolean;
+    next: string | null;
+    previous: string | null;
+    page: number;
+    page_size: number;
+    pages: number;
+  };
   results: T[];
 }
 

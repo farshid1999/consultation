@@ -10,7 +10,8 @@ import { tokenService } from "@/lib/auth/tokenService";
  * (e.g. "accounts/staff/"), matching the Django include structure:
  *   path("api/accounts/", include("accounts.Api.v1.urls"))
  */
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/";
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/";
 
 /**
  * Adjust to match your actual SimpleJWT refresh endpoint if it differs.
@@ -39,13 +40,11 @@ apiClient.interceptors.request.use((config) => {
 let refreshPromise: Promise<string | null> | null = null;
 
 async function refreshAccessToken(): Promise<string | null> {
-  const refresh = tokenService.getRefreshToken();
-  if (!refresh) return null;
-
   try {
     const { data } = await axios.post<{ access: string }>(
-      `${API_BASE_URL.replace(/\/$/, "")}${REFRESH_ENDPOINT}`,
-      { refresh }
+      `${API_BASE_URL}${REFRESH_ENDPOINT}`,
+      {},
+      { withCredentials: true },
     );
     tokenService.setAccessToken(data.access);
     return data.access;
@@ -64,7 +63,11 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as RetriableConfig | undefined;
 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       // Coalesce concurrent 401s into a single refresh call.
@@ -85,5 +88,5 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
