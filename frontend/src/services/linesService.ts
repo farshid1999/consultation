@@ -14,7 +14,7 @@ function toQueryParams(params: LineListParams = {}): Record<string, string> {
 export const lineService = {
     async list(params?: LineListParams): Promise<Line[]> {
         try {
-            const {data} = await apiClient.get<Line[]>(LINE_ENDPOINTS.list, {
+            const {data} = await apiClient.get<Line[]>(LINE_ENDPOINTS.myList, {
                 params: toQueryParams(params),
             });
             return data;

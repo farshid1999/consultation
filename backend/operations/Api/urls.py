@@ -16,16 +16,17 @@ line_urls = [
     ),
 
     path(
+        "my/",
+        MyLineListAPIView.as_view(),
+        name="my-lines-list",
+    ),
+
+    path(
         "<str:pk>/",
         LineDetailAPIView.as_view(),
         name="lines-detail",
     ),
 
-    path(
-        "my/",
-        MyLineListAPIView.as_view(),
-        name="my-lines-list",
-    ),
 
     path(
         "<str:line_id>/members/",
