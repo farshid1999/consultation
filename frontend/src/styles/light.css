@@ -9,15 +9,29 @@
   display: none !important;
 }
 
-/* --- تعریف متغیرهای تم روشن --- */
+/* --- تعریف متغیرهای تم روشن (هماهنگ با هویت سایت اصلی: سبز تیره + طلایی) --- */
 .theme-light-admin {
   --bg-base: #ffffff;
-  --bg-secondary: #f8fafc;
+  --bg-secondary: #f7faf8; /* سفید با ته‌رنگ ملایم سبز */
   --text-main: #0f172a; /* slate-900 */
   --text-muted: #64748b; /* slate-500 */
   --border-light: #e2e8f0; /* slate-200 */
+
+  /* طلایی برند (از سایت اصلی) */
   --gold: #c9a24d;
   --gold-hover: #b08d3e;
+  --gold-soft: #d4af37;
+
+  /* سبز تیره برند (از bg-deep سایت اصلی) */
+  --green-deep: #0f1f12;
+  --green: #1e5c3f;
+  --green-hover: #164a32;
+  --green-soft: #e8f5ee; /* تینت سبز برای بک‌گراندهای ملایم */
+  --green-soft-border: #bfe3cf;
+
+  /* گرادیان برند برای المان‌های تاکیدی */
+  --brand-gradient: linear-gradient(135deg, var(--gold) 0%, var(--green) 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(201, 162, 77, 0.12) 0%, rgba(30, 92, 63, 0.12) 100%);
 
   background-color: var(--bg-secondary) !important;
   color: var(--text-main);
@@ -31,6 +45,24 @@
 .theme-light-admin h4 {
   color: var(--text-main) !important;
   font-weight: 700;
+}
+
+/* خط تاکیدی گرادیانی زیر h1/h2 برای حس برندینگ سایت اصلی */
+.theme-light-admin h1,
+.theme-light-admin h2 {
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+.theme-light-admin h1::after,
+.theme-light-admin h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 56px;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--brand-gradient);
 }
 
 .theme-light-admin p,
@@ -69,11 +101,14 @@
   color: #cbd5e1 !important;
 }
 
+/* فوکوس: حلقه‌ی طلایی + یک لبه‌ی ظریف سبز برای هماهنگی برند */
 .theme-light-admin input:focus,
 .theme-light-admin textarea:focus,
 .theme-light-admin select:focus {
   border-color: var(--gold) !important;
-  box-shadow: 0 0 0 3px rgba(201, 162, 77, 0.15) !important;
+  box-shadow:
+    0 0 0 3px rgba(201, 162, 77, 0.15),
+    0 0 0 5px rgba(30, 92, 63, 0.08) !important;
   outline: none;
 }
 
@@ -87,15 +122,29 @@
 }
 
 /* --- Sections & Cards (FormSection) --- */
-/* تبدیل کارت‌های تیره به کارت‌های سفید با سایه نرم */
+/* تبدیل کارت‌های تیره به کارت‌های سفید با سایه نرم + نوار تاکیدی برند در بالای کارت */
 .theme-light-admin section,
 .theme-light-admin [class*="bg-deep"],
 .theme-light-admin [class*="bg-cream/"],
 .theme-light-admin .card {
+  position: relative;
   background-color: white !important;
   border: 1px solid var(--border-light) !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
   border-radius: 1.5rem !important;
+  overflow: hidden;
+}
+
+.theme-light-admin section::before,
+.theme-light-admin .card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: var(--brand-gradient);
+  opacity: 0.8;
 }
 
 /* تیترهای داخل سکشن‌ها */
@@ -105,31 +154,35 @@
   padding-bottom: 0.75rem;
   margin-bottom: 1.5rem;
 }
+.theme-light-admin section h3::after {
+  display: none; /* خط گرادیانی h1/h2 داخل کارت‌ها تکرار نشه */
+}
 
 /* --- Buttons --- */
-/* دکمه اصلی (Submit) */
+/* دکمه اصلی (Submit) - گرادیان طلایی رو به سبز، امضای برند سایت */
 .theme-light-admin button[type="submit"],
 .theme-light-admin button[class*="from-gold"] {
-  background: linear-gradient(135deg, var(--gold) 0%, #d4af37 100%) !important;
+  background: var(--brand-gradient) !important;
   color: white !important;
   border: none;
-  box-shadow: 0 4px 12px rgba(201, 162, 77, 0.25);
+  box-shadow: 0 4px 12px rgba(30, 92, 63, 0.25);
 }
 .theme-light-admin button[type="submit"]:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(201, 162, 77, 0.35);
+  filter: brightness(1.05);
 }
 
-/* دکمه ثانویه (Cancel) */
+/* دکمه ثانویه (Cancel) - هاور با لمسی از سبز */
 .theme-light-admin button:not([type="submit"]):not([class*="from-gold"]) {
   background-color: white !important;
   border: 1px solid var(--border-light) !important;
   color: var(--text-muted) !important;
 }
 .theme-light-admin button:not([type="submit"]):hover {
-  border-color: var(--gold) !important;
-  color: var(--gold) !important;
-  background-color: #fffbeb !important;
+  border-color: var(--green) !important;
+  color: var(--green-hover) !important;
+  background-color: var(--green-soft) !important;
 }
 
 /* --- Dropdowns & Popovers (DatePicker, MultiSelect) --- */
@@ -149,11 +202,13 @@
 }
 .theme-light-admin [role="option"]:hover,
 .theme-light-admin [role="listbox"] button:hover {
-  background-color: #f1f5f9 !important;
+  background-color: var(--green-soft) !important;
 }
+/* آیتم انتخاب‌شده: تینت طلایی + متن سبز تیره برای تمایز واضح از هاور */
 .theme-light-admin [aria-selected="true"] {
-  background-color: rgba(201, 162, 77, 0.1) !important;
-  color: var(--gold) !important;
+  background-color: rgba(201, 162, 77, 0.12) !important;
+  color: var(--green-deep) !important;
+  font-weight: 600;
 }
 
 /* --- File Uploader --- */
@@ -168,6 +223,16 @@
 .theme-light-admin [role="button"][class*="border-dashed"] svg {
   color: var(--gold) !important;
 }
+/* حالت درگ فایل روی آپلودر: تاکید سبز برای تمایز از هاور طلایی */
+.theme-light-admin [role="button"][class*="border-dashed"][class*="drag"],
+.theme-light-admin [role="button"][class*="border-dashed"].is-dragging {
+  border-color: var(--green) !important;
+  background-color: var(--green-soft) !important;
+}
+.theme-light-admin [role="button"][class*="border-dashed"][class*="drag"] svg,
+.theme-light-admin [role="button"][class*="border-dashed"].is-dragging svg {
+  color: var(--green) !important;
+}
 
 /* --- Switches & Checkboxes --- */
 .theme-light-admin input[type="checkbox"] + span,
@@ -175,9 +240,10 @@
   background-color: #e2e8f0 !important;
   border: none;
 }
+/* سوئیچ روشن: گرادیان طلایی-سبز */
 .theme-light-admin input[type="checkbox"]:checked + span,
 .theme-light-admin input[type="radio"]:checked + span {
-  background-color: var(--gold) !important;
+  background: var(--brand-gradient) !important;
 }
 /* دایره سفید داخل سوئیچ */
 .theme-light-admin input[type="checkbox"] + span span,
@@ -196,7 +262,68 @@
   color: var(--text-main) !important;
 }
 .theme-light-admin [class*="AudioRecorder"] button:hover {
-  background-color: #e2e8f0 !important;
+  background-color: var(--green-soft) !important;
+  color: var(--green-hover) !important;
+}
+
+/* --- Badges / Tags (در صورت استفاده در پنل ادمین) --- */
+.theme-light-admin .badge-gold {
+  background-color: rgba(201, 162, 77, 0.12);
+  color: var(--gold-hover);
+  border: 1px solid rgba(201, 162, 77, 0.3);
+  border-radius: 99px;
+  padding: 0.15rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.theme-light-admin .badge-green {
+  background-color: var(--green-soft);
+  color: var(--green-hover);
+  border: 1px solid var(--green-soft-border);
+  border-radius: 99px;
+  padding: 0.15rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* --- Brand Utility Classes (برای استفاده مستقیم داخل کامپوننت‌های ری‌اکت به‌جای هاردکد رنگ) --- */
+
+/* اسپینر لودینگ با رنگ برند */
+.theme-light-admin .spinner-brand {
+  border-color: var(--border-light);
+  border-top-color: var(--gold);
+}
+
+/* دکمه‌ی آیکونی (مثل چشمِ مشاهده‌ی جزئیات) با هاور برند */
+.theme-light-admin .icon-btn-brand {
+  color: #94a3b8;
+  transition: all 0.2s;
+}
+.theme-light-admin .icon-btn-brand:hover {
+  background-color: rgba(201, 162, 77, 0.1);
+  color: var(--gold);
+}
+.theme-light-admin .icon-btn-brand:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(201, 162, 77, 0.3);
+}
+
+/* تیتر اصلی صفحات ادمین با رنگ سبز تیره‌ی برند */
+.theme-light-admin .page-title {
+  color: var(--green-deep) !important;
+}
+
+/* ردیف‌های جدول: هاور با تینت سبز ملایم برند به‌جای خاکستری خنثی */
+.theme-light-admin .table-row-brand:hover {
+  background-color: var(--green-soft) !important;
+}
+
+/* کارت جستجو/فیلتر بالای جدول */
+.theme-light-admin .toolbar-card {
+  background-color: white;
+  border: 1px solid var(--border-light);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 /* --- Scrollbar (برای زیبایی بیشتر در فرم‌های طولانی) --- */
@@ -211,5 +338,5 @@
   border-radius: 4px;
 }
 .theme-light-admin ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--green);
 }
