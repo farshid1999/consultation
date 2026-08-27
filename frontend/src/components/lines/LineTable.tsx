@@ -2,50 +2,46 @@
 
 import {useState} from "react";
 import Link from "next/link";
-import {FiEye, FiSearch,FiUsers} from "react-icons/fi";
+import {FiEye, FiSearch, FiUsers, FiBriefcase, FiPlus} from "react-icons/fi";
 import {Input} from "@/components/ui/inputs";
 import {useLines} from "@/hooks/useLines";
-import {LINE_ENDPOINTS} from "@/services/api/endpoints";
 
 export default function LineTable() {
     const [search, setSearch] = useState("");
 
-    // دریافت لیست لاین‌ها
+    // دریافت لیست بخش‌ها
     const {data: lines, isLoading, isError} = useLines({search: search || undefined});
 
     return (
         <div className="flex flex-col gap-6">
-
-            {/* هدر جستجو */}
+            {/* هدر جستجو با استایل کارت تیره */}
             <div className="toolbar-card flex items-center justify-between p-4">
                 <div className="w-full max-w-xs">
                     <Input
-                        placeholder="جست‌وجوی عنوان لاین..."
+                        placeholder="جست‌وجوی عنوان بخش..."
                         leftIcon={<FiSearch/>}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-
-                {/* دکمه افزودن حذف شد چون فرمودید نیاز نیست */}
             </div>
 
-            {/* جدول */}
+            {/* جدول با استایل تاریک */}
             <div className="card overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-right text-sm">
                         <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50 text-xs font-medium text-slate-500">
-                            <th className="px-5 py-4 w-1/3">عنوان لاین</th>
+                        <tr className="border-b border-cream/10 bg-deep-2/50 text-xs font-medium text-cream/40">
+                            <th className="px-5 py-4 w-1/3">عنوان بخش</th>
                             <th className="px-5 py-4">توضیحات</th>
                             <th className="px-5 py-4 w-24 text-center">والد</th>
-                            <th className="px-5 py-4 w-20 text-center">عملیات</th>
+                            <th className="px-5 py-4 w-32 text-center">عملیات</th>
                         </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-cream/5">
                         {isLoading && (
                             <tr>
-                                <td colSpan={4} className="px-5 py-12 text-center text-slate-400">
+                                <td colSpan={4} className="px-5 py-12 text-center text-cream/40">
                                     <span
                                         className="spinner-brand h-6 w-6 animate-spin rounded-full border-2 inline-block"></span>
                                 </td>
@@ -54,7 +50,7 @@ export default function LineTable() {
 
                         {isError && (
                             <tr>
-                                <td colSpan={4} className="px-5 py-12 text-center text-red-500">
+                                <td colSpan={4} className="px-5 py-12 text-center text-red-400">
                                     دریافت اطلاعات با خطا مواجه شد.
                                 </td>
                             </tr>
@@ -62,23 +58,22 @@ export default function LineTable() {
 
                         {!isLoading && !isError && lines?.length === 0 && (
                             <tr>
-                                <td colSpan={4} className="px-5 py-12 text-center text-slate-400">
-                                    هیچ لاینی یافت نشد.
+                                <td colSpan={4} className="px-5 py-12 text-center text-cream/40">
+                                    هیچ بخشی یافت نشد.
                                 </td>
                             </tr>
                         )}
 
                         {lines?.map((line) => (
                             <tr key={line.id} className="table-row-brand group transition-colors">
-
                                 {/* عنوان */}
                                 <td className="px-5 py-3.5">
-                                    <div className="font-bold text-slate-800">{line.title}</div>
+                                    <div className="font-bold text-cream">{line.title}</div>
                                 </td>
 
                                 {/* توضیحات */}
-                                <td className="px-5 py-3.5 text-slate-600 line-clamp-2">
-                                    {line.descriptions || <span className="text-slate-300">—</span>}
+                                <td className="px-5 py-3.5 text-cream/70 line-clamp-2">
+                                    {line.descriptions || <span className="text-cream/30">—</span>}
                                 </td>
 
                                 {/* وضعیت والد */}
@@ -90,29 +85,46 @@ export default function LineTable() {
                                     )}
                                 </td>
 
-                                {/* دکمه مشاهده */}
+                                {/* دکمه‌های عملیات */}
                                 <td className="px-5 py-3.5">
-                                    <div className="flex items-center justify-center">
-                                        {/* دکمه مشاهده جزئیات لاین */}
+                                    <div className="flex items-center justify-center gap-2">
+                                        {/* 1. مشاهده جزئیات بخش */}
                                         <Link
-                                            href={`/lines/${line.id}`}
-                                            aria-label="مشاهده جزئیات لاین"
-                                            className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-blue-50 hover:text-blue-600"
+                                            href={`/line/${line.id}`}
+                                            aria-label="مشاهده جزئیات بخش"
+                                            className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-blue-500/10 hover:text-blue-400"
                                         >
                                             <FiEye size={18}/>
                                         </Link>
 
-                                        {/* دکمه جدید: مشاهده اعضای لاین */}
+                                        {/* 2. مشاهده اعضای عادی بخش */}
                                         <Link
-                                            href={`/lines/${line.id}/members`}
-                                            aria-label="مشاهده اعضای لاین"
-                                            className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-[#e8f5ee] hover:text-[#1e5c3f]"
+                                            href={`/line/${line.id}/members`}
+                                            aria-label="مشاهده اعضای بخش"
+                                            className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-[#1e5c3f]/20 hover:text-[#4ade80]"
                                         >
                                             <FiUsers size={18}/>
                                         </Link>
+
+                                        {/* 3. مشاهده کارمندان رسمی بخش */}
+                                        <Link
+                                            href={`/line/${line.id}/staff`}
+                                            aria-label="مشاهده کارمندان بخش"
+                                            className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-purple-500/10 hover:text-purple-400"
+                                        >
+                                            <FiBriefcase size={18}/>
+                                        </Link>
+
+                                        {/* 4. ایجاد محتوا (جدید) */}
+                                        <Link
+                                            href={`/line/${line.id}/content/create`}
+                                            aria-label="ایجاد محتوا"
+                                            className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-gold/10 hover:text-gold"
+                                        >
+                                            <FiPlus size={18}/> {/* نیاز به ایمپورت FiPlus از react-icons/fi */}
+                                        </Link>
                                     </div>
                                 </td>
-
                             </tr>
                         ))}
                         </tbody>

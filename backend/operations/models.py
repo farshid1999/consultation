@@ -88,6 +88,13 @@ class StaffLine(BaseModel):
         return f"{self.staff} - {self.line}"
 
 class Media(BaseModel):
+    content = models.ForeignKey(
+        "Content",
+        on_delete=models.CASCADE,
+        related_name="media",
+        null=True,
+        blank=True,
+    )
     text = models.TextField(
         blank=True,
     )
@@ -380,14 +387,6 @@ class Content(BaseModel):
 
     text = models.TextField(
         blank=True,
-    )
-
-    media = models.ForeignKey(
-        Media,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="contents",
     )
 
     parent = models.ForeignKey(

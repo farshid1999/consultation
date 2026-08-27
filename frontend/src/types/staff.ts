@@ -1,5 +1,6 @@
 import type { UserCreateInput, UserDetail, UserListItem, UserUpdateInput } from "./user";
 import type { UserRole } from "./role";
+import {PaginatedResponse} from "@/types/lineMember";
 
 /** Mirrors StaffListSerializer. */
 export interface StaffListItem {
@@ -46,3 +47,23 @@ export interface StaffMutationResult {
   hire_date: string;
   position: string;
 }
+
+
+export interface StaffLine {
+  id: number;
+  staff: string; // همان StringRelatedField که نام کاربر را برمی‌گرداند
+  user: UserDetail;
+
+  // فیلدهای جدید از مدل Staff
+  employee_code: string;
+  hire_date: string; // تاریخ به صورت رشته ISO از بک‌اند می‌آید
+  position: string;
+}
+
+
+export interface StaffLineListParams {
+  search?: string;
+  ordering?: string;
+}
+
+export type StaffLineListResponse = PaginatedResponse<StaffLine>;

@@ -340,3 +340,143 @@
 .theme-light-admin ::-webkit-scrollbar-thumb:hover {
   background: var(--green);
 }
+
+/* =====================================================================
+   PATCH — هدر جدول سبز + خط طلایی + استثنای سایدبار
+   ===================================================================== */
+
+/* هدر جدول: پس‌زمینه سبز تیره‌ی برند + متن کرم روشن.
+   نکته‌ی مهم: سلکتور [class*="bg-deep"] بالاتر در فایل از نظر
+   specificity قوی‌تر از یک سلکتور تگ ساده (thead) است، و چون خود
+   <tr> هدر جدول معمولاً کلاس bg-deep-2/50 دارد، باید این override را
+   با specificity بالاتر و هدف‌گیری دقیق‌تر بنویسیم تا قطعاً برنده شود. */
+.theme-light-admin thead,
+.theme-light-admin thead[class],
+.theme-light-admin thead tr[class] {
+  background: var(--green-deep) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.theme-light-admin thead th,
+.theme-light-admin thead th[class] {
+  color: #f5f1e7 !important;
+  font-weight: 600;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* استثنا روی قانون سراسری متن خاکستری (.theme-light-admin p, span, div) —
+   بدون این، متن هدر به رنگ خاکستری کم‌کنتراست بازنویسی می‌شد و روی
+   پس‌زمینه‌ی سبز ناخوانا می‌شد */
+.theme-light-admin thead th,
+.theme-light-admin thead span,
+.theme-light-admin thead div {
+  color: #f5f1e7 !important;
+}
+
+/* خط طلایی زیر هدر جدول — امضای بصری هماهنگ با برند */
+.theme-light-admin table {
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: white;
+}
+.theme-light-admin thead tr:last-child {
+  box-shadow: inset 0 -2px 0 var(--gold);
+}
+
+/* پوشش کامل واریانت‌های text-cream که در کامپوننت‌ها استفاده شده
+   ولی قوانین قبلی فقط /45 و /35 و /60 و /75 را پوشش می‌دادند.
+   بدون این‌ها، متن‌هایی مثل text-cream (کامل)، text-cream/70،
+   text-cream/40، text-cream/30 روی پس‌زمینه‌ی سفید تقریباً نامرئی می‌شوند. */
+.theme-light-admin .text-cream,
+.theme-light-admin [class*="text-cream/90"],
+.theme-light-admin [class*="text-cream/80"],
+.theme-light-admin [class*="text-cream/70"] {
+  color: var(--text-main) !important;
+}
+
+.theme-light-admin [class*="text-cream/50"] {
+  color: #334155 !important;
+}
+
+.theme-light-admin [class*="text-cream/40"] {
+  color: #64748b !important;
+}
+
+.theme-light-admin [class*="text-cream/30"],
+.theme-light-admin [class*="text-cream/20"],
+.theme-light-admin [class*="text-cream/10"] {
+  color: #94a3b8 !important;
+}
+
+/* بوردر و خط جداکننده‌ی cream که تعریف نشده بودند */
+.theme-light-admin [class*="border-cream"],
+.theme-light-admin [class*="divide-cream"] {
+  border-color: var(--border-light) !important;
+}
+
+/* استثنا: سایدبار باید سبز تیره‌ی برند بماند، نه سفید بشود.
+   بدون این، سلکتور عمومی [class*="bg-cream/"] بالاتر در فایل،
+   خود <aside> را هم سفید می‌کند چون کلاس bg-cream/[0.03] دارد.
+   روی خود المان <aside> این attribute را اضافه کنید: data-brand-sidebar */
+.theme-light-admin [data-brand-sidebar] {
+  background-color: var(--green-deep) !important;
+  border-color: rgba(245, 241, 231, 0.08) !important;
+  box-shadow: none !important;
+}
+.theme-light-admin [data-brand-sidebar]::before {
+  display: none !important; /* حذف نوار گرادیانی بالای کارت از سایدبار */
+}
+
+/* رنگ متن‌های داخل سایدبار: قوانین عمومی text-cream/XX رنگ‌های
+   خاکستری تیره (برای متن روی سفید) تحمیل می‌کردند که روی پس‌زمینه‌ی
+   سبز تیره‌ی سایدبار تقریباً نامرئی می‌شد. اینجا با specificity
+   بالاتر ([data-brand-sidebar] + [class*=...]) دوباره رنگ‌های
+   روشن/کرم‌رنگ مناسب پس‌زمینه‌ی تیره را برمی‌گردانیم. */
+.theme-light-admin [data-brand-sidebar] {
+  color: rgba(245, 241, 231, 0.55);
+}
+.theme-light-admin [data-brand-sidebar] [class*="text-cream/70"],
+.theme-light-admin [data-brand-sidebar] [class*="text-cream/60"],
+.theme-light-admin [data-brand-sidebar] .text-cream {
+  color: rgba(245, 241, 231, 0.75) !important;
+}
+.theme-light-admin [data-brand-sidebar] [class*="text-cream/50"],
+.theme-light-admin [data-brand-sidebar] [class*="text-cream/45"],
+.theme-light-admin [data-brand-sidebar] [class*="text-cream/40"] {
+  color: rgba(245, 241, 231, 0.5) !important;
+}
+.theme-light-admin [data-brand-sidebar] [class*="text-cream/30"],
+.theme-light-admin [data-brand-sidebar] [class*="text-cream/20"] {
+  color: rgba(245, 241, 231, 0.35) !important;
+}
+
+/* بوردر داخل سایدبار: نسخه‌ی تیره‌ی بوردر، نه border-light روشن */
+.theme-light-admin [data-brand-sidebar] [class*="border-cream"] {
+  border-color: rgba(245, 241, 231, 0.08) !important;
+}
+
+/* دکمه‌ی خروج و هر دکمه‌ی دیگری داخل سایدبار: قانون عمومی دکمه‌ها
+   (سفید با بوردر خاکستری) را خنثی می‌کنیم تا شکل شفاف و تیره‌ی
+   اصلی خودش را حفظ کند. [class] اضافه شده فقط برای بالا بردن
+   specificity و برنده شدن قطعی در برابر قانون عمومی است. */
+.theme-light-admin [data-brand-sidebar] button[class] {
+  background-color: transparent !important;
+  border: none !important;
+  color: rgba(245, 241, 231, 0.5) !important;
+  box-shadow: none !important;
+}
+.theme-light-admin [data-brand-sidebar] button[class]:hover {
+  color: #f87171 !important;
+  background-color: rgba(248, 113, 113, 0.08) !important;
+}
+
+/* آیتم فعال منو (bg-gold/10 text-gold) و هاور آیتم‌های غیرفعال
+   دست‌نخورده می‌مانند چون رنگشان gold/red است، نه cream — فقط
+   مطمئن می‌شویم هاور حالت روشن/تیره‌ی درستی دارد */
+.theme-light-admin [data-brand-sidebar] a:hover {
+  color: #f5f1e7 !important;
+  background-color: rgba(245, 241, 231, 0.05) !important;
+}

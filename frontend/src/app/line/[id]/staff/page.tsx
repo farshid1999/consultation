@@ -3,82 +3,82 @@
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { FiEye, FiSearch, FiUserPlus, FiTrash2 } from "react-icons/fi"; // اضافه کردن آیکون سطل آشغال
+import { FiSearch, FiEye, FiArrowRight, FiUserPlus, FiTrash2 } from "react-icons/fi";
 import { Input } from "@/components/ui/inputs";
-import { useLineMembers } from "@/hooks/useLines";
-import { useAddLineMembers, useRemoveLineMembers } from "@/hooks/useLines"; // ایمپورت هوک جدید
+import { useLineStaff } from "@/hooks/useLines";
+import { useAddLineStaff, useRemoveLineStaff } from "@/hooks/useLines";
 import UserDetailModal from "@/components/ui/modals/UserDetailModal";
-import AddMemberModal from "@/components/ui/modals/AddMemberModal";
-import RemoveMemberModal from "@/components/ui/modals/RemoveMemberModal"; // ایمپورت مودال حذف
-import type { LineMember } from "@/types";
+import AddStaffModal from "@/components/ui/modals/AddStaffModal";
+import RemoveStaffModal from "@/components/ui/modals/RemoveStaffModal";
+import type { StaffLine } from "@/types";
 
-export default function LineMembersPage() {
+export default function LineStaffPage() {
   const params = useParams<{ id: string }>();
   const lineId = params.id;
-
+  
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
-
+  
   // State for Modals
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
 
-  const { data, isLoading } = useLineMembers(lineId, { search: search || undefined });
-  const members = data?.results || [];
+  const { data, isLoading } = useLineStaff(lineId, { search: search || undefined });
+  const staffList = data?.results || [];
 
   // Hooks
-  const addMembersMutation = useAddLineMembers(lineId);
-  const removeMembersMutation = useRemoveLineMembers(lineId);
+  const addStaffMutation = useAddLineStaff(lineId);
+  const removeStaffMutation = useRemoveLineStaff(lineId);
 
-  const handleViewDetails = (member: LineMember) => {
-    setSelectedUser(member.user);
+  const handleViewDetails = (staff: StaffLine) => {
+    setSelectedUser(staff.user);
     setIsDetailModalOpen(true);
   };
 
-  const handleAddMembers = (userIds: (string | number)[]) => {
-    addMembersMutation.mutate(userIds, {
+  const handleAddStaff = (staffIds: (string | number)[]) => {
+    addStaffMutation.mutate(staffIds, {
       onSuccess: () => setIsAddModalOpen(false),
     });
   };
 
-  const handleRemoveMembers = (userIds: (string | number)[]) => {
-    removeMembersMutation.mutate(userIds, {
+  const handleRemoveStaff = (staffIds: (string | number)[]) => {
+    removeStaffMutation.mutate(staffIds, {
       onSuccess: () => setIsRemoveModalOpen(false),
     });
   };
 
   return (
     <main dir="rtl" className="mx-auto max-w-6xl px-6 py-10">
-
+      
       {/* هدر صفحه */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cream/10 pb-6">
         <div>
           <div className="flex items-center gap-2 text-xs text-cream/40 mb-2">
             <Link href="/line" className="hover:text-gold transition-colors">بخش‌ها</Link>
-            <span>/</span>
-            <span>اعضا</span>
+            <FiArrowRight size={12} className="rotate-180" />
+            <span>کارمندان بخش</span>
           </div>
-          <h1 className="page-title text-3xl font-extrabold">لیست اعضای بخش</h1>
+          <h1 className="page-title text-3xl font-extrabold">لیست کارمندان فعال</h1>
         </div>
-
+        
         <div className="flex items-center gap-3">
-          {/* دکمه حذف عضو */}
+          {/* دکمه حذف کارمند */}
           <button
             onClick={() => setIsRemoveModalOpen(true)}
             className="flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-5 py-2.5 text-sm font-bold text-red-400 hover:bg-red-500/20 transition-all"
           >
             <FiTrash2 size={16} />
-            حذف اعضا
+            حذف کارمند
           </button>
 
-          {/* دکمه افزودن عضو */}
+          {/* دکمه افزودن کارمند */}
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-soft to-gold px-5 py-2.5 text-sm font-bold text-deep shadow-gold hover:shadow-[0_16px_50px_-8px_rgba(201,162,77,0.6)] transition-all"
           >
             <FiUserPlus size={16} />
-            افزودن عضو
+            افزودن کارمند
           </button>
         </div>
       </div>
@@ -86,21 +86,21 @@ export default function LineMembersPage() {
       {/* نوار جستجو */}
       <div className="mb-6 max-w-md">
         <Input
-          placeholder="جست‌وجوی نام، شماره تماس یا ایمیل..."
+          placeholder="جست‌وجوی نام، کد پرسنلی یا سمت..."
           leftIcon={<FiSearch />}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      {/* جدول اعضا */}
+      {/* جدول استاف‌ها */}
       <div className="card overflow-hidden">
         <table className="w-full text-right text-sm">
           <thead className="bg-deep-2/50 text-xs font-medium text-cream/40 border-b border-cream/10">
             <tr>
-              <th className="px-5 py-4">نام کاربر</th>
-              <th className="px-5 py-4">شماره تماس</th>
-              <th className="px-5 py-4">ایمیل</th>
+              <th className="px-5 py-4">نام کارمند</th>
+              <th className="px-5 py-4">کد پرسنلی</th>
+              <th className="px-5 py-4">سمت سازمانی</th>
               <th className="px-5 py-4 text-center w-24">عملیات</th>
             </tr>
           </thead>
@@ -111,24 +111,28 @@ export default function LineMembersPage() {
                   <span className="spinner-brand h-6 w-6 animate-spin rounded-full border-2 inline-block"></span>
                 </td>
               </tr>
-            ) : members.length === 0 ? (
+            ) : staffList.length === 0 ? (
               <tr>
-                <td colSpan={4} className="py-12 text-center text-cream/40">عضوی یافت نشد.</td>
+                <td colSpan={4} className="py-12 text-center text-cream/40">کارمندی در این بخش یافت نشد.</td>
               </tr>
             ) : (
-              members.map((member) => (
-                <tr key={member.id} className="table-row-brand group transition-colors">
+              staffList.map((staff) => (
+                <tr key={staff.id} className="table-row-brand group transition-colors">
                   <td className="px-5 py-4">
                     <div className="font-bold text-cream">
-                      {member.user.first_name} {member.user.last_name}
+                      {staff.user.first_name} {staff.user.last_name}
                     </div>
-                    <div className="text-xs text-cream/40">@{member.user.username}</div>
+                    <div className="text-xs text-cream/40">@{staff.user.username}</div>
                   </td>
-                  <td className="px-5 py-4 text-cream/70 dir-ltr text-left">{member.user.phone_number}</td>
-                  <td className="px-5 py-4 text-cream/70">{member.user.email || "—"}</td>
+                  <td className="px-5 py-4">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gold/10 text-gold border border-gold/20">
+                      {staff.employee_code}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-cream/70">{staff.position}</td>
                   <td className="px-5 py-4 text-center">
                     <button
-                      onClick={() => handleViewDetails(member)}
+                      onClick={() => handleViewDetails(staff)}
                       className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full mx-auto"
                     >
                       <FiEye size={18} />
@@ -142,27 +146,27 @@ export default function LineMembersPage() {
       </div>
 
       {/* مودال‌ها */}
-      <UserDetailModal
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        user={selectedUser}
+      <UserDetailModal 
+        isOpen={isDetailModalOpen} 
+        onClose={() => setIsDetailModalOpen(false)} 
+        user={selectedUser} 
       />
 
-      <AddMemberModal
+      <AddStaffModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         lineId={lineId}
-        currentMembers={members}
-        onConfirm={handleAddMembers}
-        isPending={addMembersMutation.isPending}
+        currentStaff={staffList}
+        onConfirm={handleAddStaff}
+        isPending={addStaffMutation.isPending}
       />
 
-      <RemoveMemberModal
+      <RemoveStaffModal
         isOpen={isRemoveModalOpen}
         onClose={() => setIsRemoveModalOpen(false)}
-        members={members}
-        onConfirm={handleRemoveMembers}
-        isPending={removeMembersMutation.isPending}
+        staffList={staffList}
+        onConfirm={handleRemoveStaff}
+        isPending={removeStaffMutation.isPending}
       />
 
     </main>

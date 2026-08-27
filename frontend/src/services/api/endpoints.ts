@@ -7,21 +7,35 @@
  */
 
 export const STAFF_ENDPOINTS = {
-  list: "accounts/staff/",
-  create: "accounts/staff/create/",
-  detail: (id: number | string) => `accounts/staff/${id}/`,
-  update: (id: number | string) => `accounts/staff/${id}/update/`,
-  delete: (id: number | string) => `accounts/staff/${id}/delete/`,
+    list: "accounts/staff/",
+    create: "accounts/staff/create/",
+    detail: (id: number | string) => `accounts/staff/${id}/`,
+    update: (id: number | string) => `accounts/staff/${id}/update/`,
+    delete: (id: number | string) => `accounts/staff/${id}/delete/`,
 };
 
 // اضافه کردن اندپوینت‌های لاین
 export const LINE_ENDPOINTS = {
-  myList: "operations/lines/my/",
-  list: "operations/lines/",
-  // اگر در آینده نیاز به جزئیات یا حذف بود، اینجا تعریف می‌شود
-  detail: (id: number | string) => `operations/lines/${id}/`,
+    myList: "operations/lines/my/",
+    list: "operations/lines/",
+    // اگر در آینده نیاز به جزئیات یا حذف بود، اینجا تعریف می‌شود
+    detail: (id: number | string) => `operations/lines/${id}/`,
 };
 
 export const LINE_MEMBER_ENDPOINTS = {
-  list: (lineId: string | number) => `operations/lines/${lineId}/members/`,
+    list: (lineId: string | number) => `operations/lines/${lineId}/members/`,
+    add: (lineId: string | number) => `operations/lines/${lineId}/members/add/`,
+    remove: (lineId: string | number) => `operations/lines/${lineId}/members/remove/`,
+};
+
+
+export const LINE_STAFF_ENDPOINTS = {
+    list: (lineId: string | number) => `operations/lines/${lineId}/staff/`,
+    add: (lineId: string | number) => `operations/lines/${lineId}/staff/add/`,
+    remove: (lineId: string | number) => `operations/lines/${lineId}/staff/remove/`
+};
+
+
+export const CONTENT_ENDPOINTS = {
+  create: "operations/contents/create/",
 };

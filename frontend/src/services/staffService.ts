@@ -87,4 +87,5 @@ export const staffService = {
       throw extractApiError(error);
     }
   },
+
 };

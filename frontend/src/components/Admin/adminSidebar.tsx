@@ -23,7 +23,7 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="w-60 shrink-0 border-l border-cream/10 bg-cream/[0.03] flex flex-col">
+    <aside data-brand-sidebar className="w-60 shrink-0 border-l border-cream/10 bg-cream/[0.03] flex flex-col">
       <div className="px-6 py-6 border-b border-cream/10">
         <p className="text-gold font-semibold text-sm">پنل مدیریت</p>
         <p className="text-cream/40 text-xs mt-0.5">سفیران اوج آرامش</p>

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateUserSchema, type UpdateUserFormValues } from "@/schemas/user";
 import { useUser, useUpdateUser } from "@/hooks/useUsers";
-import { Input, Switch } from "@/components/ui/Inputs";
+import { Input, Switch } from "@/components/ui/inputs";
 import { FiArrowRight } from "react-icons/fi";
 import Link from "next/link";
 

@@ -175,21 +175,18 @@ class RemoveLineMembersSerializer(serializers.Serializer):
         return attrs
 
 
-
 class StaffLineSerializer(serializers.ModelSerializer):
     staff = serializers.StringRelatedField()
-    user = UserDetailSerializer(
-        source="staff.user",
-        read_only=True,
-    )
+    user = UserDetailSerializer(source="staff.user", read_only=True)
+
+    # اضافه کردن فیلدهای استاف
+    employee_code = serializers.CharField(source="staff.employee_code", read_only=True)
+    hire_date = serializers.DateField(source="staff.hire_date", read_only=True)
+    position = serializers.CharField(source="staff.position", read_only=True)
 
     class Meta:
         model = StaffLine
-        fields = (
-            "id",
-            "staff",
-            "user",
-        )
+        fields = ("id", "staff", "user", "employee_code", "hire_date", "position")
 
 
 class AddLineStaffSerializer(serializers.Serializer):
@@ -1102,8 +1099,8 @@ class ContentCreateSerializer(serializers.ModelSerializer):
     )
 
     media = MediaSerializer(
+        many=True,
         required=False,
-        allow_null=True,
     )
 
     class Meta:
@@ -1123,22 +1120,22 @@ class ContentCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request = self.context["request"]
-        line = attrs["lines"]
+        line = attrs["line"]
         members = attrs.get("members", [])
 
         staff = getattr(request.user, "staff", None)
 
         if not staff:
             raise serializers.ValidationError({
-                "lines": "Only staff members can create content."
+                "line": "Only staff members can create content."
             })
 
         if not StaffLine.objects.filter(
-                staff=staff,
-                line=line,
+            staff=staff,
+            line=line,
         ).exists():
             raise serializers.ValidationError({
-                "lines": "You are not a staff member of this lines."
+                "line": "You are not a staff member of this line."
             })
 
         invalid_members = [
@@ -1150,7 +1147,7 @@ class ContentCreateSerializer(serializers.ModelSerializer):
         if invalid_members:
             raise serializers.ValidationError({
                 "member_ids": (
-                    "Selected members must belong to the selected lines."
+                    "Selected members must belong to the selected line."
                 )
             })
 
@@ -1159,19 +1156,19 @@ class ContentCreateSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         members = validated_data.pop("members", [])
-        media_data = validated_data.pop("media", None)
-
-        media = None
-
-        if media_data:
-            media = Media.objects.create(
-                **media_data
-            )
+        media_data = validated_data.pop("media", [])
 
         content = Content.objects.create(
-            media=media,
             **validated_data,
         )
+
+        Media.objects.bulk_create([
+            Media(
+                content=content,
+                **media,
+            )
+            for media in media_data
+        ])
 
         ContentRecipient.objects.bulk_create([
             ContentRecipient(

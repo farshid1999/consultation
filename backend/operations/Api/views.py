@@ -9,19 +9,11 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-
+from django.core.cache import cache
 from core.permissions import IsAdminOrSuperUser, IsStaff
-from operations.models import Line, LineMember, StaffLine, Assignment, AssignmentRecipient, AssignmentSubmission, \
-    Conversation, Content
-from .serializers import LineListSerializer, LineDetailSerializer, AddLineMembersSerializer, \
-    RemoveLineMembersSerializer, AddLineStaffSerializer, RemoveLineStaffSerializer, LineMemberSerializer, \
-    StaffLineSerializer, AssignmentCreateSerializer, AssignmentUpdateSerializer, AllAssignmentListSerializer, \
-    AssignmentListSerializer, AssignmentDetailSerializer, AssignmentSubmissionCreateSerializer, \
-    AssignmentSubmissionUpdateSerializer, AssignmentSubmissionListSerializer, AssignmentSubmissionDetailSerializer, \
-    AllAssignmentSubmissionListSerializer, MemberConversationCreateSerializer, StaffConversationCreateSerializer, \
-    ConversationListSerializer, ConversationDetailSerializer, ConversationJoinSerializer, MessageCreateSerializer, \
-    MessageSerializer, ContentCreateSerializer, ContentUpdateSerializer, ContentDetailSerializer, ContentListSerializer, \
-    ContentLineListSerializer
+from core.utils import *
+from operations.models import *
+from .serializers import *
 
 
 class LineListAPIView(generics.ListAPIView):
@@ -197,7 +189,7 @@ class LineAddMembersView(GenericAPIView):
 
         serializer.is_valid(raise_exception=True)
         memberships = serializer.save()
-
+        cache.delete_pattern(f"line:{line.id}:members:*")
         return Response(
             {
                 "detail": "Users added to lines successfully.",
@@ -234,6 +226,8 @@ class LineRemoveMembersView(GenericAPIView):
             user_id__in=user_ids,
         ).delete()
 
+        cache.delete_pattern(f"line:{line.id}:members:*")
+
         return Response(
             {
                 "detail": "Users removed from lines successfully.",
@@ -261,7 +255,7 @@ class LineAddStaffView(GenericAPIView):
 
         serializer.is_valid(raise_exception=True)
         staff_lines = serializer.save()
-
+        cache.delete_pattern(f"line:{line.id}:staff:*")
         return Response(
             {
                 "detail": "Staff added to lines successfully.",
@@ -296,7 +290,7 @@ class LineRemoveStaffView(GenericAPIView):
             line=line,
             staff_id__in=staff_ids,
         ).delete()
-
+        cache.delete_pattern(f"line:{line.id}:staff:*")
         return Response(
             {
                 "detail": "Staff removed from lines successfully.",
@@ -306,7 +300,7 @@ class LineRemoveStaffView(GenericAPIView):
         )
 
 
-@method_decorator(cache_page(60 * 5), name="dispatch")
+
 class LineMemberListView(generics.ListAPIView):
     serializer_class = LineMemberSerializer
     permission_classes = [IsStaff | IsAdminOrSuperUser]
@@ -351,8 +345,20 @@ class LineMemberListView(generics.ListAPIView):
         )
 
 
+    def list(self, request, *args, **kwargs):
+        line_id = self.kwargs["line_id"]
+        cache_key = f"line:{line_id}:members:{request.get_full_path()}"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
 
-@method_decorator(cache_page(60 * 5), name="dispatch")
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response.data, timeout=60 * 5)
+        return response
+
+
+
+# @method_decorator(cache_page(60 * 5), name="dispatch")
 class LineStaffListView(generics.ListAPIView):
     serializer_class = StaffLineSerializer
     permission_classes = [IsAdminOrSuperUser]
@@ -396,6 +402,17 @@ class LineStaffListView(generics.ListAPIView):
                 "staff__user__informations__children",
             )
         )
+
+    def list(self, request, *args, **kwargs):
+        line_id = self.kwargs["line_id"]
+        cache_key = f"line:{line_id}:staff:{request.get_full_path()}"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response.data, timeout=60 * 5)
+        return response
 
 
 class AssignmentCreateAPIView(generics.CreateAPIView):
@@ -1338,7 +1355,7 @@ class ContentCreateAPIView(generics.CreateAPIView):
     queryset = Content.objects.all()
     serializer_class = ContentCreateSerializer
     permission_classes = [
-        IsStaff,
+        IsStaff|IsAdminOrSuperUser
     ]
 
 

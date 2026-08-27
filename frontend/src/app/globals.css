@@ -59,18 +59,18 @@ body {
 
 
 
-body:has(.theme-light-admin) {
-  background-color: #f8fafc !important; /* رنگ سفید/خاکستری خیلی روشن */
-  color: #1e293b !important; /* تغییر رنگ پیش‌فرض متن به تیره */
-}
+/*body:has(.theme-light-admin) {*/
+/*  background-color: #f8fafc !important; !* رنگ سفید/خاکستری خیلی روشن *!*/
+/*  color: #1e293b !important; !* تغییر رنگ پیش‌فرض متن به تیره *!*/
+/*}*/
 
-/* اصلاح اسکرول‌بار برای تم روشن */
-body:has(.theme-light-admin) ::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-body:has(.theme-light-admin) ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-}
-body:has(.theme-light-admin) ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
+/*!* اصلاح اسکرول‌بار برای تم روشن *!*/
+/*body:has(.theme-light-admin) ::-webkit-scrollbar-track {*/
+/*  background: #f1f5f9;*/
+/*}*/
+/*body:has(.theme-light-admin) ::-webkit-scrollbar-thumb {*/
+/*  background: #cbd5e1;*/
+/*}*/
+/*body:has(.theme-light-admin) ::-webkit-scrollbar-thumb:hover {*/
+/*  background: #94a3b8;*/
+/*}*/

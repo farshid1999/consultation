@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import { Input, Textarea, DatePicker, FileUploader, Switch } from "@/components/ui/inputs";
-import FormSection from "./FormSection";
+import FormSection from "../FormSection";
 import AddressFields from "./AddressFields";
 import ClubFields from "./ClubFields";
 import InformationFieldArray from "./InformationFieldArray";
