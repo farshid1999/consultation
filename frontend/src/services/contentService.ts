@@ -1,48 +1,50 @@
 // services/contentService.ts
 
-import { apiClient } from "@/lib/axios";
-import { extractApiError } from "@/services/api/errors";
-import type { ContentCreateInput } from "@/types";
-import {CONTENT_ENDPOINTS} from "@/services/api/endpoints"; // تایپ را بعداً تعریف می‌کنیم
-
-
+import {apiClient} from "@/lib/axios";
+import {extractApiError} from "@/services/api/errors";
+import {containsFile, buildFormData} from "@/services/api/formData";
+import type {
+    ContentCreateInput, ContentDetail,
+    ContentListItem,
+    ContentListParams,
+    PaginatedResponse,
+} from "@/types";
+import {CONTENT_ENDPOINTS} from "@/services/api/endpoints";
 
 export const contentService = {
-  async create(payload: ContentCreateInput): Promise<any> {
-    try {
-      // تبدیل آبجکت به FormData برای ارسال فایل‌ها
-      const formData = new FormData();
 
-      // فیلدهای ساده
-      formData.append("line", payload.line.toString());
-      if (payload.title) formData.append("title", payload.title);
-      if (payload.text) formData.append("text", payload.text);
-      if (payload.parent) formData.append("parent", payload.parent.toString());
-
-      // member_ids (آرایه‌ای از IDها)
-      payload.member_ids?.forEach((id) => {
-        formData.append("member_ids", id.toString());
-      });
-
-      // media (آرایه‌ای از فایل‌ها و متن‌ها)
-      payload.media?.forEach((mediaItem, index) => {
-        if (mediaItem.file) {
-          // اگر فایل Blob (صوت) یا File باشد
-          formData.append(`media[${index}][file]`, mediaItem.file);
+    async create(payload: ContentCreateInput): Promise<unknown> {
+        try {
+            const hasFile = containsFile(payload);
+            const {data} = await apiClient.post(
+                CONTENT_ENDPOINTS.create,
+                hasFile ? buildFormData(payload as unknown as Record<string, unknown>) : payload,
+                hasFile ? {headers: {"Content-Type": "multipart/form-data"}} : undefined
+            );
+            return data;
+        } catch (error) {
+            throw extractApiError(error);
         }
-        if (mediaItem.text) {
-          formData.append(`media[${index}][text]`, mediaItem.text);
-        }
-      });
+    },
 
-      const { data } = await apiClient.post(CONTENT_ENDPOINTS.create, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      return data;
-    } catch (error) {
-      throw extractApiError(error);
-    }
-  },
+    async getList(params?: ContentListParams): Promise<PaginatedResponse<ContentListItem>> {
+        try {
+            const {data} = await apiClient.get<PaginatedResponse<ContentListItem>>(
+                CONTENT_ENDPOINTS.list,
+                {params: params || {}}
+            );
+            return data;
+        } catch (error) {
+            throw extractApiError(error);
+        }
+    },
+
+    async getDetail(id: number | string): Promise<ContentDetail> {
+        try {
+            const {data} = await apiClient.get<ContentDetail>(CONTENT_ENDPOINTS.detail(id));
+            return data;
+        } catch (error) {
+            throw extractApiError(error);
+        }
+    },
 };

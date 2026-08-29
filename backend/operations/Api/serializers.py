@@ -1088,7 +1088,6 @@ class MessageCreateSerializer(serializers.ModelSerializer):
         )
 
 
-
 class ContentCreateSerializer(serializers.ModelSerializer):
     member_ids = serializers.PrimaryKeyRelatedField(
         source="members",
@@ -1120,8 +1119,12 @@ class ContentCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request = self.context["request"]
-        line = attrs["line"]
+        line = attrs.get("line")
         members = attrs.get("members", [])
+        parent = attrs.get("parent")
+
+        if not line:
+            raise serializers.ValidationError({"line": "This field is required."})
 
         staff = getattr(request.user, "staff", None)
 
@@ -1129,13 +1132,19 @@ class ContentCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "line": "Only staff members can create content."
             })
+        if not staff.user.is_superuser:
+            if not StaffLine.objects.filter(
+                    staff=staff,
+                    line=line,
+            ).exists():
+                raise serializers.ValidationError({
+                    "line": "You are not a staff member of this line."
+                })
 
-        if not StaffLine.objects.filter(
-            staff=staff,
-            line=line,
-        ).exists():
+        # جدید: parent باید متعلق به همان line باشد
+        if parent is not None and parent.line_id != line.id:
             raise serializers.ValidationError({
-                "line": "You are not a staff member of this line."
+                "parent": "Parent content must belong to the same line."
             })
 
         invalid_members = [
@@ -1347,7 +1356,7 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
 
 
 class ContentLineListSerializer(serializers.ModelSerializer):
-    line = serializers.StringRelatedField()
+    line = LineListSerializer()
 
     class Meta:
         model = Content
@@ -1376,10 +1385,11 @@ class ContentRecipientSerializer(serializers.ModelSerializer):
 
 
 class ContentDetailSerializer(serializers.ModelSerializer):
-    line = serializers.StringRelatedField()
+    line = LineDetailSerializer()
 
     media = MediaSerializer(
         read_only=True,
+        many=True
     )
 
     recipients = ContentRecipientSerializer(

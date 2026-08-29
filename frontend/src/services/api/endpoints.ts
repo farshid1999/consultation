@@ -37,7 +37,9 @@ export const LINE_STAFF_ENDPOINTS = {
 };
 
 export const CONTENT_ENDPOINTS = {
-  create: "operations/contents/create/",
+    create: "operations/contents/create/",
+    list: "operations/staff/contents/",
+    detail: (id: number | string) => `operations/staff/contents/${id}/`,
 };
 
 export const ASSIGNMENT_ENDPOINTS = {
@@ -53,11 +55,7 @@ export const ASSIGNMENT_ENDPOINTS = {
     `operations/assignments/staff/lines/${lineId}/${assignmentId}/`,
   staffSubmissionList: (lineId: string | number, assignmentId: number) =>
     `operations/assignments/staff/lines/${lineId}/${assignmentId}/submissions/`,
-  staffSubmissionDetail: (
-    lineId: string | number,
-    assignmentId: number,
-    submissionId: number,
-  ) =>
+  staffSubmissionDetail: (lineId: string | number, assignmentId: number, submissionId: number) =>
     `operations/assignments/staff/lines/${lineId}/${assignmentId}/submissions/${submissionId}/`,
 
   // Member
@@ -71,11 +69,7 @@ export const ASSIGNMENT_ENDPOINTS = {
     `operations/assignments/member/${assignmentId}/submission/`,
   memberSubmissionList: (lineId: string | number, assignmentId: number) =>
     `operations/assignments/member/lines/${lineId}/${assignmentId}/submissions/`,
-  memberSubmissionDetail: (
-    lineId: string | number,
-    assignmentId: number,
-    submissionId: number,
-  ) =>
+  memberSubmissionDetail: (lineId: string | number, assignmentId: number, submissionId: number) =>
     `operations/assignments/member/lines/${lineId}/${assignmentId}/submissions/${submissionId}/`,
 
   // Admin submissions

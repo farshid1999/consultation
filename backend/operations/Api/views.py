@@ -7,6 +7,7 @@ from django.views.decorators.cache import cache_page
 from rest_framework import generics, status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.generics import GenericAPIView
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.core.cache import cache
@@ -14,7 +15,7 @@ from core.permissions import IsAdminOrSuperUser, IsStaff
 from core.utils import *
 from operations.models import *
 from .serializers import *
-
+from core.mixins import NestedMultipartCreateMixin
 
 class LineListAPIView(generics.ListAPIView):
     serializer_class = LineListSerializer
@@ -69,7 +70,6 @@ class LineListAPIView(generics.ListAPIView):
 class LineDetailAPIView(generics.RetrieveAPIView):
     serializer_class = LineDetailSerializer
     permission_classes = [AllowAny]
-
 
     def get_queryset(self):
         return Line.objects.select_related(
@@ -237,7 +237,6 @@ class LineRemoveMembersView(GenericAPIView):
         )
 
 
-
 class LineAddStaffView(GenericAPIView):
     serializer_class = AddLineStaffSerializer
     permission_classes = [IsAdminOrSuperUser]
@@ -263,6 +262,7 @@ class LineAddStaffView(GenericAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
 
 class LineRemoveStaffView(GenericAPIView):
     serializer_class = RemoveLineStaffSerializer
@@ -298,7 +298,6 @@ class LineRemoveStaffView(GenericAPIView):
             },
             status=status.HTTP_200_OK,
         )
-
 
 
 class LineMemberListView(generics.ListAPIView):
@@ -344,7 +343,6 @@ class LineMemberListView(generics.ListAPIView):
             )
         )
 
-
     def list(self, request, *args, **kwargs):
         line_id = self.kwargs["line_id"]
         cache_key = f"line:{line_id}:members:{request.get_full_path()}"
@@ -355,7 +353,6 @@ class LineMemberListView(generics.ListAPIView):
         response = super().list(request, *args, **kwargs)
         cache.set(cache_key, response.data, timeout=60 * 5)
         return response
-
 
 
 # @method_decorator(cache_page(60 * 5), name="dispatch")
@@ -479,6 +476,7 @@ class AllAssignmentListAPIView(generics.ListAPIView):
             .all()
         )
 
+
 class StaffAssignmentListAPIView(generics.ListAPIView):
     serializer_class = AssignmentListSerializer
 
@@ -523,10 +521,10 @@ class StaffAssignmentListAPIView(generics.ListAPIView):
 
         # Admin / Superuser
         if (
-            user.is_superuser
-            or user.user_roles.filter(
-                role__name="admin"
-            ).exists()
+                user.is_superuser
+                or user.user_roles.filter(
+            role__name="admin"
+        ).exists()
         ):
             return queryset
 
@@ -579,6 +577,7 @@ class MemberAssignmentListAPIView(generics.ListAPIView):
             .distinct()
         )
 
+
 class StaffAssignmentDetailAPIView(generics.RetrieveAPIView):
     serializer_class = AssignmentDetailSerializer
     permission_classes = [
@@ -612,10 +611,10 @@ class StaffAssignmentDetailAPIView(generics.RetrieveAPIView):
 
         # Admin / Superuser
         if (
-            user.is_superuser
-            or user.user_roles.filter(
-                role__name="admin"
-            ).exists()
+                user.is_superuser
+                or user.user_roles.filter(
+            role__name="admin"
+        ).exists()
         ):
             return queryset
 
@@ -660,6 +659,7 @@ class MemberAssignmentDetailAPIView(generics.RetrieveAPIView):
             .distinct()
         )
 
+
 class AssignmentSubmissionCreateAPIView(generics.CreateAPIView):
     serializer_class = AssignmentSubmissionCreateSerializer
     permission_classes = [IsAuthenticated]
@@ -681,6 +681,7 @@ class AssignmentSubmissionCreateAPIView(generics.CreateAPIView):
         serializer.save(
             assignment_recipient=recipient,
         )
+
 
 class AssignmentSubmissionUpdateAPIView(
     generics.UpdateAPIView
@@ -705,7 +706,6 @@ class AssignmentSubmissionUpdateAPIView(
                 "assignment_recipient__member",
             )
         )
-
 
 
 class StaffAssignmentSubmissionListAPIView(
@@ -759,10 +759,10 @@ class StaffAssignmentSubmissionListAPIView(
 
         # Admin / Superuser
         if (
-            user.is_superuser
-            or user.user_roles.filter(
-                role__name="admin"
-            ).exists()
+                user.is_superuser
+                or user.user_roles.filter(
+            role__name="admin"
+        ).exists()
         ):
             return queryset
 
@@ -1011,7 +1011,7 @@ class StaffAssignmentSubmissionDetailAPIView(
         )
 
         if user.is_superuser or user.user_roles.filter(
-            role__name="admin"
+                role__name="admin"
         ).exists():
             return queryset
 
@@ -1233,7 +1233,6 @@ class StaffConversationCreateAPIView(generics.CreateAPIView):
     permission_classes = [IsStaff | IsAdminOrSuperUser]
 
 
-
 class StaffConversationListAPIView(generics.ListAPIView):
     serializer_class = ConversationListSerializer
     permission_classes = [IsStaff]
@@ -1266,6 +1265,7 @@ class StaffConversationDetailAPIView(generics.RetrieveAPIView):
             )
             .distinct()
         )
+
 
 class MemberConversationDetailAPIView(generics.RetrieveAPIView):
     serializer_class = ConversationDetailSerializer
@@ -1350,13 +1350,20 @@ class MessageCreateAPIView(generics.GenericAPIView):
             status=status.HTTP_201_CREATED,
         )
 
-
-class ContentCreateAPIView(generics.CreateAPIView):
+class ContentCreateAPIView(NestedMultipartCreateMixin, generics.CreateAPIView):
     queryset = Content.objects.all()
     serializer_class = ContentCreateSerializer
-    permission_classes = [
-        IsStaff|IsAdminOrSuperUser
-    ]
+    permission_classes = [IsStaff | IsAdminOrSuperUser]
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
+
+    def perform_create(self, serializer):
+        content = serializer.save()
+
+        staff_ids = content.line.staff_memberships.values_list("staff_id", flat=True)
+        user_ids = content.recipients.values_list("member__user_id", flat=True)
+
+        invalidate_staff_contents_cache(staff_ids)
+        invalidate_member_contents_cache(user_ids)
 
 
 class ContentUpdateAPIView(generics.UpdateAPIView):
@@ -1384,22 +1391,78 @@ class ContentUpdateAPIView(generics.UpdateAPIView):
             )
             .select_related(
                 "line",
-                "media",
+                "parent",
             )
             .prefetch_related(
+                "media",
                 "recipients__member__user",
             )
             .distinct()
         )
 
+    def perform_update(self, serializer):
+        content = self.get_object()
+
+        # -------------------------
+        # Cache های قبل از update
+        # -------------------------
+
+        old_staff_ids = list(
+            content.line.staff_memberships.values_list(
+                "staff_id",
+                flat=True,
+            )
+        )
+
+        old_user_ids = list(
+            content.recipients.values_list(
+                "member__user_id",
+                flat=True,
+            )
+        )
+
+        # -------------------------
+        # Update
+        # -------------------------
+
+        content = serializer.save()
+
+        # -------------------------
+        # Cache های بعد از update
+        # -------------------------
+
+        new_staff_ids = list(
+            content.line.staff_memberships.values_list(
+                "staff_id",
+                flat=True,
+            )
+        )
+
+        new_user_ids = list(
+            content.recipients.values_list(
+                "member__user_id",
+                flat=True,
+            )
+        )
+
+        # -------------------------
+        # Invalidate
+        # -------------------------
+
+        invalidate_staff_contents_cache(
+            set(old_staff_ids) | set(new_staff_ids)
+        )
+
+        invalidate_member_contents_cache(
+            set(old_user_ids) | set(new_user_ids)
+        )
 
 
 class StaffContentListAPIView(generics.ListAPIView):
     serializer_class = ContentLineListSerializer
 
     permission_classes = [
-        IsAuthenticated,
-        IsStaff,
+        IsStaff | IsAdminOrSuperUser,
     ]
 
     filter_backends = (
@@ -1410,6 +1473,7 @@ class StaffContentListAPIView(generics.ListAPIView):
     search_fields = (
         "title",
         "text",
+        "line__title"
     )
 
     ordering_fields = (
@@ -1432,39 +1496,50 @@ class StaffContentListAPIView(generics.ListAPIView):
         if not staff:
             return Content.objects.none()
 
-        return (
+        queryset = (
             Content.objects
             .filter(
+                # فقط Lineهایی که این Staff به آنها دسترسی دارد
                 line__staff_memberships__staff=staff,
             )
             .select_related(
                 "line",
                 "parent",
             )
-            .distinct()
+            .prefetch_related(
+                "line__children",
+            )
         )
+
+        line_id = self.request.query_params.get(
+            "line_id",
+        )
+
+        member_id = self.request.query_params.get(
+            "member_id",
+        )
+
+        # -----------------------------
+        # Filter by Line
+        # -----------------------------
+
+        if line_id:
+            queryset = queryset.filter(
+                line_id=line_id,
+            )
+
+        # -----------------------------
+        # Filter by Member
+        # -----------------------------
+
+        if member_id:
+            queryset = queryset.filter(
+                recipients__member_id=member_id,
+            )
+
+        return queryset.distinct()
 
     def list(self, request, *args, **kwargs):
-        search = request.query_params.get(
-            "search",
-            "",
-        ).strip()
-
-        ordering = request.query_params.get(
-            "ordering",
-            "-created_at",
-        )
-
-        page = request.query_params.get(
-            "page",
-            "1",
-        )
-
-        page_size = request.query_params.get(
-            "page_size",
-            "10",
-        )
-
         staff = getattr(
             request.user,
             "staff",
@@ -1476,25 +1551,77 @@ class StaffContentListAPIView(generics.ListAPIView):
                 "results": [],
             })
 
+        # -----------------------------
+        # Query Params
+        # -----------------------------
+
+        search = request.query_params.get(
+            "search",
+            "",
+        ).strip()
+
+        ordering = request.query_params.get(
+            "ordering",
+            "-created_at",
+        ).strip()
+
+        page = request.query_params.get(
+            "page",
+            "1",
+        ).strip()
+
+        page_size = request.query_params.get(
+            "page_size",
+            "10",
+        ).strip()
+
+        line_id = request.query_params.get(
+            "line_id",
+            "",
+        ).strip()
+
+        member_id = request.query_params.get(
+            "member_id",
+            "",
+        ).strip()
+
+        # -----------------------------
+        # Cache Key
+        # -----------------------------
+
         cache_key = (
             f"staff:{staff.id}:"
             f"contents:"
+            f"line={line_id}:"
+            f"member={member_id}:"
             f"search={search}:"
             f"ordering={ordering}:"
             f"page={page}:"
             f"page_size={page_size}"
         )
 
+        # -----------------------------
+        # Cache
+        # -----------------------------
+
         cached_data = cache.get(cache_key)
 
         if cached_data is not None:
             return Response(cached_data)
+
+        # -----------------------------
+        # DB
+        # -----------------------------
 
         response = super().list(
             request,
             *args,
             **kwargs,
         )
+
+        # -----------------------------
+        # Save Cache
+        # -----------------------------
 
         cache.set(
             cache_key,
@@ -1535,20 +1662,41 @@ class MemberContentListAPIView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        return (
+        queryset = (
             Content.objects
             .filter(
+                # Content باید به این Member ارسال شده باشد
                 recipients__member__user=user,
+
+                # Member باید عضو همان Line هم باشد
                 line__members__user=user,
             )
             .select_related(
                 "line",
                 "parent",
             )
-            .distinct()
         )
 
+        # -----------------------------
+        # Line filter
+        # -----------------------------
+
+        line_id = self.request.query_params.get(
+            "line_id",
+        )
+
+        if line_id:
+            queryset = queryset.filter(
+                line_id=line_id,
+            )
+
+        return queryset.distinct()
+
     def list(self, request, *args, **kwargs):
+        # -----------------------------
+        # Query Params
+        # -----------------------------
+
         search = request.query_params.get(
             "search",
             "",
@@ -1557,37 +1705,59 @@ class MemberContentListAPIView(generics.ListAPIView):
         ordering = request.query_params.get(
             "ordering",
             "-created_at",
-        )
+        ).strip()
 
         page = request.query_params.get(
             "page",
             "1",
-        )
+        ).strip()
 
         page_size = request.query_params.get(
             "page_size",
             "10",
-        )
+        ).strip()
+
+        line_id = request.query_params.get(
+            "line_id",
+            "",
+        ).strip()
+
+        # -----------------------------
+        # Cache Key
+        # -----------------------------
 
         cache_key = (
             f"user:{request.user.id}:"
             f"member-contents:"
+            f"line={line_id}:"
             f"search={search}:"
             f"ordering={ordering}:"
             f"page={page}:"
             f"page_size={page_size}"
         )
 
+        # -----------------------------
+        # Get Cache
+        # -----------------------------
+
         cached_data = cache.get(cache_key)
 
         if cached_data is not None:
             return Response(cached_data)
+
+        # -----------------------------
+        # Query DB
+        # -----------------------------
 
         response = super().list(
             request,
             *args,
             **kwargs,
         )
+
+        # -----------------------------
+        # Set Cache
+        # -----------------------------
 
         cache.set(
             cache_key,
@@ -1598,12 +1768,11 @@ class MemberContentListAPIView(generics.ListAPIView):
         return response
 
 
-
 class StaffContentDetailAPIView(generics.RetrieveAPIView):
     serializer_class = ContentDetailSerializer
     permission_classes = [
-        IsAuthenticated,
-        IsAdminOrSuperUser,
+        IsStaff |
+        IsAdminOrSuperUser
     ]
 
     def get_queryset(self):
@@ -1613,21 +1782,21 @@ class StaffContentDetailAPIView(generics.RetrieveAPIView):
             Content.objects
             .select_related(
                 "line",
-                "media",
                 "parent",
             )
             .prefetch_related(
                 "recipients__member__user",
                 "children",
+                "media",
             )
         )
 
         # Admin / Superuser → همه Contentها
         if (
-            user.is_superuser
-            or user.user_roles.filter(
-                role__name="admin"
-            ).exists()
+                user.is_superuser
+                or user.user_roles.filter(
+            role__name="admin"
+        ).exists()
         ):
             return queryset
 
