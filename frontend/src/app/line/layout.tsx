@@ -16,7 +16,7 @@ export default function KineLayout({children}: { children: React.ReactNode }) {
     }, [router]);
 
     return (
-        <div className="theme-light-admin min-h-screen flex" dir="rtl">
+        <div className="min-h-screen flex" dir="rtl">
             <AdminSidebar/>
             <main className="flex-1 overflow-auto p-8">
                 {children}

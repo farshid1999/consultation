@@ -50,12 +50,19 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
     disabled,
     size = "md",
     defaultValue,
+    value,
     ...props
   },
   ref
 ) {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
+
+  // کنترل‌شده (مثلاً از Controller در react-hook-form) وقتی value صراحتاً
+  // پاس داده شده باشد؛ فقط در حالت uncontrolled باید defaultValue ست شود،
+  // وگرنه دادن هم‌زمان value و defaultValue به <select> باعث هشدار
+  // "must be either controlled or uncontrolled" در React می‌شود.
+  const isControlled = value !== undefined;
 
   return (
     <FieldWrapper
@@ -72,7 +79,9 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
           id={fieldId}
           disabled={disabled}
           required={required}
-          defaultValue={defaultValue ?? (placeholder ? "" : undefined)}
+          {...(isControlled
+            ? { value }
+            : { defaultValue: defaultValue ?? (placeholder ? "" : undefined) })}
           aria-invalid={Boolean(error)}
           aria-describedby={describedBy(fieldId, error, helperText)}
           className={cn(

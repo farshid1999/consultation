@@ -282,7 +282,7 @@ staff_content_urls = [
     ),
 
     path(
-        "<int:pk>/",
+        "<str:pk>/",
         StaffContentDetailAPIView.as_view(),
         name="staff-content-detail",
     ),

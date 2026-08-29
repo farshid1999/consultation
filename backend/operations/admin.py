@@ -1388,3 +1388,591 @@
 #     )
 #     def children_count(self, obj):
 #         return obj._children_count
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+admin.py — پنل مدیریت اپ operations
+
+پیش‌نیاز: برای این‌که autocomplete_fields روی "user" و "staff" کار کند،
+مدل‌های accounts.User و accounts.Staff باید در admin خودشان search_fields
+تعریف کرده باشند (الزام خود Django برای AutocompleteSelect).
+"""
+
+from django.contrib import admin
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from django.urls import reverse
+
+from .models import (
+    InviteRule,
+    Line,
+    LineMember,
+    StaffLine,
+    Media,
+    Assignment,
+    AssignmentMedia,
+    AssignmentRecipient,
+    AssignmentSubmission,
+    SubmissionMedia,
+    Conversation,
+    ConversationParticipant,
+    Message,
+    ConsultationForm,
+    Appointment,
+    Feature,
+    Content,
+    ContentRecipient,
+)
+
+
+# =============================================================================
+# Helpers
+# =============================================================================
+
+READONLY_BASE = ("id", "created_at", "updated_at")
+
+
+def short_uuid(obj):
+    """نمایش کوتاه‌شده‌ی UUID برای خوانایی بهتر در ستون‌های لیست."""
+    return str(obj.id)[:8]
+
+
+short_uuid.short_description = "شناسه"
+
+
+def tree_depth(obj, max_depth=10):
+    """
+    عمق یک آبجکت خودارجاع (self-referential) را با دنبال کردن زنجیره‌ی
+    parent محاسبه می‌کند. سقف max_depth صرفاً محافظ در برابر داده‌ی
+    خراب (حلقه‌ی parent) است، نه یک محدودیت منطقی واقعی.
+    """
+    depth = 0
+    current = obj.parent
+    while current is not None and depth < max_depth:
+        depth += 1
+        current = current.parent
+    return depth
+
+
+def indented_title(obj, field="title"):
+    """عنوان را با تورفتگی بصری متناسب با عمقش در درخت parent/child نمایش می‌دهد."""
+    depth = tree_depth(obj)
+    prefix = "—" * depth + " " if depth else ""
+    value = getattr(obj, field, "") or ""
+    return format_html("<span style='white-space:pre'>{}</span>{}", prefix, value)
+
+
+def file_preview(file_field, label="فایل"):
+    """
+    پیش‌نمایش فایل: اگر تصویر باشد <img> کوچک، در غیر این صورت
+    لینک دانلود با آیکون نوع فایل.
+    """
+    if not file_field:
+        return "—"
+    name = file_field.name.lower()
+    image_exts = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg")
+    if name.endswith(image_exts):
+        return format_html(
+            '<a href="{0}" target="_blank">'
+            '<img src="{0}" style="height:48px;width:48px;object-fit:cover;'
+            'border-radius:6px;border:1px solid #ddd;" /></a>',
+            file_field.url,
+        )
+    return format_html(
+        '<a href="{}" target="_blank">📎 دانلود {}</a>',
+        file_field.url,
+        label,
+    )
+
+
+STATUS_COLORS = {
+    "pending": "#f59e0b",
+    "confirmed": "#3b82f6",
+    "completed": "#10b981",
+    "cancelled": "#ef4444",
+    "canceled": "#ef4444",
+    "rejected": "#ef4444",
+}
+
+
+def status_badge(value):
+    """رنگ‌بندی وضعیت‌های شناخته‌شده؛ مقادیر ناشناس خاکستری خنثی نمایش داده می‌شوند."""
+    if not value:
+        return "—"
+    color = STATUS_COLORS.get(str(value).strip().lower(), "#64748b")
+    return format_html(
+        '<span style="background:{}1a;color:{};padding:2px 10px;'
+        'border-radius:999px;font-size:11px;font-weight:600;">{}</span>',
+        color,
+        color,
+        value,
+    )
+
+
+# =============================================================================
+# InviteRule
+# =============================================================================
+
+@admin.register(InviteRule)
+class InviteRuleAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "created_at", "is_active")
+    list_filter = ("is_active",)
+    readonly_fields = READONLY_BASE
+    ordering = ("-created_at",)
+
+
+# =============================================================================
+# Line (ساختار درختی بخش‌ها)
+# =============================================================================
+
+class LineMemberInline(admin.TabularInline):
+    model = LineMember
+    extra = 0
+    autocomplete_fields = ("user",)
+    fields = ("user", "is_active", "created_at")
+    readonly_fields = ("created_at",)
+    show_change_link = True
+
+
+class StaffLineInline(admin.TabularInline):
+    model = StaffLine
+    extra = 0
+    autocomplete_fields = ("staff",)
+    fields = ("staff", "is_active", "created_at")
+    readonly_fields = ("created_at",)
+    show_change_link = True
+
+
+@admin.register(Line)
+class LineAdmin(admin.ModelAdmin):
+    list_display = ("tree_title", "parent", "member_count", "staff_count", "is_active", "created_at")
+    list_display_links = ("tree_title",)
+    list_editable = ("is_active",)
+    list_filter = ("is_active", "parent")
+    search_fields = ("title", "descriptions")
+    autocomplete_fields = ("parent",)
+    readonly_fields = READONLY_BASE
+    ordering = ("title",)
+    list_select_related = ("parent",)
+    inlines = (LineMemberInline, StaffLineInline)
+
+    @admin.display(description="عنوان بخش")
+    def tree_title(self, obj):
+        return indented_title(obj, "title")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("parent")
+            .prefetch_related("members", "staff_memberships")
+        )
+
+    @admin.display(description="تعداد اعضا")
+    def member_count(self, obj):
+        return obj.members.count()
+
+    @admin.display(description="تعداد کارمندان")
+    def staff_count(self, obj):
+        return obj.staff_memberships.count()
+
+
+# =============================================================================
+# LineMember / StaffLine (به‌صورت مستقل هم قابل جست‌وجو باشند)
+# =============================================================================
+
+@admin.register(LineMember)
+class LineMemberAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "user", "line", "is_active", "created_at")
+    list_filter = ("is_active", "line")
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "line__title",
+    )
+    autocomplete_fields = ("user", "line")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("user", "line")
+    ordering = ("-created_at",)
+
+
+@admin.register(StaffLine)
+class StaffLineAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "staff", "line", "is_active", "created_at")
+    list_filter = ("is_active", "line")
+    search_fields = (
+        "staff__user__username",
+        "staff__user__first_name",
+        "staff__user__last_name",
+        "staff__employee_code",
+        "line__title",
+    )
+    autocomplete_fields = ("staff", "line")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("staff", "staff__user", "line")
+    ordering = ("-created_at",)
+
+
+# =============================================================================
+# Media
+# =============================================================================
+
+@admin.register(Media)
+class MediaAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "preview_thumb", "content", "short_text", "created_at", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("text",)
+    autocomplete_fields = ("content",)
+    readonly_fields = READONLY_BASE + ("preview_large",)
+    fields = ("content", "text", "file", "preview_large", "is_active") + READONLY_BASE
+    ordering = ("-created_at",)
+
+    @admin.display(description="پیش‌نمایش")
+    def preview_thumb(self, obj):
+        return file_preview(obj.file, "فایل")
+
+    @admin.display(description="پیش‌نمایش کامل")
+    def preview_large(self, obj):
+        return file_preview(obj.file, "فایل")
+
+    @admin.display(description="متن")
+    def short_text(self, obj):
+        text = obj.text or ""
+        return text[:60] + ("…" if len(text) > 60 else "")
+
+
+# =============================================================================
+# Assignment (تکلیف/تمرین) با درخت parent/child + رسانه‌ها + گیرندگان
+# =============================================================================
+
+class AssignmentMediaInline(admin.TabularInline):
+    model = AssignmentMedia
+    extra = 0
+    autocomplete_fields = ("media",)
+
+
+class AssignmentRecipientInline(admin.TabularInline):
+    model = AssignmentRecipient
+    extra = 0
+    autocomplete_fields = ("member",)
+    show_change_link = True
+
+
+@admin.register(Assignment)
+class AssignmentAdmin(admin.ModelAdmin):
+    list_display = ("tree_title", "line", "parent", "recipient_count", "media_count", "created_at")
+    list_display_links = ("tree_title",)
+    list_filter = ("line",)
+    search_fields = ("title", "description", "line__title")
+    autocomplete_fields = ("line", "parent")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("line", "parent")
+    ordering = ("-created_at",)
+    inlines = (AssignmentMediaInline, AssignmentRecipientInline)
+
+    @admin.display(description="عنوان تکلیف")
+    def tree_title(self, obj):
+        return indented_title(obj, "title")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("line", "parent")
+            .prefetch_related("recipients", "media_items")
+        )
+
+    @admin.display(description="تعداد گیرندگان")
+    def recipient_count(self, obj):
+        return obj.recipients.count()
+
+    @admin.display(description="تعداد رسانه")
+    def media_count(self, obj):
+        return obj.media_items.count()
+
+
+@admin.register(AssignmentMedia)
+class AssignmentMediaAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "assignment", "media", "created_at")
+    search_fields = ("assignment__title",)
+    autocomplete_fields = ("assignment", "media")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("assignment", "media")
+
+
+@admin.register(AssignmentRecipient)
+class AssignmentRecipientAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "assignment", "member", "created_at")
+    search_fields = (
+        "assignment__title",
+        "member__user__username",
+        "member__user__first_name",
+        "member__user__last_name",
+    )
+    autocomplete_fields = ("assignment", "member")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("assignment", "member", "member__user")
+
+
+# =============================================================================
+# AssignmentSubmission / SubmissionMedia
+# =============================================================================
+
+class SubmissionMediaInline(admin.TabularInline):
+    model = SubmissionMedia
+    extra = 0
+    autocomplete_fields = ("media",)
+
+
+@admin.register(AssignmentSubmission)
+class AssignmentSubmissionAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "assignment_recipient", "media_count", "created_at")
+    search_fields = (
+        "assignment_recipient__assignment__title",
+        "assignment_recipient__member__user__username",
+    )
+    autocomplete_fields = ("assignment_recipient",)
+    readonly_fields = READONLY_BASE
+    list_select_related = (
+        "assignment_recipient",
+        "assignment_recipient__assignment",
+        "assignment_recipient__member",
+    )
+    inlines = (SubmissionMediaInline,)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("media_items")
+
+    @admin.display(description="تعداد رسانه")
+    def media_count(self, obj):
+        return obj.media_items.count()
+
+
+@admin.register(SubmissionMedia)
+class SubmissionMediaAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "submission", "media", "created_at")
+    autocomplete_fields = ("submission", "media")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("submission", "media")
+
+
+# =============================================================================
+# Conversation / ConversationParticipant / Message
+# =============================================================================
+
+class ConversationParticipantInline(admin.TabularInline):
+    model = ConversationParticipant
+    extra = 0
+    autocomplete_fields = ("user",)
+
+
+@admin.register(Conversation)
+class ConversationAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "line", "participant_count", "message_count", "created_at")
+    list_filter = ("line",)
+    search_fields = ("line__title",)
+    autocomplete_fields = ("line",)
+    readonly_fields = READONLY_BASE
+    list_select_related = ("line",)
+    ordering = ("-created_at",)
+    inlines = (ConversationParticipantInline,)
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("line")
+            .prefetch_related("participants", "messages")
+        )
+
+    @admin.display(description="تعداد شرکت‌کنندگان")
+    def participant_count(self, obj):
+        return obj.participants.count()
+
+    @admin.display(description="تعداد پیام‌ها")
+    def message_count(self, obj):
+        return obj.messages.count()
+
+
+@admin.register(ConversationParticipant)
+class ConversationParticipantAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "conversation", "user", "created_at")
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+    )
+    autocomplete_fields = ("conversation", "user")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("conversation", "user")
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "conversation", "sender", "media_preview", "created_at")
+    list_filter = ("conversation__line",)
+    search_fields = (
+        "sender__user__username",
+        "conversation__line__title",
+    )
+    autocomplete_fields = ("conversation", "sender", "media")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("conversation", "sender", "sender__user", "media")
+    ordering = ("-created_at",)
+    date_hierarchy = "created_at"
+
+    @admin.display(description="رسانه")
+    def media_preview(self, obj):
+        if not obj.media or not obj.media.file:
+            return "—"
+        return file_preview(obj.media.file, "رسانه")
+
+
+# =============================================================================
+# ConsultationForm
+# =============================================================================
+
+@admin.register(ConsultationForm)
+class ConsultationFormAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "title", "line", "file_link", "created_at")
+    search_fields = ("title", "line__title")
+    autocomplete_fields = ("line",)
+    readonly_fields = READONLY_BASE + ("file_link",)
+    list_select_related = ("line",)
+    ordering = ("-created_at",)
+
+    @admin.display(description="فایل")
+    def file_link(self, obj):
+        return file_preview(obj.file, "فرم")
+
+
+# =============================================================================
+# Appointment
+# =============================================================================
+
+@admin.register(Appointment)
+class AppointmentAdmin(admin.ModelAdmin):
+    list_display = (
+        short_uuid,
+        "line",
+        "member",
+        "staff",
+        "status_display",
+        "appointment_time",
+        "created_at",
+    )
+    list_filter = ("status", "line")
+    search_fields = (
+        "member__user__username",
+        "member__user__first_name",
+        "member__user__last_name",
+        "staff__user__username",
+        "line__title",
+    )
+    autocomplete_fields = ("line", "member", "staff")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("line", "member", "member__user", "staff", "staff__user")
+    date_hierarchy = "appointment_time"
+    ordering = ("-appointment_time",)
+
+    @admin.display(description="وضعیت")
+    def status_display(self, obj):
+        return status_badge(obj.status)
+
+
+# =============================================================================
+# Feature (ساختار درختی ویژگی‌ها)
+# =============================================================================
+
+@admin.register(Feature)
+class FeatureAdmin(admin.ModelAdmin):
+    list_display = ("tree_title", "line", "parent", "has_media", "created_at", "is_active")
+    list_display_links = ("tree_title",)
+    list_editable = ("is_active",)
+    list_filter = ("is_active", "line")
+    search_fields = ("title", "text", "line__title")
+    autocomplete_fields = ("line", "parent", "media")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("line", "parent", "media")
+    ordering = ("line", "title")
+
+    @admin.display(description="عنوان")
+    def tree_title(self, obj):
+        return indented_title(obj, "title")
+
+    @admin.display(description="رسانه", boolean=True)
+    def has_media(self, obj):
+        return bool(obj.media_id)
+
+
+# =============================================================================
+# Content (ساختار درختی محتوا) + گیرندگان
+# =============================================================================
+
+class ContentRecipientInline(admin.TabularInline):
+    model = ContentRecipient
+    extra = 0
+    autocomplete_fields = ("member",)
+
+
+@admin.register(Content)
+class ContentAdmin(admin.ModelAdmin):
+    list_display = ("tree_title", "line", "parent", "recipient_count", "created_at", "is_active")
+    list_display_links = ("tree_title",)
+    list_editable = ("is_active",)
+    list_filter = ("is_active", "line")
+    search_fields = ("title", "text", "line__title")
+    autocomplete_fields = ("line", "parent")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("line", "parent")
+    ordering = ("line", "title")
+    inlines = (ContentRecipientInline,)
+
+    @admin.display(description="عنوان")
+    def tree_title(self, obj):
+        return indented_title(obj, "title")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("line", "parent")
+            .prefetch_related("recipients")
+        )
+
+    @admin.display(description="تعداد گیرندگان")
+    def recipient_count(self, obj):
+        return obj.recipients.count()
+
+
+@admin.register(ContentRecipient)
+class ContentRecipientAdmin(admin.ModelAdmin):
+    list_display = (short_uuid, "content", "member", "created_at")
+    search_fields = (
+        "content__title",
+        "member__user__username",
+        "member__user__first_name",
+        "member__user__last_name",
+    )
+    autocomplete_fields = ("content", "member")
+    readonly_fields = READONLY_BASE
+    list_select_related = ("content", "member", "member__user")

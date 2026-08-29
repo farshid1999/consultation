@@ -1,9 +1,8 @@
 "use client";
 
-import { Controller, type Control, type FieldErrors } from "react-hook-form";
-// اصلاح مسیرها به حروف کوچک و ایمپورت صحیح FormSection
+import { Controller, useFieldArray, type Control, type FieldErrors } from "react-hook-form";
+import { FiTrash2, FiPlus } from "react-icons/fi";
 import { Input, Textarea, FileUploader, MultiSelect, AudioRecorder } from "@/components/ui/inputs";
-import type { LineMember } from "@/types";
 import FormSection from "@/forms/FormSection";
 
 interface ContentFormFieldsProps {
@@ -17,41 +16,30 @@ export default function ContentFormFields({
   errors,
   membersOptions,
 }: ContentFormFieldsProps) {
+  const {
+    fields: audioFields,
+    append: appendAudio,
+    remove: removeAudio,
+  } = useFieldArray({ control, name: "audio_clips" });
 
   return (
     <div className="flex flex-col gap-6">
 
       {/* --- اطلاعات اصلی محتوا --- */}
       <FormSection title="اطلاعات اصلی" description="عنوان و متن محتوا">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Controller
-            name="title"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Input
-                label="عنوان محتوا"
-                required
-                {...field}
-                value={field.value ?? ""}
-                error={fieldState.error?.message}
-              />
-            )}
-          />
-
-          {/*<Controller*/}
-          {/*  name="parent"*/}
-          {/*  control={control}*/}
-          {/*  render={({ field, fieldState }) => (*/}
-          {/*    <Input*/}
-          {/*      label="شناسه والد (اختیاری)"*/}
-          {/*      type="number"*/}
-          {/*      {...field}*/}
-          {/*      value={field.value ?? ""}*/}
-          {/*      error={fieldState.error?.message}*/}
-          {/*    />*/}
-          {/*  )}*/}
-          {/*/>*/}
-        </div>
+        <Controller
+          name="title"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Input
+              label="عنوان محتوا"
+              required
+              {...field}
+              value={field.value ?? ""}
+              error={fieldState.error?.message}
+            />
+          )}
+        />
 
         <Controller
           name="text"
@@ -70,10 +58,10 @@ export default function ContentFormFields({
         />
       </FormSection>
 
-        {/* --- رسانه‌ها (فایل و صوت) --- */}
+      {/* --- رسانه‌ها: فایل (many) + صدا (many) --- */}
       <FormSection
         title="رسانه‌ها"
-        description="فایل‌های ضمیمه و پیام‌های صوتی"
+        description="می‌توانید چند فایل و چند پیام صوتی اضافه کنید"
       >
         <Controller
           name="media_files"
@@ -84,7 +72,7 @@ export default function ContentFormFields({
               wrapperClassName="mb-6"
               accept="image/*,.pdf,.doc,.docx"
               multiple
-              maxFiles={5}
+              maxFiles={10}
               maxSizeMB={10}
               value={field.value || []}
               onChange={field.onChange}
@@ -92,21 +80,45 @@ export default function ContentFormFields({
           )}
         />
 
-        <Controller
-          name="audio_clip"
-          control={control}
-          render={({ field, fieldState }) => (
-            <AudioRecorder
-              label="ضبط پیام صوتی"
-              value={field.value}
-              onChange={field.onChange}
-              error={fieldState.error?.message}
-              maxDurationSeconds={120}
-            />
-          )}
-        />
-      </FormSection>
+        <div className="flex flex-col gap-3">
+          {audioFields.map((audioField, index) => (
+            <div key={audioField.id} className="flex items-center gap-2">
+              <div className="flex-1">
+                <Controller
+                  name={`audio_clips.${index}.clip`}
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <AudioRecorder
+                      label={`پیام صوتی ${index + 1}`}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={fieldState.error?.message}
+                      maxDurationSeconds={120}
+                    />
+                  )}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => removeAudio(index)}
+                aria-label="حذف این صدا"
+                className="mt-6 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-cream/40 transition-colors hover:bg-red-500/10 hover:text-red-400"
+              >
+                <FiTrash2 size={16} />
+              </button>
+            </div>
+          ))}
 
+          <button
+            type="button"
+            onClick={() => appendAudio({ clip: null })}
+            className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-gold/30 py-2.5 text-sm font-medium text-gold/80 transition-colors hover:border-gold/60 hover:text-gold"
+          >
+            <FiPlus size={14} />
+            افزودن پیام صوتی دیگر
+          </button>
+        </div>
+      </FormSection>
 
       {/* --- انتخاب گیرندگان (Members) --- */}
       <FormSection
@@ -130,7 +142,6 @@ export default function ContentFormFields({
           )}
         />
       </FormSection>
-
 
     </div>
   );
