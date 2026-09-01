@@ -26,7 +26,7 @@ export default function AssignmentCreateForm({ lineId, memberOptions, onSuccess 
   } = useForm<AssignmentCreateFormValues>({
     resolver: zodResolver(assignmentCreateSchema),
     defaultValues: {
-      line: lineId,
+      line: String(lineId),
       member_ids: [],
       media_items: [],
     },
@@ -39,14 +39,13 @@ export default function AssignmentCreateForm({ lineId, memberOptions, onSuccess 
 
   const selectedMembers = watch("member_ids") ?? [];
 
-  const toggleMember = (id: number) => {
-    const current = selectedMembers;
-    if (current.includes(id)) {
-      setValue("member_ids", current.filter((m) => m !== id));
-    } else {
-      setValue("member_ids", [...current, id]);
-    }
-  };
+  const toggleMember = (id: string) => {
+  if (selectedMembers.includes(id)) {
+    setValue("member_ids", selectedMembers.filter((m) => m !== id));
+  } else {
+    setValue("member_ids", [...selectedMembers, id]);
+  }
+};
 
   const onSubmit = (data: AssignmentCreateFormValues) => {
     createAssignment(data, {
@@ -91,9 +90,9 @@ export default function AssignmentCreateForm({ lineId, memberOptions, onSuccess 
             <button
               key={m.id}
               type="button"
-              onClick={() => toggleMember(m.id)}
+              onClick={() => toggleMember(String(m.id))}
               className={`text-right px-3 py-2 rounded-xl text-sm transition-colors border ${
-                selectedMembers.includes(m.id)
+                selectedMembers.includes(String(m.id))
                   ? "border-gold/50 bg-gold/10 text-gold"
                   : "border-cream/10 text-cream/50 hover:text-cream hover:border-cream/20"
               }`}

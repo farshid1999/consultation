@@ -40,7 +40,7 @@ export interface AssignmentRecipient {
 
 export interface AssignmentDetail {
   id: number;
-  line: number;
+  line: string;
   title: string;
   description: string;
   parent: number | null;
@@ -60,20 +60,20 @@ export interface AllAssignmentListItem {
 }
 
 export interface AssignmentCreateInput {
-  line: number;
+  line: string;
   title: string;
   description?: string;
   parent?: number | null;
-  member_ids: number[];
+  member_ids: string[];
   media_items?: { media: MediaInput }[];
 }
 
 export interface AssignmentUpdateInput {
-  line?: number;
+  line: string;
   title?: string;
   description?: string;
   parent?: number | null;
-  member_ids?: number[];
+  member_ids?: string[];
   media_items?: { media: MediaInput }[];
 }
 

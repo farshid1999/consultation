@@ -315,7 +315,7 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, attrs):
-        line = attrs["lines"]
+        line = attrs["line"]
         members = attrs.get("members", [])
 
         request = self.context["request"]
