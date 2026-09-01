@@ -6,9 +6,10 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateAssignment } from "@/hooks/useAssignment";
-import { useDebounce } from "use-debounce";
+// import { useDebounce } from "use-debounce";
 import { useLines, useLineMembers } from "@/hooks/useLines";
 import { Input, FileUploader } from "@/components/ui/Inputs";
+import { buildFormData, containsFile } from "@/services/api/formData";
 import {
   FiArrowRight,
   FiPlus,
@@ -108,39 +109,31 @@ export default function CreateAssignmentPage() {
 
   const clearAll = () => setValue("member_ids", []);
 
-  const onSubmit = async (data: FormValues) => {
-    const toBase64 = (file: File): Promise<string> =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-    const media_items = await Promise.all(
-      (data.media_items ?? []).map(async (item) => ({
-        media: {
-          text: item.text ?? "",
-          ...(item.file ? { file: await toBase64(item.file) } : {}),
-        },
-      })),
-    );
-
+  const onSubmit = (data: FormValues) => {
     const payload = {
       line: data.line,
       title: data.title,
       description: data.description,
-      parent: data.parent,
       member_ids: data.member_ids,
-      media_items,
+      media_items: data.media_items
+        ?.filter((item) => item.text?.trim() || item.file)
+        .map((item) => ({
+          media: {
+            text: item.text ?? "",
+            file: item.file ?? null,
+          },
+        })),
     };
 
-    createAssignment(payload as any, {
+    const body = containsFile(payload)
+      ? buildFormData(payload as Record<string, unknown>)
+      : payload;
+
+    createAssignment(body as any, {
       onSuccess: () => router.push("/admin/assignments"),
       onError: (err: any) => console.log("server error:", err.response?.data),
     });
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}

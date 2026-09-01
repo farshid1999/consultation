@@ -304,6 +304,10 @@ class AssignmentRecipientSerializer(serializers.ModelSerializer):
         )
 
 
+class MediaItemInputSerializer(serializers.Serializer):
+    media = MediaSerializer()
+
+
 class AssignmentCreateSerializer(serializers.ModelSerializer):
     member_ids = serializers.PrimaryKeyRelatedField(
         source="members",
@@ -312,9 +316,10 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         write_only=True,
     )
 
-    media_items = AssignmentMediaSerializer(
+    media_items = MediaItemInputSerializer(
         many=True,
         required=False,
+        write_only=True,
     )
 
     class Meta:
@@ -337,13 +342,11 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         user = request.user
 
-        # Staff فعلی
         staff = getattr(user, "staff", None)
 
         if staff is None:
             raise serializers.ValidationError({"lines": "شما Staff نیستید."})
 
-        # آیا Staff به این Line دسترسی دارد؟
         has_access = StaffLine.objects.filter(
             staff=staff,
             line=line,
@@ -354,7 +357,6 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
                 {"lines": "شما به این Line دسترسی ندارید."}
             )
 
-        # آیا همه Memberها متعلق به همین Line هستند؟
         invalid_members = [member.id for member in members if member.line_id != line.id]
 
         if invalid_members:
@@ -366,37 +368,20 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        media_items_data = validated_data.pop(
-            "media_items",
-            [],
-        )
-
-        members = validated_data.pop(
-            "members",
-            [],
-        )
+        media_items_data = validated_data.pop("media_items", [])
+        members = validated_data.pop("members", [])
 
         assignment = Assignment.objects.create(**validated_data)
 
-        for item_data in media_items_data:
-            media_data = item_data.pop("media")
-
+        for item in media_items_data:
+            media_data = item.get("media", {})
             media = Media.objects.create(**media_data)
+            AssignmentMedia.objects.create(assignment=assignment, media=media)
 
-            AssignmentMedia.objects.create(
-                assignment=assignment,
-                media=media,
-            )
-
-        AssignmentRecipient.objects.bulk_create(
-            [
-                AssignmentRecipient(
-                    assignment=assignment,
-                    member=member,
-                )
-                for member in members
-            ]
-        )
+        AssignmentRecipient.objects.bulk_create([
+            AssignmentRecipient(assignment=assignment, member=member)
+            for member in members
+        ])
 
         return assignment
 
@@ -788,7 +773,27 @@ class AllAssignmentSubmissionListSerializer(serializers.ModelSerializer):
             "updated_at",
         )
 
+class AdminAssignmentDetailSerializer(serializers.ModelSerializer):
+    line = serializers.StringRelatedField()
+    
+    media_items = AssignmentMediaSerializer(many=True, read_only=True)
+    recipients = AssignmentRecipientSerializer(many=True, read_only=True)
+    children = AssignmentListSerializer(many=True, read_only=True)
 
+    class Meta:
+        model = Assignment
+        fields = (
+            "id",
+            "line",
+            "title",
+            "description",
+            "parent",
+            "media_items",
+            "recipients",
+            "children",
+            "created_at",
+            "updated_at",
+        )
 class MemberConversationCreateSerializer(serializers.ModelSerializer):
     line = serializers.PrimaryKeyRelatedField(
         queryset=Line.objects.all(),

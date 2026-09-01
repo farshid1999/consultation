@@ -31,6 +31,7 @@ class NestedMultipartCreateMixin:
         return request.data
 
     def _inject_files(self, obj, files_dict, path):
+        print(f"Looking for path: {path}, files available: {list(files_dict.keys())}")
         if isinstance(obj, dict):
             for key, value in obj.items():
                 new_path = f"{path}[{key}]" if path else key
@@ -39,10 +40,14 @@ class NestedMultipartCreateMixin:
                     and value.startswith("__FILE__")
                     and new_path in files_dict
                 ):
+                    print(f"✅ INJECTING: {new_path}")
                     obj[key] = files_dict[new_path]
                 else:
+                    if isinstance(value, str) and value.startswith("__FILE__"):
+                        print(f"❌ PLACEHOLDER NOT FOUND: {new_path}, value: {value}") 
                     self._inject_files(value, files_dict, new_path)
         elif isinstance(obj, list):
+            
             for i, item in enumerate(obj):
                 self._inject_files(item, files_dict, f"{path}[{i}]")
 

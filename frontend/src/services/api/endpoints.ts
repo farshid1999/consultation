@@ -37,12 +37,13 @@ export const LINE_STAFF_ENDPOINTS = {
 };
 
 export const CONTENT_ENDPOINTS = {
-    create: "operations/contents/create/",
-    edit: (id: number | string) => `operations/contents/${id}/update/`,
-    list: "operations/staff/contents/",
-    detail: (id: number | string) => `operations/staff/contents/${id}/`,
-    memberList: `operations/member/contents/`,
-    memberDetailContent: (id: number | string) => `operations/member/contents/${id}/`,
+  create: "operations/contents/create/",
+  edit: (id: number | string) => `operations/contents/${id}/update/`,
+  list: "operations/staff/contents/",
+  detail: (id: number | string) => `operations/staff/contents/${id}/`,
+  memberList: `operations/member/contents/`,
+  memberDetailContent: (id: number | string) =>
+    `operations/member/contents/${id}/`,
 };
 
 export const ASSIGNMENT_ENDPOINTS = {
@@ -50,6 +51,7 @@ export const ASSIGNMENT_ENDPOINTS = {
   adminList: "operations/assignments/admin/",
   create: "operations/assignments/create/",
   update: (id: number) => `operations/assignments/${id}/update/`,
+  adminDetail: (id: string | number) => `operations/assignments/admin/${id}/`,
 
   // Staff
   staffList: (lineId: string | number) =>
@@ -58,25 +60,43 @@ export const ASSIGNMENT_ENDPOINTS = {
     `operations/assignments/staff/lines/${lineId}/${assignmentId}/`,
   staffSubmissionList: (lineId: string | number, assignmentId: number) =>
     `operations/assignments/staff/lines/${lineId}/${assignmentId}/submissions/`,
-  staffSubmissionDetail: (lineId: string | number, assignmentId: number, submissionId: number) =>
+  staffSubmissionDetail: (
+    lineId: string | number,
+    assignmentId: number,
+    submissionId: number,
+  ) =>
     `operations/assignments/staff/lines/${lineId}/${assignmentId}/submissions/${submissionId}/`,
 
   // Member
   memberList: (lineId: string | number) =>
-    `operations/assignments/member/lines/${lineId}/`,
-  memberDetail: (lineId: string | number, assignmentId: number) =>
-    `operations/assignments/member/lines/${lineId}/${assignmentId}/`,
-  memberSubmissionCreate: (assignmentId: number) =>
-    `operations/assignments/member/${assignmentId}/submit/`,
-  memberSubmissionUpdate: (assignmentId: number) =>
-    `operations/assignments/member/${assignmentId}/submission/`,
-  memberSubmissionList: (lineId: string | number, assignmentId: number) =>
-    `operations/assignments/member/lines/${lineId}/${assignmentId}/submissions/`,
-  memberSubmissionDetail: (lineId: string | number, assignmentId: number, submissionId: number) =>
-    `operations/assignments/member/lines/${lineId}/${assignmentId}/submissions/${submissionId}/`,
+    `operations/member/assignments/lines/${lineId}/`,
+
+  memberDetail: (
+    lineId: string | number,
+    assignmentId: string | number, // ✅ تغییر اینجا
+  ) => `operations/member/assignments/lines/${lineId}/${assignmentId}/`,
+
+  memberSubmissionCreate: (
+    assignmentId: string | number, // ✅ تغییر اینجا
+  ) => `operations/member/assignments/${assignmentId}/submit/`,
+
+  memberSubmissionUpdate: (
+    assignmentId: string | number, // ✅ تغییر اینجا
+  ) => `operations/member/assignments/${assignmentId}/submission/`,
+
+  memberSubmissionList: (
+    lineId: string | number,
+    assignmentId: string | number, // ✅ تغییر اینجا
+  ) =>
+    `operations/member/assignments/lines/${lineId}/${assignmentId}/submissions/`, // ✅ member قبل از assignments
+
+  memberSubmissionDetail: (
+    lineId: string | number,
+    assignmentId: string | number,
+    submissionId: string | number, // ✅ تغییر اینجا
+  ) =>
+    `operations/member/assignments/lines/${lineId}/${assignmentId}/submissions/${submissionId}/`,
 
   // Admin submissions
   adminSubmissionList: "operations/assignments/submissions/",
 };
-
-

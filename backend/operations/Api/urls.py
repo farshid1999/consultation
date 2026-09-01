@@ -76,72 +76,40 @@ assignment_urls = [
         AllAssignmentListAPIView.as_view(),
         name="admin-assignment-list",
     ),
+    path(
+        "admin/<str:pk>/",
+        AdminAssignmentDetailAPIView.as_view(),
+        name="admin-assignment-detail",
+    ),
 ]
 
 # =========================
 # Staff Assignment URLs
 # =========================
 
+# operations/Api/urls.py (یا هر جایی که urls.py شماست)
+
+# =========================
+# Staff Assignment URLs
+# =========================
 staff_assignment_urls = [
-    path(
-        "lines/<str:line_id>/",
-        StaffAssignmentListAPIView.as_view(),
-        name="staff-assignment-list",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/",
-        StaffAssignmentDetailAPIView.as_view(),
-        name="staff-assignment-detail",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/submissions/",
-        StaffAssignmentSubmissionListAPIView.as_view(),
-        name="staff-assignment-submission-list",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/submissions/<int:submission_id>/",
-        StaffAssignmentSubmissionDetailAPIView.as_view(),
-        name="staff-assignment-submission-detail",
-    ),
+    path("lines/<str:line_id>/", StaffAssignmentListAPIView.as_view(), name="staff-assignment-list"),
+    path("lines/<str:line_id>/<str:assignment_id>/", StaffAssignmentDetailAPIView.as_view(), name="staff-assignment-detail"), # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/", StaffAssignmentSubmissionListAPIView.as_view(), name="staff-assignment-submission-list"),
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/<str:submission_id>/", StaffAssignmentSubmissionDetailAPIView.as_view(), name="staff-assignment-submission-detail"), # ✅ تغییر به str
 ]
 
 # =========================
 # Member Assignment URLs
 # =========================
-
 member_assignment_urls = [
-    path(
-        "lines/<str:line_id>/",
-        MemberAssignmentListAPIView.as_view(),
-        name="member-assignment-list",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/",
-        MemberAssignmentDetailAPIView.as_view(),
-        name="member-assignment-detail",
-    ),
-    path(
-        "<int:assignment_id>/submit/",
-        AssignmentSubmissionCreateAPIView.as_view(),
-        name="assignment-submission-create",
-    ),
-    path(
-        "<int:assignment_id>/submission/",
-        AssignmentSubmissionUpdateAPIView.as_view(),
-        name="assignment-submission-update",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/submissions/",
-        MemberAssignmentSubmissionListAPIView.as_view(),
-        name="member-assignment-submission-list",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/submissions/<int:submission_id>/",
-        MemberAssignmentSubmissionDetailAPIView.as_view(),
-        name="member-assignment-submission-detail",
-    ),
+    path("lines/<str:line_id>/", MemberAssignmentListAPIView.as_view(), name="member-assignment-list"),
+    path("lines/<str:line_id>/<str:assignment_id>/", MemberAssignmentDetailAPIView.as_view(), name="member-assignment-detail"), # ✅ تغییر به str
+    path("<str:assignment_id>/submit/", AssignmentSubmissionCreateAPIView.as_view(), name="assignment-submission-create"), # ✅ تغییر به str
+    path("<str:assignment_id>/submission/", AssignmentSubmissionUpdateAPIView.as_view(), name="assignment-submission-update"), # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/", MemberAssignmentSubmissionListAPIView.as_view(), name="member-assignment-submission-list"), # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/<str:submission_id>/", MemberAssignmentSubmissionDetailAPIView.as_view(), name="member-assignment-submission-detail"), # ✅ تغییر به str
 ]
-
 # =========================
 # Admin Assignment Submission URLs
 # =========================
@@ -192,6 +160,7 @@ staff_conversation_urls = [
         ConversationJoinAPIView.as_view(),
         name="staff-conversation-join",
     ),
+    
 ]
 
 # =========================

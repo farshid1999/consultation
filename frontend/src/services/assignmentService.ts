@@ -26,10 +26,16 @@ export const assignmentService = {
     return res.data;
   },
 
-  create: async (data: AssignmentCreateInput): Promise<AssignmentDetail> => {
+  create: async (
+    data: AssignmentCreateInput | FormData,
+  ): Promise<AssignmentDetail> => {
+    const isFormData = data instanceof FormData;
     const res = await apiClient.post<AssignmentDetail>(
       ASSIGNMENT_ENDPOINTS.create,
       data,
+      {
+        headers: isFormData ? { "Content-Type": "multipart/form-data" } : {},
+      },
     );
     return res.data;
   },
@@ -41,6 +47,13 @@ export const assignmentService = {
     const res = await apiClient.patch<AssignmentDetail>(
       ASSIGNMENT_ENDPOINTS.update(id),
       data,
+    );
+    return res.data;
+  },
+
+  adminDetail: async (id: string | number): Promise<AssignmentDetail> => {
+    const res = await apiClient.get<AssignmentDetail>(
+      ASSIGNMENT_ENDPOINTS.adminDetail(id),
     );
     return res.data;
   },
@@ -108,9 +121,11 @@ export const assignmentService = {
     return res.data;
   },
 
+  // ── Member ─────────────────────────────────────────────────────────────────
+
   memberDetail: async (
     lineId: string | number,
-    assignmentId: number,
+    assignmentId: string | number, // ✅
   ): Promise<AssignmentDetail> => {
     const res = await apiClient.get<AssignmentDetail>(
       ASSIGNMENT_ENDPOINTS.memberDetail(lineId, assignmentId),
@@ -119,30 +134,34 @@ export const assignmentService = {
   },
 
   memberSubmissionCreate: async (
-    assignmentId: number,
-    data: AssignmentSubmissionCreateInput,
+    assignmentId: string | number, // ✅
+    data: AssignmentSubmissionCreateInput | FormData,
   ): Promise<AssignmentSubmissionDetail> => {
+    const isFormData = data instanceof FormData;
     const res = await apiClient.post<AssignmentSubmissionDetail>(
       ASSIGNMENT_ENDPOINTS.memberSubmissionCreate(assignmentId),
       data,
+      { headers: isFormData ? { "Content-Type": "multipart/form-data" } : {} },
     );
     return res.data;
   },
 
   memberSubmissionUpdate: async (
-    assignmentId: number,
-    data: AssignmentSubmissionUpdateInput,
+    assignmentId: string | number, // ✅
+    data: AssignmentSubmissionUpdateInput | FormData,
   ): Promise<AssignmentSubmissionDetail> => {
+    const isFormData = data instanceof FormData;
     const res = await apiClient.patch<AssignmentSubmissionDetail>(
       ASSIGNMENT_ENDPOINTS.memberSubmissionUpdate(assignmentId),
       data,
+      { headers: isFormData ? { "Content-Type": "multipart/form-data" } : {} },
     );
     return res.data;
   },
 
   memberSubmissionList: async (
     lineId: string | number,
-    assignmentId: number,
+    assignmentId: string | number, // ✅
     params?: ListQueryParams,
   ): Promise<Paginated<AssignmentSubmissionListItem>> => {
     const res = await apiClient.get<Paginated<AssignmentSubmissionListItem>>(
@@ -154,8 +173,8 @@ export const assignmentService = {
 
   memberSubmissionDetail: async (
     lineId: string | number,
-    assignmentId: number,
-    submissionId: number,
+    assignmentId: string | number, // ✅
+    submissionId: string | number, // ✅
   ): Promise<AssignmentSubmissionDetail> => {
     const res = await apiClient.get<AssignmentSubmissionDetail>(
       ASSIGNMENT_ENDPOINTS.memberSubmissionDetail(

@@ -415,19 +415,21 @@ class LineStaffListView(generics.ListAPIView):
         return response
 
 
-class AssignmentCreateAPIView(generics.CreateAPIView):
+class AssignmentCreateAPIView(NestedMultipartCreateMixin, generics.CreateAPIView):
     serializer_class = AssignmentCreateSerializer
-
-    permission_classes = [
-        IsStaff |
-        IsAdminOrSuperUser
-    ]
+    permission_classes = [IsStaff | IsAdminOrSuperUser]
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     def get_queryset(self):
         return Assignment.objects.all()
 
     def perform_create(self, serializer):
         serializer.save()
+
+    def create(self, request, *args, **kwargs):
+        print("FILES:", request.FILES)        # 👈 اضافه کن
+        print("DATA:", request.data)          # 👈 اضافه کن
+        return super().create(request, *args, **kwargs)
 
 
 class AssignmentUpdateAPIView(generics.UpdateAPIView):
@@ -642,6 +644,28 @@ class MemberAssignmentDetailAPIView(generics.RetrieveAPIView):
         line_id = self.kwargs["line_id"]
         assignment_id = self.kwargs["assignment_id"]
         user = self.request.user
+        print(f"\n{'='*60}")
+        print(f"🔍 MemberAssignmentDetailAPIView DEBUG")
+        print(f"📍 line_id از URL: {line_id}")
+        print(f"📍 assignment_id از URL: {assignment_id}")
+        print(f"👤 کاربر لاگین‌شده: {user.username} (ID: {user.id})")
+        
+        # بررسی ۱: آیا تکلیف اصلاً وجود دارد؟
+        assignment_exists = Assignment.objects.filter(id=assignment_id).exists()
+        print(f"✅ آیا تکلیف با این ID وجود دارد؟ {assignment_exists}")
+        
+        # بررسی ۲: آیا تکلیف متعلق به این line است؟
+        assignment_in_line = Assignment.objects.filter(id=assignment_id, line_id=line_id).exists()
+        print(f"✅ آیا تکلیف متعلق به این line است؟ {assignment_in_line}")
+        
+        # بررسی ۳: آیا کاربر گیرنده است؟
+        user_is_recipient = Assignment.objects.filter(
+            id=assignment_id,
+            line_id=line_id,
+            recipients__member__user=user
+        ).exists()
+        print(f"✅ آیا این کاربر گیرنده تکلیف است؟ {user_is_recipient}")
+        print(f"{'='*60}\n")
 
         return (
             Assignment.objects
@@ -686,21 +710,23 @@ class AssignmentSubmissionCreateAPIView(generics.CreateAPIView):
         )
 
 
-class AssignmentSubmissionUpdateAPIView(
-    generics.UpdateAPIView
-):
+class AssignmentSubmissionUpdateAPIView(generics.UpdateAPIView):
     serializer_class = AssignmentSubmissionUpdateSerializer
     permission_classes = [IsAuthenticated]
 
     http_method_names = ["put", "patch"]
 
+
+    lookup_url_kwarg = "assignment_id"
+    
+    
+    lookup_field = "assignment_recipient__assignment_id"
+
     def get_queryset(self):
         return (
             AssignmentSubmission.objects
             .filter(
-                assignment_recipient__assignment_id=self.kwargs[
-                    "assignment_id"
-                ],
+                assignment_recipient__assignment_id=self.kwargs["assignment_id"],
                 assignment_recipient__member__user=self.request.user,
             )
             .select_related(
@@ -1224,6 +1250,21 @@ class AllAssignmentSubmissionListAPIView(generics.ListAPIView):
         )
 
         return Response(data)
+    
+class AdminAssignmentDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = AdminAssignmentDetailSerializer
+    permission_classes = [IsAdminOrSuperUser]
+
+    def get_queryset(self):
+        return (
+            Assignment.objects
+            .select_related("line", "parent")
+            .prefetch_related(
+                "media_items__media",
+                "recipients__member__user",
+                "children",
+            )
+        )
 
 
 class MemberConversationCreateAPIView(generics.CreateAPIView):
