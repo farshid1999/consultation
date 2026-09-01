@@ -2,7 +2,7 @@
 
 import {useState} from "react";
 import Link from "next/link";
-import {FiSearch, FiEye, FiFileText} from "react-icons/fi";
+import {FiSearch, FiEye, FiFileText, FiPlus, FiEdit2} from "react-icons/fi";
 import {Input} from "@/components/ui/inputs";
 import {useStaffContents} from "@/hooks/useContent";
 import type {ContentListItem} from "@/types";
@@ -93,15 +93,16 @@ export default function StaffContentListPage() {
                                 </td>
 
                                 {/* عملیات */}
-                                <td className="px-5 py-4 text-center">
-                                    <Link
-                                        href={`/staff/content/${content.id}`}
-                                        aria-label="مشاهده جزئیات"
-                                        className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full mx-auto hover:bg-gold/10 hover:text-gold transition-colors"
-                                    >
-                                        <FiEye size={18}/>
-                                    </Link>
+                                <td className="px-5 py-4">
+                                    <div className="flex items-center justify-center gap-2"> {/* مشاهده */} <Link
+                                        href={`/staff/content/${content.id}`} aria-label="مشاهده جزئیات"
+                                        className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-gold/10 hover:text-gold transition-colors">
+                                        <FiEye size={18}/> </Link> {/* ویرایش */} <Link
+                                        href={`/staff/content/${content.id}/edit`} aria-label="ویرایش محتوا"
+                                        className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-blue-500/10 hover:text-blue-400 transition-colors">
+                                        <FiEdit2 size={18}/> </Link></div>
                                 </td>
+
                             </tr>
                         ))
                     )}

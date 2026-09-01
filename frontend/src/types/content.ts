@@ -18,6 +18,16 @@ export interface ContentCreateInput {
   media: MediaInput[];
 }
 
+export interface ContentUpdateInput {
+  title?: string;
+  text?: string;
+  member_ids?: string[];
+  media?: MediaInput[];
+  /** UUIDهای Media قدیمی که باید نگه داشته شوند؛ بقیه حذف می‌شوند. */
+  existing_media_ids?: string[];
+}
+
+
 export interface ContentListItem {
   /** UUID (Content extends BaseModel, primary key is a UUIDField). */
   id: string;

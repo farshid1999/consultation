@@ -5,19 +5,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('operations', '0001_initial'),
+        ("operations", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='content',
-            name='media',
+            model_name="content",
+            name="media",
         ),
         migrations.AddField(
-            model_name='media',
-            name='content',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='media', to='operations.content'),
+            model_name="media",
+            name="content",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="media",
+                to="operations.content",
+            ),
         ),
     ]

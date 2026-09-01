@@ -2,7 +2,7 @@
 
 import {useState} from "react";
 import Link from "next/link";
-import {FiEye, FiSearch, FiUsers, FiBriefcase, FiPlus} from "react-icons/fi";
+import {FiEye, FiSearch, FiUsers, FiBriefcase, FiPlus, FiFileText} from "react-icons/fi";
 import {Input} from "@/components/ui/inputs";
 import {useLines} from "@/hooks/useLines";
 
@@ -90,7 +90,7 @@ export default function LineTable() {
                                     <div className="flex items-center justify-center gap-2">
                                         {/* 1. مشاهده جزئیات بخش */}
                                         <Link
-                                            href={`/line/${line.id}`}
+                                            href={`/staff/line/${line.id}`}
                                             aria-label="مشاهده جزئیات بخش"
                                             className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-blue-500/10 hover:text-blue-400"
                                         >
@@ -99,7 +99,7 @@ export default function LineTable() {
 
                                         {/* 2. مشاهده اعضای عادی بخش */}
                                         <Link
-                                            href={`/line/${line.id}/members`}
+                                            href={`/staff/line/${line.id}/members`}
                                             aria-label="مشاهده اعضای بخش"
                                             className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-[#1e5c3f]/20 hover:text-[#4ade80]"
                                         >
@@ -108,7 +108,7 @@ export default function LineTable() {
 
                                         {/* 3. مشاهده کارمندان رسمی بخش */}
                                         <Link
-                                            href={`/line/${line.id}/staff`}
+                                            href={`/staff/line/${line.id}/staff`}
                                             aria-label="مشاهده کارمندان بخش"
                                             className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-purple-500/10 hover:text-purple-400"
                                         >
@@ -117,11 +117,20 @@ export default function LineTable() {
 
                                         {/* 4. ایجاد محتوا (جدید) */}
                                         <Link
-                                            href={`/line/${line.id}/content/create`}
+                                            href={`/staff/line/${line.id}/content/create`}
                                             aria-label="ایجاد محتوا"
                                             className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-gold/10 hover:text-gold"
                                         >
                                             <FiPlus size={18}/> {/* نیاز به ایمپورت FiPlus از react-icons/fi */}
+                                        </Link>
+
+                                        {/* 5. لیست محتوای لاین (جدید) */}
+                                        <Link
+                                            href={`/staff/line/${line.id}/content`}
+                                            aria-label="مشاهده آرشیو محتوا"
+                                            className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-blue-500/10 hover:text-blue-400 transition-colors"
+                                        >
+                                            <FiFileText size={18}/>
                                         </Link>
                                     </div>
                                 </td>

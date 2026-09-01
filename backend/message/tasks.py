@@ -1,7 +1,7 @@
 # accounts/tasks.py
 
-import json
 import http.client
+import json
 import logging
 
 from celery import shared_task
@@ -97,14 +97,10 @@ def send_like_to_like_sms(
     """
 
     if len(mobiles) != len(message_texts):
-        raise ValueError(
-            "mobiles and message_texts must have the same length."
-        )
+        raise ValueError("mobiles and message_texts must have the same length.")
 
     if len(mobiles) > 100:
-        raise ValueError(
-            "Maximum 100 mobile numbers are allowed."
-        )
+        raise ValueError("Maximum 100 mobile numbers are allowed.")
 
     conn = http.client.HTTPSConnection("api.sms.ir")
 

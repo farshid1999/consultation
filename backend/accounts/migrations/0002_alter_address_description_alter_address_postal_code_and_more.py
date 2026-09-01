@@ -5,65 +5,70 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0001_initial'),
+        ("accounts", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='address',
-            name='description',
+            model_name="address",
+            name="description",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='address',
-            name='postal_code',
+            model_name="address",
+            name="postal_code",
             field=models.CharField(blank=True, max_length=20, null=True),
         ),
         migrations.AlterField(
-            model_name='club',
-            name='address',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='clubs', to='accounts.address'),
+            model_name="club",
+            name="address",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="clubs",
+                to="accounts.address",
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='bio',
+            model_name="user",
+            name="bio",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='degree',
+            model_name="user",
+            name="degree",
             field=models.CharField(blank=True, max_length=100, null=True),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='job',
+            model_name="user",
+            name="job",
             field=models.CharField(blank=True, max_length=100, null=True),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='land_line',
+            model_name="user",
+            name="land_line",
             field=models.CharField(blank=True, max_length=20, null=True),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='phone_number',
+            model_name="user",
+            name="phone_number",
             field=models.CharField(max_length=20),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='professional_background',
+            model_name="user",
+            name="professional_background",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='referral_code',
+            model_name="user",
+            name="referral_code",
             field=models.CharField(blank=True, max_length=100, null=True),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='sport_discipline',
+            model_name="user",
+            name="sport_discipline",
             field=models.CharField(blank=True, max_length=100, null=True),
         ),
     ]

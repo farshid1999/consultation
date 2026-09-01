@@ -5,7 +5,6 @@ from django.db import models
 
 from core.models import BaseModel
 
-
 # Create your models here.
 
 
@@ -21,12 +20,12 @@ def information_upload_path(instance, filename):
     return f"informations/{instance.id}/{filename}"
 
 
-from django.utils import timezone
 from datetime import timedelta
+
+from django.utils import timezone
 
 
 class OTPCode(BaseModel):
-
     phone_number = models.CharField(
         max_length=20,
         db_index=True,
@@ -51,29 +50,21 @@ class OTPCode(BaseModel):
     def is_expired(self):
         return timezone.now() >= self.expires_at
 
+
 class Information(BaseModel):
     title = models.CharField(max_length=150)
 
-    text = models.TextField(
-        blank=True
-    )
+    text = models.TextField(blank=True)
 
-    file = models.FileField(
-        upload_to=information_upload_path,
-        blank=True,
-        null=True
-    )
+    file = models.FileField(upload_to=information_upload_path, blank=True, null=True)
 
     parent = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name="children"
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="children"
     )
 
     def __str__(self):
         return self.title
+
 
 class Address(BaseModel):
     country = models.CharField(max_length=100)
@@ -81,9 +72,9 @@ class Address(BaseModel):
     city = models.CharField(max_length=100)
 
     street = models.CharField(max_length=255)
-    postal_code = models.CharField(max_length=20, blank=True,null=True)
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
 
-    description = models.TextField(blank=True,null=True)
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.country} - {self.city}"
@@ -93,11 +84,7 @@ class Club(BaseModel):
     name = models.CharField(max_length=150)
 
     address = models.ForeignKey(
-        Address,
-        on_delete=models.CASCADE,
-        related_name="clubs",
-        blank=True,
-        null=True
+        Address, on_delete=models.CASCADE, related_name="clubs", blank=True, null=True
     )
 
     def __str__(self):
@@ -105,65 +92,32 @@ class Club(BaseModel):
 
 
 class User(AbstractUser):
-
     phone_number = models.CharField(
         max_length=20,
     )
 
-    land_line = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True
-    )
+    land_line = models.CharField(max_length=20, blank=True, null=True)
 
     is_student = models.BooleanField(
         default=False,
-
     )
 
-    degree = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True
-    )
+    degree = models.CharField(max_length=100, null=True, blank=True)
 
-    job = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True
-    )
+    job = models.CharField(max_length=100, null=True, blank=True)
 
-    sport_discipline = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
+    sport_discipline = models.CharField(max_length=100, blank=True, null=True)
 
-    professional_background = models.TextField(
-        blank=True,
-        null=True
-    )
+    professional_background = models.TextField(blank=True, null=True)
 
-    referral_code = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
+    referral_code = models.CharField(max_length=100, blank=True, null=True)
 
     address = models.ForeignKey(
-        Address,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="users"
+        Address, null=True, blank=True, on_delete=models.SET_NULL, related_name="users"
     )
 
     club = models.ForeignKey(
-        Club,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="members"
+        Club, null=True, blank=True, on_delete=models.SET_NULL, related_name="members"
     )
 
     informations = models.ManyToManyField(
@@ -172,55 +126,29 @@ class User(AbstractUser):
         related_name="users",
     )
 
-    avatar = models.ImageField(
-        upload_to=user_avatar_upload_path,
-        blank=True,
-        null=True
-    )
+    avatar = models.ImageField(upload_to=user_avatar_upload_path, blank=True, null=True)
 
-    bio = models.TextField(
-        blank=True,
-        null=True
-    )
+    bio = models.TextField(blank=True, null=True)
 
-    birth_date = models.DateField(
-        blank=True,
-        null=True
-    )
+    birth_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return self.get_full_name() or self.username
 
 
-
 class Staff(BaseModel):
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
-    employee_code = models.CharField(
-        max_length=50,
-        unique=True
-    )
+    user = models.OneToOneField("User", on_delete=models.CASCADE)
+    employee_code = models.CharField(max_length=50, unique=True)
 
     hire_date = models.DateField()
 
-    position = models.CharField(
-        max_length=100
-    )
-
+    position = models.CharField(max_length=100)
 
 
 class UserRole(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_roles")
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="user_roles"
-    )
-
-    role = models.ForeignKey(
-        'Role',
-        on_delete=models.CASCADE,
-        related_name="users"
-    )
+    role = models.ForeignKey("Role", on_delete=models.CASCADE, related_name="users")
 
     class Meta:
         unique_together = (
@@ -228,15 +156,11 @@ class UserRole(BaseModel):
             "role",
         )
 
-class Role(BaseModel):
-    name = models.CharField(
-        max_length=100,
-        unique=True
-    )
 
-    description = models.TextField(
-        blank=True
-    )
+class Role(BaseModel):
+    name = models.CharField(max_length=100, unique=True)
+
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name

@@ -55,11 +55,11 @@ export default function LineMembersPage() {
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cream/10 pb-6">
         <div>
           <div className="flex items-center gap-2 text-xs text-cream/40 mb-2">
-            <Link href="/line" className="hover:text-gold transition-colors">بخش‌ها</Link>
+            <Link href="/lines" className="hover:text-gold transition-colors">لاین‌ها</Link>
             <span>/</span>
             <span>اعضا</span>
           </div>
-          <h1 className="page-title text-3xl font-extrabold">لیست اعضای بخش</h1>
+          <h1 className="page-title text-3xl font-extrabold">لیست اعضای لاین</h1>
         </div>
 
         <div className="flex items-center gap-3">

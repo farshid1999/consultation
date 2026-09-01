@@ -15,7 +15,6 @@ class InviteRule(BaseModel):
         return f"InviteRule #{self.pk}"
 
 
-
 class Line(BaseModel):
     parent = models.ForeignKey(
         "self",
@@ -37,7 +36,6 @@ class Line(BaseModel):
         return self.title
 
 
-
 class LineMember(BaseModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -54,8 +52,7 @@ class LineMember(BaseModel):
         constraints = [
             # مطمئن شوید نام فیلدها دقیقاً همان چیزی است که بالا تعریف کردید
             models.UniqueConstraint(
-                fields=['user', 'line'],
-                name='unique_user_line_membership'
+                fields=["user", "line"], name="unique_user_line_membership"
             )
         ]
 
@@ -78,14 +75,12 @@ class StaffLine(BaseModel):
     class Meta:
         constraints = [
             # اینجا هم نام فیلدها باید دقیق باشد
-            models.UniqueConstraint(
-                fields=['staff', 'line'],
-                name='unique_staff_line'
-            )
+            models.UniqueConstraint(fields=["staff", "line"], name="unique_staff_line")
         ]
 
     def __str__(self):
         return f"{self.staff} - {self.line}"
+
 
 class Media(BaseModel):
     content = models.ForeignKey(
@@ -107,7 +102,6 @@ class Media(BaseModel):
 
     def __str__(self):
         return f"Media #{self.pk}"
-
 
 
 class Assignment(BaseModel):
@@ -135,7 +129,6 @@ class Assignment(BaseModel):
 
     def __str__(self):
         return self.title
-
 
 
 class AssignmentMedia(BaseModel):
@@ -185,9 +178,6 @@ class AssignmentRecipient(BaseModel):
         return f"{self.assignment} -> {self.member}"
 
 
-
-
-
 class AssignmentSubmission(BaseModel):
     assignment_recipient = models.OneToOneField(
         AssignmentRecipient,
@@ -197,9 +187,6 @@ class AssignmentSubmission(BaseModel):
 
     def __str__(self):
         return f"Submission #{self.pk}"
-
-
-
 
 
 class SubmissionMedia(BaseModel):
@@ -222,7 +209,6 @@ class SubmissionMedia(BaseModel):
                 name="unique_submission_media",
             )
         ]
-
 
 
 class Conversation(BaseModel):
@@ -261,7 +247,6 @@ class ConversationParticipant(BaseModel):
         return f"{self.conversation} - {self.user}"
 
 
-
 class Message(BaseModel):
     conversation = models.ForeignKey(
         Conversation,
@@ -287,7 +272,12 @@ class Message(BaseModel):
         return f"Message #{self.pk}"
 
 
-
+class Form(BaseModel):
+    file = models.FileField()
+    consultation = models.ForeignKey("ConsultationForm", related_name="form", on_delete=models.CASCADE, blank=True,
+                                     null=True)
+    submission = models.ForeignKey("SubmitConsultationForm", related_name="form", on_delete=models.CASCADE, blank=True,
+                                   null=True)
 
 
 class ConsultationForm(BaseModel):
@@ -297,13 +287,42 @@ class ConsultationForm(BaseModel):
         related_name="consultation_form",
     )
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True,null=True)
-    file = models.FileField()
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"Consultation Form - {self.line}"
 
 
+
+class SubmitConsultationForm(BaseModel):
+    consultation = models.ForeignKey(
+        "ConsultationForm",
+        related_name="submissions",
+        on_delete=models.CASCADE,
+    )
+
+    member = models.ForeignKey(
+        "LineMember",
+        related_name="consultation_submissions",
+        on_delete=models.CASCADE,
+    )
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["consultation", "member"],
+                name="unique_consultation_member_submission",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.member} - {self.consultation}"
 
 
 class Appointment(BaseModel):
@@ -333,7 +352,6 @@ class Appointment(BaseModel):
 
     def __str__(self):
         return f"Appointment #{self.pk}"
-
 
 
 class Feature(BaseModel):
@@ -370,7 +388,6 @@ class Feature(BaseModel):
 
     def __str__(self):
         return self.title or f"Feature #{self.pk}"
-
 
 
 class Content(BaseModel):
@@ -424,4 +441,3 @@ class ContentRecipient(BaseModel):
 
     def __str__(self):
         return f"{self.content} -> {self.member}"
-
