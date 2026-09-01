@@ -6,16 +6,19 @@ from django.views.decorators.cache import cache_page
 
 from rest_framework import generics, status
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.core.cache import cache
+from rest_framework.views import APIView
+
 from core.permissions import IsAdminOrSuperUser, IsStaff
 from core.utils import *
 from operations.models import *
 from .serializers import *
 from core.mixins import NestedMultipartCreateMixin
+
 
 class LineListAPIView(generics.ListAPIView):
     serializer_class = LineListSerializer
@@ -1350,6 +1353,7 @@ class MessageCreateAPIView(generics.GenericAPIView):
             status=status.HTTP_201_CREATED,
         )
 
+
 class ContentCreateAPIView(NestedMultipartCreateMixin, generics.CreateAPIView):
     queryset = Content.objects.all()
     serializer_class = ContentCreateSerializer
@@ -1366,12 +1370,13 @@ class ContentCreateAPIView(NestedMultipartCreateMixin, generics.CreateAPIView):
         invalidate_member_contents_cache(user_ids)
 
 
-class ContentUpdateAPIView(generics.UpdateAPIView):
+class ContentUpdateAPIView(NestedMultipartCreateMixin, generics.UpdateAPIView):
     serializer_class = ContentUpdateSerializer
     permission_classes = [
         IsAuthenticated,
         IsStaff,
     ]
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
 
     queryset = Content.objects.select_related(
         "line",
@@ -1487,57 +1492,34 @@ class StaffContentListAPIView(generics.ListAPIView):
     )
 
     def get_queryset(self):
-        staff = getattr(
-            self.request.user,
-            "staff",
-            None,
-        )
-
+        staff = getattr(self.request.user, "staff", None)
         if not staff:
             return Content.objects.none()
 
-        queryset = (
-            Content.objects
-            .filter(
-                # فقط Lineهایی که این Staff به آنها دسترسی دارد
-                line__staff_memberships__staff=staff,
-            )
-            .select_related(
-                "line",
-                "parent",
-            )
-            .prefetch_related(
-                "line__children",
-            )
+        queryset = Content.objects.filter(
+            line__staff_memberships__staff=staff,
+        ).select_related(
+            "line",
+            "parent",
+        ).prefetch_related(
+            "line__children",
         )
+        print(queryset)
 
-        line_id = self.request.query_params.get(
-            "line_id",
-        )
-
-        member_id = self.request.query_params.get(
-            "member_id",
-        )
-
-        # -----------------------------
-        # Filter by Line
-        # -----------------------------
+        line_id = self.request.query_params.get("line_id")
+        member_id = self.request.query_params.get("member_id")
 
         if line_id:
-            queryset = queryset.filter(
-                line_id=line_id,
-            )
-
-        # -----------------------------
-        # Filter by Member
-        # -----------------------------
+            queryset = queryset.filter(line_id=line_id)
 
         if member_id:
+            # روش مطمئن‌تر: استفاده از exists در فیلتر یا جوین دقیق
+            # این خط چک می‌کند که آیا حداقل یک ContentRecipient برای این ممبر وجود دارد
             queryset = queryset.filter(
-                recipients__member_id=member_id,
-            )
+                recipients__member_id=member_id
+            ).distinct()
 
-        return queryset.distinct()
+        return queryset
 
     def list(self, request, *args, **kwargs):
         staff = getattr(
@@ -1875,4 +1857,318 @@ class AdminContentListAPIView(generics.ListAPIView):
                 "parent",
             )
             .order_by("-created_at")
+        )
+
+
+class ConsultationFormDetailView(RetrieveAPIView):
+    serializer_class = ConsultationFormSerializer
+
+    def get_object(self):
+        line_id = self.kwargs["line_id"]
+        return ConsultationForm.objects.get(line_id=line_id)
+
+
+class ConsultationFormAPIView(APIView):
+
+    def get(self, request, line_id):
+        consultation_form = get_object_or_404(
+            ConsultationForm.objects.prefetch_related("form"),
+            line_id=line_id,
+        )
+
+        serializer = ConsultationFormSerializer(
+            consultation_form,
+            context={"request": request},
+        )
+
+        return Response(serializer.data)
+
+    def post(self, request, line_id):
+        # OneToOne
+        if ConsultationForm.objects.filter(
+            line_id=line_id
+        ).exists():
+            return Response(
+                {
+                    "message": "برای این Line قبلاً ConsultationForm ساخته شده است."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        data = request.data.copy()
+
+        # line را از URL می‌گیریم
+        data["line"] = line_id
+
+        serializer = ConsultationFormSerializer(
+            data=data,
+            context={"request": request},
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    def put(self, request, line_id):
+        consultation_form = get_object_or_404(
+            ConsultationForm,
+            line_id=line_id,
+        )
+
+        serializer = ConsultationFormSerializer(
+            consultation_form,
+            data=request.data,
+            context={"request": request},
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    def patch(self, request, line_id):
+        consultation_form = get_object_or_404(
+            ConsultationForm,
+            line_id=line_id,
+        )
+
+        serializer = ConsultationFormSerializer(
+            consultation_form,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+
+class SubmitConsultationFormDetailView(RetrieveAPIView):
+    serializer_class = SubmitConsultationFormSerializer
+
+    def get_object(self):
+        consultation_id = self.kwargs["consultation_id"]
+        return SubmitConsultationForm.objects.get(consultation_id=consultation_id)
+
+
+
+class SubmitConsultationFormAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get_consultation_and_member(
+        self,
+        consultation_id,
+        member_id,
+    ):
+        consultation = get_object_or_404(
+            ConsultationForm,
+            id=consultation_id,
+        )
+
+        member = get_object_or_404(
+            LineMember,
+            id=member_id,
+        )
+
+        # --------------------------------
+        # آیا Member عضو Line این فرم هست؟
+        # --------------------------------
+
+        if member.line_id != consultation.line_id:
+            raise PermissionDenied(
+                "این Member عضو Line مربوط به ConsultationForm نیست."
+            )
+
+        return consultation, member
+
+    # --------------------------------
+    # DETAIL
+    # --------------------------------
+
+    def get(self, request, consultation_id, member_id):
+
+        consultation, member = self.get_consultation_and_member(
+            consultation_id,
+            member_id,
+        )
+
+        submission = get_object_or_404(
+            SubmitConsultationForm.objects.prefetch_related(
+                "form"
+            ),
+            consultation=consultation,
+            member=member,
+        )
+
+        serializer = SubmitConsultationFormSerializer(
+            submission,
+            context={
+                "request": request,
+            },
+        )
+
+        return Response(serializer.data)
+
+    # --------------------------------
+    # CREATE
+    # --------------------------------
+
+    def post(self, request, consultation_id, member_id):
+
+        consultation, member = self.get_consultation_and_member(
+            consultation_id,
+            member_id,
+        )
+
+        # --------------------------------
+        # بررسی اینکه User اجازه دارد
+        # به جای این Member Submit کند
+        # --------------------------------
+
+        if member.user_id != request.user.id:
+            return Response(
+                {
+                    "detail": "شما اجازه ثبت Submission برای این Member را ندارید."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        serializer = SubmitConsultationFormSerializer(
+            data=request.data,
+            context={
+                "request": request,
+                "consultation": consultation,
+                "member": member,
+            },
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    # --------------------------------
+    # UPDATE
+    # --------------------------------
+
+    def put(self, request, consultation_id, member_id):
+
+        consultation, member = self.get_consultation_and_member(
+            consultation_id,
+            member_id,
+        )
+
+        if member.user_id != request.user.id:
+            return Response(
+                {
+                    "detail": "شما اجازه ویرایش این Submission را ندارید."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        submission = get_object_or_404(
+            SubmitConsultationForm,
+            consultation=consultation,
+            member=member,
+        )
+
+        serializer = SubmitConsultationFormSerializer(
+            submission,
+            data=request.data,
+            context={
+                "request": request,
+                "consultation": consultation,
+                "member": member,
+            },
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    # --------------------------------
+    # PATCH
+    # --------------------------------
+
+    def patch(self, request, consultation_id, member_id):
+
+        consultation, member = self.get_consultation_and_member(
+            consultation_id,
+            member_id,
+        )
+
+        if member.user_id != request.user.id:
+            return Response(
+                {
+                    "detail": "شما اجازه ویرایش این Submission را ندارید."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        submission = get_object_or_404(
+            SubmitConsultationForm,
+            consultation=consultation,
+            member=member,
+        )
+
+        serializer = SubmitConsultationFormSerializer(
+            submission,
+            data=request.data,
+            partial=True,
+            context={
+                "request": request,
+                "consultation": consultation,
+                "member": member,
+            },
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+
+from rest_framework.generics import ListAPIView
+
+
+class SubmitConsultationFormListAPIView(ListAPIView):
+
+    serializer_class = SubmitConsultationFormListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+
+        consultation_id = self.kwargs["consultation_id"]
+
+        consultation = get_object_or_404(
+            ConsultationForm,
+            id=consultation_id,
+        )
+
+        return (
+            SubmitConsultationForm.objects
+            .filter(
+                consultation=consultation
+            )
+            .select_related(
+                "member",
+                "member__user",
+            )
+            .prefetch_related(
+                "form"
+            )
+            .order_by(
+                "-created_at"
+            )
         )

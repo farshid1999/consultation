@@ -8,6 +8,8 @@
 
 import json
 
+from rest_framework.response import Response
+
 
 class NestedMultipartCreateMixin:
     """
@@ -32,7 +34,11 @@ class NestedMultipartCreateMixin:
         if isinstance(obj, dict):
             for key, value in obj.items():
                 new_path = f"{path}[{key}]" if path else key
-                if isinstance(value, str) and value.startswith("__FILE__") and new_path in files_dict:
+                if (
+                    isinstance(value, str)
+                    and value.startswith("__FILE__")
+                    and new_path in files_dict
+                ):
                     obj[key] = files_dict[new_path]
                 else:
                     self._inject_files(value, files_dict, new_path)
@@ -49,7 +55,28 @@ class NestedMultipartCreateMixin:
         return self._create_response(serializer, headers)
 
     def _create_response(self, serializer, headers):
-        from rest_framework.response import Response
         from rest_framework import status
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        from rest_framework.response import Response
 
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    # --- Update / Partial Update (جدید) ---
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        payload = self._parse_payload(request)
+        serializer = self.get_serializer(instance, data=payload, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs["partial"] = True
+        return self.update(request, *args, **kwargs)

@@ -1,6 +1,6 @@
-from django.db.models.signals import pre_delete
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
+
 from .models import Information, User
 
 
@@ -32,7 +32,6 @@ def replace_avatar(sender, instance, **kwargs):
 
     if old.avatar and old.avatar != instance.avatar:
         old.avatar.delete(save=False)
-
 
 
 @receiver(pre_delete, sender=Information)

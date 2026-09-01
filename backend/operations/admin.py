@@ -1390,24 +1390,6 @@
 #         return obj._children_count
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 """
 admin.py — پنل مدیریت اپ operations
 
@@ -1417,31 +1399,30 @@ admin.py — پنل مدیریت اپ operations
 """
 
 from django.contrib import admin
+from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from django.urls import reverse
 
 from .models import (
-    InviteRule,
-    Line,
-    LineMember,
-    StaffLine,
-    Media,
+    Appointment,
     Assignment,
     AssignmentMedia,
     AssignmentRecipient,
     AssignmentSubmission,
-    SubmissionMedia,
-    Conversation,
-    ConversationParticipant,
-    Message,
     ConsultationForm,
-    Appointment,
-    Feature,
     Content,
     ContentRecipient,
+    Conversation,
+    ConversationParticipant,
+    Feature,
+    InviteRule,
+    Line,
+    LineMember,
+    Media,
+    Message,
+    StaffLine,
+    SubmissionMedia,
 )
-
 
 # =============================================================================
 # Helpers
@@ -1531,6 +1512,7 @@ def status_badge(value):
 # InviteRule
 # =============================================================================
 
+
 @admin.register(InviteRule)
 class InviteRuleAdmin(admin.ModelAdmin):
     list_display = (short_uuid, "created_at", "is_active")
@@ -1542,6 +1524,7 @@ class InviteRuleAdmin(admin.ModelAdmin):
 # =============================================================================
 # Line (ساختار درختی بخش‌ها)
 # =============================================================================
+
 
 class LineMemberInline(admin.TabularInline):
     model = LineMember
@@ -1563,7 +1546,14 @@ class StaffLineInline(admin.TabularInline):
 
 @admin.register(Line)
 class LineAdmin(admin.ModelAdmin):
-    list_display = ("tree_title", "parent", "member_count", "staff_count", "is_active", "created_at")
+    list_display = (
+        "tree_title",
+        "parent",
+        "member_count",
+        "staff_count",
+        "is_active",
+        "created_at",
+    )
     list_display_links = ("tree_title",)
     list_editable = ("is_active",)
     list_filter = ("is_active", "parent")
@@ -1598,6 +1588,7 @@ class LineAdmin(admin.ModelAdmin):
 # =============================================================================
 # LineMember / StaffLine (به‌صورت مستقل هم قابل جست‌وجو باشند)
 # =============================================================================
+
 
 @admin.register(LineMember)
 class LineMemberAdmin(admin.ModelAdmin):
@@ -1636,9 +1627,17 @@ class StaffLineAdmin(admin.ModelAdmin):
 # Media
 # =============================================================================
 
+
 @admin.register(Media)
 class MediaAdmin(admin.ModelAdmin):
-    list_display = (short_uuid, "preview_thumb", "content", "short_text", "created_at", "is_active")
+    list_display = (
+        short_uuid,
+        "preview_thumb",
+        "content",
+        "short_text",
+        "created_at",
+        "is_active",
+    )
     list_filter = ("is_active",)
     search_fields = ("text",)
     autocomplete_fields = ("content",)
@@ -1664,6 +1663,7 @@ class MediaAdmin(admin.ModelAdmin):
 # Assignment (تکلیف/تمرین) با درخت parent/child + رسانه‌ها + گیرندگان
 # =============================================================================
 
+
 class AssignmentMediaInline(admin.TabularInline):
     model = AssignmentMedia
     extra = 0
@@ -1679,7 +1679,14 @@ class AssignmentRecipientInline(admin.TabularInline):
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
-    list_display = ("tree_title", "line", "parent", "recipient_count", "media_count", "created_at")
+    list_display = (
+        "tree_title",
+        "line",
+        "parent",
+        "recipient_count",
+        "media_count",
+        "created_at",
+    )
     list_display_links = ("tree_title",)
     list_filter = ("line",)
     search_fields = ("title", "description", "line__title")
@@ -1737,6 +1744,7 @@ class AssignmentRecipientAdmin(admin.ModelAdmin):
 # AssignmentSubmission / SubmissionMedia
 # =============================================================================
 
+
 class SubmissionMediaInline(admin.TabularInline):
     model = SubmissionMedia
     extra = 0
@@ -1779,6 +1787,7 @@ class SubmissionMediaAdmin(admin.ModelAdmin):
 # Conversation / ConversationParticipant / Message
 # =============================================================================
 
+
 class ConversationParticipantInline(admin.TabularInline):
     model = ConversationParticipant
     extra = 0
@@ -1787,7 +1796,13 @@ class ConversationParticipantInline(admin.TabularInline):
 
 @admin.register(Conversation)
 class ConversationAdmin(admin.ModelAdmin):
-    list_display = (short_uuid, "line", "participant_count", "message_count", "created_at")
+    list_display = (
+        short_uuid,
+        "line",
+        "participant_count",
+        "message_count",
+        "created_at",
+    )
     list_filter = ("line",)
     search_fields = ("line__title",)
     autocomplete_fields = ("line",)
@@ -1851,6 +1866,7 @@ class MessageAdmin(admin.ModelAdmin):
 # ConsultationForm
 # =============================================================================
 
+
 @admin.register(ConsultationForm)
 class ConsultationFormAdmin(admin.ModelAdmin):
     list_display = (short_uuid, "title", "line", "file_link", "created_at")
@@ -1868,6 +1884,7 @@ class ConsultationFormAdmin(admin.ModelAdmin):
 # =============================================================================
 # Appointment
 # =============================================================================
+
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
@@ -1903,9 +1920,17 @@ class AppointmentAdmin(admin.ModelAdmin):
 # Feature (ساختار درختی ویژگی‌ها)
 # =============================================================================
 
+
 @admin.register(Feature)
 class FeatureAdmin(admin.ModelAdmin):
-    list_display = ("tree_title", "line", "parent", "has_media", "created_at", "is_active")
+    list_display = (
+        "tree_title",
+        "line",
+        "parent",
+        "has_media",
+        "created_at",
+        "is_active",
+    )
     list_display_links = ("tree_title",)
     list_editable = ("is_active",)
     list_filter = ("is_active", "line")
@@ -1928,6 +1953,7 @@ class FeatureAdmin(admin.ModelAdmin):
 # Content (ساختار درختی محتوا) + گیرندگان
 # =============================================================================
 
+
 class ContentRecipientInline(admin.TabularInline):
     model = ContentRecipient
     extra = 0
@@ -1936,7 +1962,14 @@ class ContentRecipientInline(admin.TabularInline):
 
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
-    list_display = ("tree_title", "line", "parent", "recipient_count", "created_at", "is_active")
+    list_display = (
+        "tree_title",
+        "line",
+        "parent",
+        "recipient_count",
+        "created_at",
+        "is_active",
+    )
     list_display_links = ("tree_title",)
     list_editable = ("is_active",)
     list_filter = ("is_active", "line")

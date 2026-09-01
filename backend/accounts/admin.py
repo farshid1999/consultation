@@ -8,20 +8,20 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from .models import (
-    OTPCode,
-    Information,
     Address,
     Club,
-    User,
-    Staff,
-    UserRole,
+    Information,
+    OTPCode,
     Role,
+    Staff,
+    User,
+    UserRole,
 )
-
 
 # ============================================================
 # Base Admin
 # ============================================================
+
 
 class BaseAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
@@ -38,13 +38,12 @@ class BaseAdmin(admin.ModelAdmin):
 # Inline Admins
 # ============================================================
 
+
 class UserRoleInline(admin.TabularInline):
     model = UserRole
     extra = 0
 
-    autocomplete_fields = (
-        "role",
-    )
+    autocomplete_fields = ("role",)
 
     fields = (
         "role",
@@ -97,9 +96,7 @@ class InformationUserInline(admin.TabularInline):
     model = User.informations.through
     extra = 0
 
-    autocomplete_fields = (
-        "information",
-    )
+    autocomplete_fields = ("information",)
 
     verbose_name = "Information"
     verbose_name_plural = "Informations"
@@ -109,9 +106,9 @@ class InformationUserInline(admin.TabularInline):
 # OTPCode
 # ============================================================
 
+
 @admin.register(OTPCode)
 class OTPCodeAdmin(BaseAdmin):
-
     list_display = (
         "id",
         "phone_number",
@@ -155,11 +152,7 @@ class OTPCodeAdmin(BaseAdmin):
         ),
         (
             "Status",
-            {
-                "fields": (
-                    "expiration_status",
-                )
-            },
+            {"fields": ("expiration_status",)},
         ),
         (
             "System Information",
@@ -175,12 +168,19 @@ class OTPCodeAdmin(BaseAdmin):
     @admin.display(description="Used")
     def used_status(self, obj):
         if obj.is_used:
-            return mark_safe('<span style="background:#198754;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Used</span>')
-        return mark_safe('<span style="background:#fd7e14;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Unused</span>')
+            return mark_safe(
+                '<span style="background:#198754;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Used</span>'
+            )
+        return mark_safe(
+            '<span style="background:#fd7e14;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Unused</span>'
+        )
+
     @admin.display(description="Expiration")
     def expiration_status(self, obj):
         if obj.is_expired():
-            return mark_safe('<span style="color:#dc3545;font-weight:700;">Expired</span>')
+            return mark_safe(
+                '<span style="color:#dc3545;font-weight:700;">Expired</span>'
+            )
         return mark_safe('<span style="color:#198754;font-weight:700;">Valid</span>')
 
 
@@ -188,9 +188,9 @@ class OTPCodeAdmin(BaseAdmin):
 # Information
 # ============================================================
 
+
 @admin.register(Information)
 class InformationAdmin(BaseAdmin):
-
     list_display = (
         "id",
         "title",
@@ -211,9 +211,7 @@ class InformationAdmin(BaseAdmin):
         "updated_at",
     )
 
-    raw_id_fields = (
-        "parent",
-    )
+    raw_id_fields = ("parent",)
 
     date_hierarchy = "created_at"
 
@@ -271,9 +269,7 @@ class InformationAdmin(BaseAdmin):
     @admin.display(description="File")
     def has_file(self, obj):
         if not obj.file:
-            return format_html(
-                '<span style="color:#6c757d;">—</span>'
-            )
+            return format_html('<span style="color:#6c757d;">—</span>')
 
         return format_html(
             '<a href="{}" target="_blank">Open file</a>',
@@ -285,9 +281,9 @@ class InformationAdmin(BaseAdmin):
 # Address
 # ============================================================
 
+
 @admin.register(Address)
 class AddressAdmin(BaseAdmin):
-
     list_display = (
         "id",
         "country",
@@ -351,9 +347,9 @@ class AddressAdmin(BaseAdmin):
 # Club
 # ============================================================
 
+
 @admin.register(Club)
 class ClubAdmin(BaseAdmin):
-
     list_display = (
         "id",
         "name",
@@ -376,15 +372,11 @@ class ClubAdmin(BaseAdmin):
         "created_at",
     )
 
-    autocomplete_fields = (
-        "address",
-    )
+    autocomplete_fields = ("address",)
 
     date_hierarchy = "created_at"
 
-    list_select_related = (
-        "address",
-    )
+    list_select_related = ("address",)
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
@@ -408,9 +400,9 @@ class ClubAdmin(BaseAdmin):
 # Role
 # ============================================================
 
+
 @admin.register(Role)
 class RoleAdmin(BaseAdmin):
-
     list_display = (
         "id",
         "name",
@@ -431,9 +423,7 @@ class RoleAdmin(BaseAdmin):
 
     date_hierarchy = "created_at"
 
-    inlines = (
-        UserRoleInline,
-    )
+    inlines = (UserRoleInline,)
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
@@ -467,9 +457,9 @@ class RoleAdmin(BaseAdmin):
 # UserRole
 # ============================================================
 
+
 @admin.register(UserRole)
 class UserRoleAdmin(BaseAdmin):
-
     list_display = (
         "id",
         "user",
@@ -506,8 +496,8 @@ class UserRoleAdmin(BaseAdmin):
 # Staff
 # ============================================================
 
-class StaffAdminForm(forms.ModelForm):
 
+class StaffAdminForm(forms.ModelForm):
     class Meta:
         model = Staff
         fields = "__all__"
@@ -520,12 +510,7 @@ class StaffAdminForm(forms.ModelForm):
         if user and hasattr(user, "staff"):
             if not self.instance.pk or self.instance.user_id != user.id:
                 raise ValidationError(
-                    {
-                        "user": (
-                            "This user is already registered "
-                            "as a staff member."
-                        )
-                    }
+                    {"user": ("This user is already registered as a staff member.")}
                 )
 
         return cleaned_data
@@ -533,7 +518,6 @@ class StaffAdminForm(forms.ModelForm):
 
 @admin.register(Staff)
 class StaffAdmin(BaseAdmin):
-
     form = StaffAdminForm
 
     list_display = (
@@ -562,15 +546,11 @@ class StaffAdmin(BaseAdmin):
         "created_at",
     )
 
-    autocomplete_fields = (
-        "user",
-    )
+    autocomplete_fields = ("user",)
 
     date_hierarchy = "hire_date"
 
-    list_select_related = (
-        "user",
-    )
+    list_select_related = ("user",)
 
     fieldsets = (
         (
@@ -608,12 +588,10 @@ class StaffAdmin(BaseAdmin):
 # User Admin
 # ============================================================
 
+
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-
-    ordering = (
-        "-date_joined",
-    )
+    ordering = ("-date_joined",)
 
     list_per_page = 50
 
@@ -760,15 +738,20 @@ class CustomUserAdmin(UserAdmin):
     @admin.display(description="Staff")
     def staff_status(self, obj):
         if hasattr(obj, "staff"):
-            return mark_safe('<span style="background:#198754;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Staff</span>')
+            return mark_safe(
+                '<span style="background:#198754;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Staff</span>'
+            )
         return mark_safe('<span style="color:#6c757d;">User</span>')
 
     @admin.display(description="Status")
     def active_status(self, obj):
         if obj.is_active:
-            return mark_safe('<span style="background:#198754;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Active</span>')
-        return mark_safe('<span style="background:#dc3545;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Inactive</span>')
-
+            return mark_safe(
+                '<span style="background:#198754;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Active</span>'
+            )
+        return mark_safe(
+            '<span style="background:#dc3545;color:white;padding:4px 9px;border-radius:12px;font-size:11px;font-weight:600;">Inactive</span>'
+        )
 
 
 # ============================================================

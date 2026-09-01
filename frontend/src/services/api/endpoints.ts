@@ -38,8 +38,11 @@ export const LINE_STAFF_ENDPOINTS = {
 
 export const CONTENT_ENDPOINTS = {
     create: "operations/contents/create/",
+    edit: (id: number | string) => `operations/contents/${id}/update/`,
     list: "operations/staff/contents/",
     detail: (id: number | string) => `operations/staff/contents/${id}/`,
+    memberList: `operations/member/contents/`,
+    memberDetailContent: (id: number | string) => `operations/member/contents/${id}/`,
 };
 
 export const ASSIGNMENT_ENDPOINTS = {
@@ -75,3 +78,5 @@ export const ASSIGNMENT_ENDPOINTS = {
   // Admin submissions
   adminSubmissionList: "operations/assignments/submissions/",
 };
+
+
