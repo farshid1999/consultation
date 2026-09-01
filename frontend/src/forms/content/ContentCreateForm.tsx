@@ -13,7 +13,7 @@ import type { ApiError, ContentCreateInput } from "@/types";
 const contentSchema = z.object({
   title: z.string().min(1, "عنوان الزامی است"),
   text: z.string().optional(),
-  member_ids: z.array(z.string()).min(1, "حداقل یک عضو انتخاب کنید"),
+  member_ids: z.array(z.string()).min(1, "حداقل یک عضو را انتخاب کنید"),
   media_files: z.array(z.any()).optional(),
   audio_clips: z.array(z.object({ clip: z.any().nullable() })).optional(),
 });
