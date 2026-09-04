@@ -20,6 +20,10 @@ export const API_BASE_URL =
  */
 const REFRESH_ENDPOINT = "/accounts/auth/refresh/";
 
+export const MEDIA_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/"
+).replace(/\/api\/?$/, "");
+
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {

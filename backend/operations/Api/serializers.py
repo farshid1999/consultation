@@ -306,6 +306,10 @@ class AssignmentRecipientSerializer(serializers.ModelSerializer):
         )
 
 
+class MediaItemInputSerializer(serializers.Serializer):
+    media = MediaSerializer()
+
+
 class AssignmentCreateSerializer(serializers.ModelSerializer):
     member_ids = serializers.PrimaryKeyRelatedField(
         source="members",
@@ -314,9 +318,10 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         write_only=True,
     )
 
-    media_items = AssignmentMediaSerializer(
+    media_items = MediaItemInputSerializer(
         many=True,
         required=False,
+        write_only=True,
     )
 
     class Meta:
@@ -333,19 +338,17 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
 
     def validate(self, attrs):
-        line = attrs["lines"]
+        line = attrs["line"]
         members = attrs.get("members", [])
 
         request = self.context["request"]
         user = request.user
 
-        # Staff فعلی
         staff = getattr(user, "staff", None)
 
         if staff is None:
             raise serializers.ValidationError({"lines": "شما Staff نیستید."})
 
-        # آیا Staff به این Line دسترسی دارد؟
         has_access = StaffLine.objects.filter(
             staff=staff,
             line=line,
@@ -356,7 +359,6 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
                 {"lines": "شما به این Line دسترسی ندارید."}
             )
 
-        # آیا همه Memberها متعلق به همین Line هستند؟
         invalid_members = [member.id for member in members if member.line_id != line.id]
 
         if invalid_members:
@@ -368,37 +370,20 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        media_items_data = validated_data.pop(
-            "media_items",
-            [],
-        )
-
-        members = validated_data.pop(
-            "members",
-            [],
-        )
+        media_items_data = validated_data.pop("media_items", [])
+        members = validated_data.pop("members", [])
 
         assignment = Assignment.objects.create(**validated_data)
 
-        for item_data in media_items_data:
-            media_data = item_data.pop("media")
-
+        for item in media_items_data:
+            media_data = item.get("media", {})
             media = Media.objects.create(**media_data)
+            AssignmentMedia.objects.create(assignment=assignment, media=media)
 
-            AssignmentMedia.objects.create(
-                assignment=assignment,
-                media=media,
-            )
-
-        AssignmentRecipient.objects.bulk_create(
-            [
-                AssignmentRecipient(
-                    assignment=assignment,
-                    member=member,
-                )
-                for member in members
-            ]
-        )
+        AssignmentRecipient.objects.bulk_create([
+            AssignmentRecipient(assignment=assignment, member=member)
+            for member in members
+        ])
 
         return assignment
 
@@ -629,30 +614,53 @@ class AssignmentSubmissionCreateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        media_items_data = validated_data.pop(
-            "media_items",
-            [],
-        )
-
+        media_items_data = validated_data.pop("media_items", [])
+        
+        # ۱. ساخت Submission
         submission = AssignmentSubmission.objects.create(**validated_data)
 
+        # ۲. ساخت Mediaها و ارتباط آن‌ها با Submission
         submission_media_objects = []
-
         for media_data in media_items_data:
             media = Media.objects.create(**media_data)
-
             submission_media_objects.append(
                 SubmissionMedia(
                     submission=submission,
                     media=media,
                 )
             )
-
         SubmissionMedia.objects.bulk_create(submission_media_objects)
 
+        # ۳. ساخت خودکار Conversation
+        assignment = submission.assignment_recipient.assignment
+        member = submission.assignment_recipient.member
+        
+        # ساخت Conversation با عنوان مشخص (برای ردیابی)
+        conversation = Conversation.objects.create(
+            line=assignment.line,
+        )       
+
+        # ۴. اضافه کردن اعضا به Conversation
+        
+        # الف) اضافه کردن عضو (Member)
+        ConversationParticipant.objects.create(
+            conversation=conversation,
+            user=member.user
+        )
+
+        # ب) اضافه کردن کارمندان متصل به این Line
+        staff_memberships = assignment.line.staff_memberships.select_related("staff__user").all()
+        for staff_line in staff_memberships:
+            ConversationParticipant.objects.get_or_create(
+                conversation=conversation,
+                user=staff_line.staff.user,
+        )
+
+        # ۵. اتصال Conversation به Submission
+        submission.conversation = conversation
+        submission.save()
+
         return submission
-
-
 class AssignmentSubmissionUpdateSerializer(serializers.ModelSerializer):
     media_items = MediaSerializer(
         many=True,
@@ -765,6 +773,7 @@ class AssignmentSubmissionDetailSerializer(serializers.ModelSerializer):
             "assignment",
             "member",
             "media_items",
+            "conversation",
             "created_at",
             "updated_at",
         )
@@ -790,7 +799,27 @@ class AllAssignmentSubmissionListSerializer(serializers.ModelSerializer):
             "updated_at",
         )
 
+class AdminAssignmentDetailSerializer(serializers.ModelSerializer):
+    line = serializers.StringRelatedField()
+    
+    media_items = AssignmentMediaSerializer(many=True, read_only=True)
+    recipients = AssignmentRecipientSerializer(many=True, read_only=True)
+    children = AssignmentListSerializer(many=True, read_only=True)
 
+    class Meta:
+        model = Assignment
+        fields = (
+            "id",
+            "line",
+            "title",
+            "description",
+            "parent",
+            "media_items",
+            "recipients",
+            "children",
+            "created_at",
+            "updated_at",
+        )
 class MemberConversationCreateSerializer(serializers.ModelSerializer):
     line = serializers.PrimaryKeyRelatedField(
         queryset=Line.objects.all(),
@@ -987,13 +1016,13 @@ class ConversationJoinSerializer(serializers.Serializer):
 
 
 class MessageCreateSerializer(serializers.ModelSerializer):
-    media = MediaSerializer(
-        required=False,
-    )
+    # ✅ فیلدهای مستقیم (فرانت‌اند این‌ها را می‌فرستد)
+    text = serializers.CharField(required=False, allow_blank=True, default="")
+    file = serializers.FileField(required=False, allow_null=True, default=None)
 
     class Meta:
         model = Message
-        fields = ("media",)
+        fields = ("text", "file")
 
     def validate(self, attrs):
         request = self.context["request"]
@@ -1009,27 +1038,37 @@ class MessageCreateSerializer(serializers.ModelSerializer):
                 "You are not a participant of this conversation."
             )
 
-        attrs["_participant"] = participant
+        # ✅ حداقل یکی از متن یا فایل باید وجود داشته باشد
+        text = attrs.get("text", "").strip()
+        file = attrs.get("file")
 
+        if not text and not file:
+            raise serializers.ValidationError(
+                "حداقل یکی از فیلدهای text یا file الزامی است."
+            )
+
+        attrs["_participant"] = participant
         return attrs
 
     @transaction.atomic
     def create(self, validated_data):
         participant = validated_data.pop("_participant")
-        media_data = validated_data.pop("media", None)
+        text = validated_data.pop("text", "").strip()
+        file = validated_data.pop("file", None)
 
+        # ✅ ساخت آبجکت Media از text و file
         media = None
-
-        if media_data:
-            media = Media.objects.create(**media_data)
+        if text or file:
+            media = Media.objects.create(
+                text=text if text else "",
+                file=file
+            )
 
         return Message.objects.create(
             conversation=participant.conversation,
             sender=participant,
             media=media,
         )
-
-
 class ContentCreateSerializer(serializers.ModelSerializer):
     member_ids = serializers.PrimaryKeyRelatedField(
         source="members",

@@ -76,135 +76,67 @@ assignment_urls = [
         AllAssignmentListAPIView.as_view(),
         name="admin-assignment-list",
     ),
+    path(
+        "admin/<str:pk>/",
+        AdminAssignmentDetailAPIView.as_view(),
+        name="admin-assignment-detail",
+    ),
 ]
 
 # =========================
 # Staff Assignment URLs
 # =========================
 
+# operations/Api/urls.py (یا هر جایی که urls.py شماست)
+
+# =========================
+# Staff Assignment URLs
+# =========================
 staff_assignment_urls = [
-    path(
-        "lines/<str:line_id>/",
-        StaffAssignmentListAPIView.as_view(),
-        name="staff-assignment-list",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/",
-        StaffAssignmentDetailAPIView.as_view(),
-        name="staff-assignment-detail",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/submissions/",
-        StaffAssignmentSubmissionListAPIView.as_view(),
-        name="staff-assignment-submission-list",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/submissions/<int:submission_id>/",
-        StaffAssignmentSubmissionDetailAPIView.as_view(),
-        name="staff-assignment-submission-detail",
-    ),
+    path("lines/<str:line_id>/", StaffAssignmentListAPIView.as_view(), name="staff-assignment-list"),
+    path("lines/<str:line_id>/<str:assignment_id>/", StaffAssignmentDetailAPIView.as_view(), name="staff-assignment-detail"), # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/", StaffAssignmentSubmissionListAPIView.as_view(), name="staff-assignment-submission-list"),
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/<str:submission_id>/", StaffAssignmentSubmissionDetailAPIView.as_view(), name="staff-assignment-submission-detail"), # ✅ تغییر به str
 ]
 
 # =========================
 # Member Assignment URLs
 # =========================
-
 member_assignment_urls = [
-    path(
-        "lines/<str:line_id>/",
-        MemberAssignmentListAPIView.as_view(),
-        name="member-assignment-list",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/",
-        MemberAssignmentDetailAPIView.as_view(),
-        name="member-assignment-detail",
-    ),
-    path(
-        "<int:assignment_id>/submit/",
-        AssignmentSubmissionCreateAPIView.as_view(),
-        name="assignment-submission-create",
-    ),
-    path(
-        "<int:assignment_id>/submission/",
-        AssignmentSubmissionUpdateAPIView.as_view(),
-        name="assignment-submission-update",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/submissions/",
-        MemberAssignmentSubmissionListAPIView.as_view(),
-        name="member-assignment-submission-list",
-    ),
-    path(
-        "lines/<str:line_id>/<int:assignment_id>/submissions/<int:submission_id>/",
-        MemberAssignmentSubmissionDetailAPIView.as_view(),
-        name="member-assignment-submission-detail",
-    ),
+    path("lines/<str:line_id>/", MemberAssignmentListAPIView.as_view(), name="member-assignment-list"),
+    path("lines/<str:line_id>/<str:assignment_id>/", MemberAssignmentDetailAPIView.as_view(), name="member-assignment-detail"), # ✅ تغییر به str
+    path("<str:assignment_id>/submit/", AssignmentSubmissionCreateAPIView.as_view(), name="assignment-submission-create"), # ✅ تغییر به str
+    path("<str:assignment_id>/submission/", AssignmentSubmissionUpdateAPIView.as_view(), name="assignment-submission-update"), # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/", MemberAssignmentSubmissionListAPIView.as_view(), name="member-assignment-submission-list"), # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/<str:submission_id>/", MemberAssignmentSubmissionDetailAPIView.as_view(), name="member-assignment-submission-detail"), # ✅ تغییر به str
 ]
-
 # =========================
 # Admin Assignment Submission URLs
 # =========================
-
 admin_assignment_submission_urls = [
-    path(
-        "",
-        AllAssignmentSubmissionListAPIView.as_view(),
-        name="admin-assignment-submission-list",
-    ),
+    path("", AllAssignmentSubmissionListAPIView.as_view(), name="admin-assignment-submission-list"),
 ]
 
 # =========================
-# Conversation URLs
+# Conversation & Message URLs
 # =========================
-
 conversation_urls = [
-    # Member creates / gets conversation with lines
-    path(
-        "",
-        MemberConversationCreateAPIView.as_view(),
-        name="member-conversation-create",
-    ),
+    path("", MemberConversationCreateAPIView.as_view(), name="member-conversation-create"),
+    
+    path("<str:conversation_id>/messages/", MessageCreateAPIView.as_view(), name="message-create"),
 ]
-
-# =========================
-# Staff Conversation URLs
-# =========================
 
 staff_conversation_urls = [
-    path(
-        "",
-        StaffConversationListAPIView.as_view(),
-        name="staff-conversation-list",
-    ),
-    path(
-        "create/",
-        StaffConversationCreateAPIView.as_view(),
-        name="staff-conversation-create",
-    ),
-    path(
-        "<int:pk>/",
-        StaffConversationDetailAPIView.as_view(),
-        name="staff-conversation-detail",
-    ),
-    path(
-        "<int:pk>/join/",
-        ConversationJoinAPIView.as_view(),
-        name="staff-conversation-join",
-    ),
+    path("", StaffConversationListAPIView.as_view(), name="staff-conversation-list"),
+    path("create/", StaffConversationCreateAPIView.as_view(), name="staff-conversation-create"),
+    path("<str:pk>/", StaffConversationDetailAPIView.as_view(), name="staff-conversation-detail"),
+    path("<str:pk>/join/", ConversationJoinAPIView.as_view(), name="staff-conversation-join"),
 ]
-
-# =========================
-# Member Conversation URLs
-# =========================
 
 member_conversation_urls = [
-    path(
-        "<int:pk>/",
-        MemberConversationDetailAPIView.as_view(),
-        name="member-conversation-detail",
-    ),
+    path("<str:pk>/", MemberConversationDetailAPIView.as_view(), name="member-conversation-detail"),
 ]
+
 
 # =========================
 # Content URLs
