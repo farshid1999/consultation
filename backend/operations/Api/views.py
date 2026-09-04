@@ -686,8 +686,13 @@ class MemberAssignmentDetailAPIView(generics.RetrieveAPIView):
             .distinct()
         )
 
-
-class AssignmentSubmissionCreateAPIView(generics.CreateAPIView):
+import json
+import re
+class AssignmentSubmissionCreateAPIView(NestedMultipartCreateMixin, generics.CreateAPIView):
+    """
+    ساخت سابمیشن جدید توسط عضو.
+    با استفاده از Mixin، فایل‌های تودرتو به درستی هندل می‌شوند.
+    """
     serializer_class = AssignmentSubmissionCreateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -704,22 +709,17 @@ class AssignmentSubmissionCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         recipient = self.get_assignment_recipient()
-
-        serializer.save(
-            assignment_recipient=recipient,
-        )
+        serializer.save(assignment_recipient=recipient)
 
 
-class AssignmentSubmissionUpdateAPIView(generics.UpdateAPIView):
+
+class AssignmentSubmissionUpdateAPIView(NestedMultipartCreateMixin, generics.UpdateAPIView):
+    """
+    ویرایش سابمیشن موجود توسط عضو.
+    """
     serializer_class = AssignmentSubmissionUpdateSerializer
     permission_classes = [IsAuthenticated]
-
-    http_method_names = ["put", "patch"]
-
-
     lookup_url_kwarg = "assignment_id"
-    
-    
     lookup_field = "assignment_recipient__assignment_id"
 
     def get_queryset(self):
@@ -1360,7 +1360,7 @@ class ConversationJoinAPIView(generics.GenericAPIView):
         )
 
 
-class MessageCreateAPIView(generics.GenericAPIView):
+class MessageCreateAPIView(NestedMultipartCreateMixin, generics.GenericAPIView):
     serializer_class = MessageCreateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -1372,18 +1372,16 @@ class MessageCreateAPIView(generics.GenericAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-
         context["conversation"] = self.get_conversation()
-
         return context
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(
-            data=request.data,
-        )
-
+        # ✅ استفاده از Mixin برای هندل کردن multipart/form-data
+        payload = self._parse_payload(request)
+        
+        serializer = self.get_serializer(data=payload)
         serializer.is_valid(raise_exception=True)
-
+        
         message = serializer.save()
 
         return Response(
@@ -1393,8 +1391,6 @@ class MessageCreateAPIView(generics.GenericAPIView):
             ).data,
             status=status.HTTP_201_CREATED,
         )
-
-
 class ContentCreateAPIView(NestedMultipartCreateMixin, generics.CreateAPIView):
     queryset = Content.objects.all()
     serializer_class = ContentCreateSerializer

@@ -73,7 +73,7 @@ export const assignmentService = {
 
   staffDetail: async (
     lineId: string | number,
-    assignmentId: number,
+    assignmentId: string | number, 
   ): Promise<AssignmentDetail> => {
     const res = await apiClient.get<AssignmentDetail>(
       ASSIGNMENT_ENDPOINTS.staffDetail(lineId, assignmentId),
@@ -83,7 +83,7 @@ export const assignmentService = {
 
   staffSubmissionList: async (
     lineId: string | number,
-    assignmentId: number,
+    assignmentId: string | number,
     params?: ListQueryParams,
   ): Promise<Paginated<AssignmentSubmissionListItem>> => {
     const res = await apiClient.get<Paginated<AssignmentSubmissionListItem>>(
@@ -95,8 +95,8 @@ export const assignmentService = {
 
   staffSubmissionDetail: async (
     lineId: string | number,
-    assignmentId: number,
-    submissionId: number,
+    assignmentId: string | number, 
+    submissionId: string | number, 
   ): Promise<AssignmentSubmissionDetail> => {
     const res = await apiClient.get<AssignmentSubmissionDetail>(
       ASSIGNMENT_ENDPOINTS.staffSubmissionDetail(

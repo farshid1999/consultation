@@ -18,14 +18,20 @@ const KEYS = {
     ["assignments", "admin", "list", params] as const,
   staffList: (lineId: string | number, params?: ListQueryParams) =>
     ["assignments", "staff", "list", lineId, params] as const,
-  staffDetail: (lineId: string | number, assignmentId: number) =>
-    ["assignments", "staff", "detail", lineId, assignmentId] as const,
-  staffSubmissionList: (lineId: string | number, assignmentId: number) =>
-    ["assignments", "staff", "submissions", lineId, assignmentId] as const,
+  staffDetail: (
+    lineId: string | number,
+    assignmentId: string | number, // ✅ تغییر به string | number
+  ) => ["assignments", "staff", "detail", lineId, assignmentId] as const,
+
+  staffSubmissionList: (
+    lineId: string | number,
+    assignmentId: string | number, // ✅ تغییر به string | number
+  ) => ["assignments", "staff", "submissions", lineId, assignmentId] as const,
+
   staffSubmissionDetail: (
     lineId: string | number,
-    assignmentId: number,
-    submissionId: number,
+    assignmentId: string | number, // ✅ تغییر به string | number
+    submissionId: string | number, // ✅ تغییر به string | number
   ) =>
     [
       "assignments",
@@ -115,7 +121,7 @@ export const useStaffAssignments = (
 
 export const useStaffAssignmentDetail = (
   lineId: string | number,
-  assignmentId: number,
+  assignmentId: string | number, // ✅ تغییر به string | number
 ) =>
   useQuery<AssignmentDetail>({
     queryKey: KEYS.staffDetail(lineId, assignmentId),
@@ -125,7 +131,7 @@ export const useStaffAssignmentDetail = (
 
 export const useStaffSubmissions = (
   lineId: string | number,
-  assignmentId: number,
+  assignmentId: string | number, // ✅ تغییر به string | number
   params?: ListQueryParams,
 ) =>
   useQuery<Paginated<AssignmentSubmissionListItem>>({
@@ -138,8 +144,8 @@ export const useStaffSubmissions = (
 
 export const useStaffSubmissionDetail = (
   lineId: string | number,
-  assignmentId: number,
-  submissionId: number,
+  assignmentId: string | number, // ✅ تغییر به string | number
+  submissionId: string | number, // ✅ تغییر به string | number
 ) =>
   useQuery<AssignmentSubmissionDetail>({
     queryKey: KEYS.staffSubmissionDetail(lineId, assignmentId, submissionId),

@@ -96,6 +96,7 @@ export interface AssignmentSubmissionDetail {
   assignment: number;
   member: string;
   media_items: SubmissionMedia[];
+  conversation: string | number | null;
   created_at: string;
   updated_at: string;
 }

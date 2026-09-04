@@ -55,18 +55,20 @@ export const ASSIGNMENT_ENDPOINTS = {
 
   // Staff
   staffList: (lineId: string | number) =>
-    `operations/assignments/staff/lines/${lineId}/`,
-  staffDetail: (lineId: string | number, assignmentId: number) =>
-    `operations/assignments/staff/lines/${lineId}/${assignmentId}/`,
-  staffSubmissionList: (lineId: string | number, assignmentId: number) =>
-    `operations/assignments/staff/lines/${lineId}/${assignmentId}/submissions/`,
+    `operations/staff/assignments/lines/${lineId}/`, // ✅ اصلاح شد: staff قبل از assignments
+
+  staffDetail: (lineId: string | number, assignmentId: string | number) =>
+    `operations/staff/assignments/lines/${lineId}/${assignmentId}/`, // ✅ اصلاح شد
+
+  staffSubmissionList: (lineId: string | number, assignmentId: string | number) =>
+    `operations/staff/assignments/lines/${lineId}/${assignmentId}/submissions/`, // ✅ اصلاح شد
+
   staffSubmissionDetail: (
     lineId: string | number,
-    assignmentId: number,
-    submissionId: number,
+    assignmentId: string | number,
+    submissionId: string | number,
   ) =>
-    `operations/assignments/staff/lines/${lineId}/${assignmentId}/submissions/${submissionId}/`,
-
+    `operations/staff/assignments/lines/${lineId}/${assignmentId}/submissions/${submissionId}/`, // ✅ اصلاح شد
   // Member
   memberList: (lineId: string | number) =>
     `operations/member/assignments/lines/${lineId}/`,
@@ -99,4 +101,25 @@ export const ASSIGNMENT_ENDPOINTS = {
 
   // Admin submissions
   adminSubmissionList: "operations/assignments/submissions/",
+};
+
+export const CONVERSATION_ENDPOINTS = {
+  // ── Member ──
+  memberCreate: "operations/conversations/",
+  memberDetail: (id: string | number) =>
+    `operations/member/conversations/${id}/`,
+
+  // ── Staff ──
+  staffList: "operations/staff/conversations/",
+  staffCreate: "operations/staff/conversations/create/",
+  staffDetail: (id: string | number) => `operations/staff/conversations/${id}/`,
+  staffJoin: (id: string | number) =>
+    `operations/staff/conversations/${id}/join/`,
+
+  // ── Messages ──
+  // نکته: هم برای GET (لیست) و هم برای POST (ایجاد) از همین مسیر استفاده می‌شود
+  messageList: (conversationId: string | number) =>
+    `operations/conversations/${conversationId}/messages/`,
+  messageCreate: (conversationId: string | number) =>
+    `operations/conversations/${conversationId}/messages/`,
 };

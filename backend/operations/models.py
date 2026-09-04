@@ -178,16 +178,25 @@ class AssignmentRecipient(BaseModel):
         return f"{self.assignment} -> {self.member}"
 
 
+# در operations/models.py
+
 class AssignmentSubmission(BaseModel):
     assignment_recipient = models.OneToOneField(
         AssignmentRecipient,
         on_delete=models.CASCADE,
         related_name="submission",
     )
+    conversation = models.OneToOneField(
+        "Conversation",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="submission",
+        help_text="گفتگوی اختصاصی برای این سابمیشن"
+    )
 
     def __str__(self):
         return f"Submission #{self.pk}"
-
 
 class SubmissionMedia(BaseModel):
     submission = models.ForeignKey(
@@ -441,3 +450,5 @@ class ContentRecipient(BaseModel):
 
     def __str__(self):
         return f"{self.content} -> {self.member}"
+    
+

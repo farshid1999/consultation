@@ -113,67 +113,30 @@ member_assignment_urls = [
 # =========================
 # Admin Assignment Submission URLs
 # =========================
-
 admin_assignment_submission_urls = [
-    path(
-        "",
-        AllAssignmentSubmissionListAPIView.as_view(),
-        name="admin-assignment-submission-list",
-    ),
+    path("", AllAssignmentSubmissionListAPIView.as_view(), name="admin-assignment-submission-list"),
 ]
 
 # =========================
-# Conversation URLs
+# Conversation & Message URLs
 # =========================
-
 conversation_urls = [
-    # Member creates / gets conversation with lines
-    path(
-        "",
-        MemberConversationCreateAPIView.as_view(),
-        name="member-conversation-create",
-    ),
+    path("", MemberConversationCreateAPIView.as_view(), name="member-conversation-create"),
+    
+    path("<str:conversation_id>/messages/", MessageCreateAPIView.as_view(), name="message-create"),
 ]
-
-# =========================
-# Staff Conversation URLs
-# =========================
 
 staff_conversation_urls = [
-    path(
-        "",
-        StaffConversationListAPIView.as_view(),
-        name="staff-conversation-list",
-    ),
-    path(
-        "create/",
-        StaffConversationCreateAPIView.as_view(),
-        name="staff-conversation-create",
-    ),
-    path(
-        "<int:pk>/",
-        StaffConversationDetailAPIView.as_view(),
-        name="staff-conversation-detail",
-    ),
-    path(
-        "<int:pk>/join/",
-        ConversationJoinAPIView.as_view(),
-        name="staff-conversation-join",
-    ),
-    
+    path("", StaffConversationListAPIView.as_view(), name="staff-conversation-list"),
+    path("create/", StaffConversationCreateAPIView.as_view(), name="staff-conversation-create"),
+    path("<str:pk>/", StaffConversationDetailAPIView.as_view(), name="staff-conversation-detail"),
+    path("<str:pk>/join/", ConversationJoinAPIView.as_view(), name="staff-conversation-join"),
 ]
-
-# =========================
-# Member Conversation URLs
-# =========================
 
 member_conversation_urls = [
-    path(
-        "<int:pk>/",
-        MemberConversationDetailAPIView.as_view(),
-        name="member-conversation-detail",
-    ),
+    path("<str:pk>/", MemberConversationDetailAPIView.as_view(), name="member-conversation-detail"),
 ]
+
 
 # =========================
 # Content URLs
