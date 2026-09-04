@@ -39,6 +39,7 @@ user_urls = [
     path("<int:pk>/", UserDetailAPIView.as_view(), name="user-detail"),
     path("<int:pk>/update/", UserUpdateAPIView.as_view(), name="user-update"),
     path("<int:pk>/delete/", UserDeleteAPIView.as_view(), name="user-delete"),
+    path("me/", CurrentUserAPIView.as_view(), name="current-user"),
 ]
 
 

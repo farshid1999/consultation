@@ -272,23 +272,27 @@ admin_content_urls = [
 ]
 
 consultation_form_urls = [
+    path("staff/lines/<str:line_id>/create-update/", ConsultationFormAPIView.as_view(), name="consultation-form", ),
+    path("staff/<str:consultation_id>/submissions/", SubmitConsultationFormListAPIView.as_view(),
+         name="consultation-form-submissions", ),
+
+    path("staff/consultation-forms/<str:consultation_id>/members/<str:member_id>/submit/",
+         StaffSubmitConsultationFormDetailView.as_view(), name="staff-submit-consultation-form-detail", ),
+
+
     path("<str:line_id>/", ConsultationFormDetailView.as_view(), ),
-    path("<str:consultation_id>/submit/", SubmitConsultationFormDetailView.as_view(), ),
-    path(
-        "lines/<str:line_id>/create-update/",
-        ConsultationFormAPIView.as_view(),
-        name="consultation-form",
-    ),
+
+
+
+    path("member/<str:consultation_id>/members/<str:member_id>/submit/",
+         MemberSubmitConsultationFormDetailView.as_view(), name="member-submit-consultation-form-detail", ),
+
     path(
         "<str:consultation_id>/members/<str:member_id>/submit/",
         SubmitConsultationFormAPIView.as_view(),
         name="member-submit-consultation-form",
     ),
-    path(
-        "consultation-forms/<str:consultation_id>/submissions/",
-        SubmitConsultationFormListAPIView.as_view(),
-        name="consultation-form-submissions",
-    ),
+
 ]
 
 # =========================
@@ -357,5 +361,8 @@ urlpatterns = [
         include(admin_content_urls),
     ),
 
-    path("cosultation/", include(consultation_form_urls))
+    path(
+        "cosultation/",
+        include(consultation_form_urls),
+    ),
 ]

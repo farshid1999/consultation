@@ -132,6 +132,16 @@ export default function LineTable() {
                                         >
                                             <FiFileText size={18}/>
                                         </Link>
+
+                                        <Link
+                                            href={`/staff/line/${line.id}/consultation`} // <--- ارسال آیدی به عنوان کوئری پارامتر
+                                            aria-label="مدیریت فرم‌های مشاوره"
+                                            className="icon-btn-brand flex h-9 w-9 items-center justify-center rounded-full hover:bg-purple-500/10 hover:text-purple-400 transition-colors"
+                                            title="فرم‌ها و قراردادها"
+                                        >
+                                            <FiFileText size={18}/>
+                                        </Link>
+
                                     </div>
                                 </td>
                             </tr>

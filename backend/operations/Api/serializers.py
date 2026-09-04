@@ -1,3 +1,5 @@
+import json
+
 from django.db import transaction
 from rest_framework import serializers
 
@@ -1353,13 +1355,30 @@ class ConsultationFormSerializer(serializers.ModelSerializer):
 
 
 class SubmitConsultationFormSerializer(serializers.ModelSerializer):
-    forms = FormSerializer(source="form", many=True,read_only=True)
+    forms = FormSerializer(source="form", many=True, read_only=True)
+
     class Meta:
         model = SubmitConsultationForm
-        fields = ["id", "consultation", "title", "description", "forms", ]
+        # فیلدهای consultation و member را از fields حذف کنید یا read_only بگذارید
+        # اگر write_only هستند، باید در create هندل شوند
+        fields = ["id", "title", "description", "forms"]
 
+    def create(self, validated_data):
+        # گرفتن مقادیر از context که توسط ویو ست شده‌اند
+        consultation = self.context.get('consultation')
+        member = self.context.get('member')
 
+        if not consultation or not member:
+            raise serializers.ValidationError("Context information is missing.")
 
+        # ساخت آبجکت با مقادیر صحیح
+        return SubmitConsultationForm.objects.create(
+            consultation=consultation,
+            member=member,
+            **validated_data
+        )
+
+# operations/Api/serializers.py
 
 class ConsultationFormCreateUpdateSerializer(serializers.ModelSerializer):
     files = serializers.ListField(
@@ -1368,7 +1387,7 @@ class ConsultationFormCreateUpdateSerializer(serializers.ModelSerializer):
         required=False,
     )
     existing_file_ids = serializers.ListField(
-        child=serializers.UUIDField(),
+        child=serializers.UUIDField(),  # یا CharField بسته به نوع ID شما
         write_only=True,
         required=False,
     )
@@ -1377,40 +1396,51 @@ class ConsultationFormCreateUpdateSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True,
     )
+
     class Meta:
         model = ConsultationForm
-        fields = [ "id", "line", "title", "description", "forms", "files", "existing_file_ids", ]
-        read_only_fields = (["id", "forms"])
+        fields = ["id", "title", "description", "forms", "files", "existing_file_ids"]
+        # خط line را از fields حذف کردیم چون دستی هندل می‌شود
 
-        @transaction.atomic
-        def create(self, validated_data):
-            files = validated_data.pop("files", [])
-            line = validated_data["line"]
-            # OneToOne
-            if ConsultationForm.objects.filter(line=line).exists():
-                raise serializers.ValidationError({ "line": "برای این Line قبلاً ConsultationForm ساخته شده است." })
-            instance = ConsultationForm.objects.create( **validated_data )
-            if files:
-                Form.objects.bulk_create(
-                    [ Form( consultation=instance, file=file, ) for file in files ]
-                )
-            return instance
+    @transaction.atomic
+    def create(self, validated_data):
+        files = validated_data.pop("files", [])
+        # line از طریق serializer.save(line=line_obj) در validated_data قرار می‌گیرد
+        line = validated_data.pop("line", None)
 
-        @transaction.atomic
-        def update(self, instance, validated_data):
-            files = validated_data.pop("files", None)
-            kept_file_ids = validated_data.pop( "existing_file_ids", None, )
+        instance = ConsultationForm.objects.create(
+            line=line,
+            **validated_data
+        )
 
-            validated_data.pop("line", None)
-            for attr, value in validated_data.items():
-                setattr(instance, attr, value)
-                instance.save()
-            if kept_file_ids is not None:
-                instance.form.exclude( id__in=kept_file_ids ).delete()
-            if files:
-                Form.objects.bulk_create([ Form( consultation=instance, file=file, ) for file in files ])
-            return instance
+        if files:
+            Form.objects.bulk_create(
+                [Form(consultation=instance, file=file) for file in files]
+            )
+        return instance
 
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        files = validated_data.pop("files", None)
+        kept_file_ids = validated_data.pop("existing_file_ids", None)
+
+        # آپدیت فیلدهای ساده
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # مدیریت فایل‌های قدیمی
+        if kept_file_ids is not None:
+            # حذف فایل‌هایی که IDشان در لیست نگهداری نیست
+            instance.form.exclude(id__in=kept_file_ids).delete()
+
+        # افزودن فایل‌های جدید
+        if files:
+            Form.objects.bulk_create([
+                Form(consultation=instance, file=file) for file in files
+            ])
+
+        return instance
 
 
 class SubmitConsultationFormCreateUpdateSerializer(serializers.ModelSerializer):
@@ -1426,11 +1456,7 @@ class SubmitConsultationFormCreateUpdateSerializer(serializers.ModelSerializer):
         required=False,
     )
 
-    existing_file_ids = serializers.ListField(
-        child=serializers.UUIDField(),
-        write_only=True,
-        required=False,
-    )
+    existing_file_ids = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = SubmitConsultationForm
@@ -1452,22 +1478,31 @@ class SubmitConsultationFormCreateUpdateSerializer(serializers.ModelSerializer):
             "forms",
         ]
 
+    def validate_existing_file_ids(self, value):
+        try:
+            ids = json.loads(value)
+        except (TypeError, ValueError):
+            raise serializers.ValidationError("فرمت existing_file_ids نامعتبر است.")
+        if not isinstance(ids, list):
+            raise serializers.ValidationError("existing_file_ids باید یک لیست باشد.")
+        return ids
+
     @transaction.atomic
     def create(self, validated_data):
         files = validated_data.pop("files", [])
+        # existing_file_ids در create معنایی ندارد (چیزی برای نگه داشتن
+        # وجود ندارد چون submission تازه ساخته می‌شود)
+        validated_data.pop("existing_file_ids", None)
 
         consultation = self.context["consultation"]
         member = self.context["member"]
 
-        # امنیت اضافه
         if SubmitConsultationForm.objects.filter(
                 consultation=consultation,
                 member=member,
         ).exists():
             raise serializers.ValidationError(
-                {
-                    "detail": "شما قبلاً برای این فرم Submission ثبت کرده‌اید."
-                }
+                {"detail": "شما قبلاً برای این فرم Submission ثبت کرده‌اید."}
             )
 
         instance = SubmitConsultationForm.objects.create(
@@ -1477,72 +1512,38 @@ class SubmitConsultationFormCreateUpdateSerializer(serializers.ModelSerializer):
         )
 
         if files:
-            Form.objects.bulk_create(
-                [
-                    Form(
-                        submission=instance,
-                        file=file,
-                    )
-                    for file in files
-                ]
-            )
+            Form.objects.bulk_create([
+                Form(submission=instance, file=file)
+                for file in files
+            ])
 
         return instance
 
     @transaction.atomic
     def update(self, instance, validated_data):
         files = validated_data.pop("files", None)
-
-        kept_file_ids = validated_data.pop(
-            "existing_file_ids",
-            None,
-        )
-
-        # --------------------------------
-        # consultation و member نباید تغییر کنند
-        # --------------------------------
+        kept_file_ids = validated_data.pop("existing_file_ids", None)
 
         validated_data.pop("consultation", None)
         validated_data.pop("member", None)
 
-        # --------------------------------
-        # فیلدهای اصلی
-        # --------------------------------
-
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
         instance.save()
 
-        # --------------------------------
-        # فایل‌های قبلی
-        # --------------------------------
-
         if kept_file_ids is not None:
-            instance.form.exclude(
-                id__in=kept_file_ids
-            ).delete()
-
-        # --------------------------------
-        # فایل‌های جدید
-        # --------------------------------
+            instance.form.exclude(id__in=kept_file_ids).delete()
 
         if files:
-            Form.objects.bulk_create(
-                [
-                    Form(
-                        submission=instance,
-                        file=file,
-                    )
-                    for file in files
-                ]
-            )
+            Form.objects.bulk_create([
+                Form(submission=instance, file=file)
+                for file in files
+            ])
 
         return instance
 
 
 class SubmitConsultationFormListSerializer(serializers.ModelSerializer):
-
     forms = FormSerializer(
         source="form",
         many=True,
@@ -1554,10 +1555,7 @@ class SubmitConsultationFormListSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-    user_id = serializers.UUIDField(
-        source="member.user.id",
-        read_only=True,
-    )
+    user = UserDetailSerializer(source="member.user", read_only=True)
 
     class Meta:
         model = SubmitConsultationForm
@@ -1565,7 +1563,7 @@ class SubmitConsultationFormListSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "member_id",
-            "user_id",
+            "user",
             "title",
             "description",
             "forms",

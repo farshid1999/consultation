@@ -8,3 +8,4 @@ export * from "./user";
 export * from "./line";
 export * from "./lineMember"
 export * from "./content";
+export * from "./consultation";

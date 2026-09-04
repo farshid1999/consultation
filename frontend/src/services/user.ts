@@ -28,4 +28,9 @@ export const users = {
   deleteUser: async (id: number): Promise<void> => {
     await apiClient.delete(`${BASE}/${id}/delete/`);
   },
+
+  async getMe(): Promise<UserDetail> {
+    const { data } = await apiClient.get<UserDetail>("accounts/users/me/");
+    return data;
+  },
 };

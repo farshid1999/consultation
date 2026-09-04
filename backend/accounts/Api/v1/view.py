@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -309,6 +309,14 @@ class UserUpdateAPIView(GenericAPIView):
         return Response(
             UserDetailSerializer(user, context=self.get_serializer_context()).data
         )
+
+
+class CurrentUserAPIView(RetrieveAPIView):
+    serializer_class = UserDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
 class UserListAPIView(GenericAPIView):

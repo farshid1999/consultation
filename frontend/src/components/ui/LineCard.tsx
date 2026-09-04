@@ -57,6 +57,15 @@ export default function LineCard({ line }: LineCardProps) {
                 مشاهده محتواهای این بخش
               </Link>
 
+              <Link
+                href={`/member/lines/${line.id}/consultation`}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 text-sm text-cream/70 hover:bg-gold/10 hover:text-gold transition-colors"
+              >
+                <FiFileText size={16} />
+                قرارداد ها و فرم ها
+              </Link>
+
               {/* می‌توانید لینک‌های دیگر را اینجا اضافه کنید */}
               {/* <Link href="#" className="...">گزینه دیگر</Link> */}
             </div>
