@@ -60,7 +60,10 @@ export const ASSIGNMENT_ENDPOINTS = {
   staffDetail: (lineId: string | number, assignmentId: string | number) =>
     `operations/staff/assignments/lines/${lineId}/${assignmentId}/`, // ✅ اصلاح شد
 
-  staffSubmissionList: (lineId: string | number, assignmentId: string | number) =>
+  staffSubmissionList: (
+    lineId: string | number,
+    assignmentId: string | number,
+  ) =>
     `operations/staff/assignments/lines/${lineId}/${assignmentId}/submissions/`, // ✅ اصلاح شد
 
   staffSubmissionDetail: (
@@ -125,14 +128,22 @@ export const CONVERSATION_ENDPOINTS = {
 };
 
 export const CONSULTATION_ENDPOINTS = {
-    form: (lineId: string | number) => `operations/cosultation/staff/lines/${lineId}/create-update/`,
-    submissions: (consultationId: string) => `operations/cosultation/staff/${consultationId}/submissions/`,
-    submissionDetail: (consultationId: string, memberId: string) =>
-        `operations/cosultation/member/${consultationId}/members/${memberId}/submit/`,
-    memberForm: (lineId: string) => `operations/cosultation/${lineId}/`,
-    submitResponse: (consultationId: string, memberId: string) =>
-        `operations/cosultation/${consultationId}/members/${memberId}/submit/`,
+  form: (lineId: string | number) =>
+    `operations/cosultation/staff/lines/${lineId}/create-update/`,
+  submissions: (consultationId: string) =>
+    `operations/cosultation/staff/${consultationId}/submissions/`,
+  submissionDetail: (consultationId: string, memberId: string) =>
+    `operations/cosultation/member/${consultationId}/members/${memberId}/submit/`,
+  memberForm: (lineId: string) => `operations/cosultation/${lineId}/`,
+  submitResponse: (consultationId: string, memberId: string) =>
+    `operations/cosultation/${consultationId}/members/${memberId}/submit/`,
 
-    memberResponse: (consultationId: string, memberId: string) =>
-        `operations/cosultation/${consultationId}/members/${memberId}/submit/`,
+  memberResponse: (consultationId: string, memberId: string) =>
+    `operations/cosultation/${consultationId}/members/${memberId}/submit/`,
+};
+
+export const SITESETTING_ENDPOINTS = {
+  contactCreate: "sitesetting/contact/",
+  contactList: "sitesetting/contact/list/",
+  contactDetail: (id: number) => `sitesetting/contact/${id}/`,
 };
