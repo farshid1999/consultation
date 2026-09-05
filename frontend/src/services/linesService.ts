@@ -31,6 +31,17 @@ export const lineService = {
         }
     },
 
+    async publicList(params?: LineListParams): Promise<Line[]> {
+        try {
+            const {data} = await apiClient.get<Line[]>(LINE_ENDPOINTS.list, {
+                params: toQueryParams(params),
+            });
+            return data;
+        } catch (error) {
+            throw extractApiError(error);
+        }
+    },
+
     async getMyLines(params?: LineListParams): Promise<Line[]> {
         try {
             const {data} = await apiClient.get<Line[]>(LINE_ENDPOINTS.myList, {

@@ -22,6 +22,13 @@ export function useLines(params?: LineListParams) {
     });
 }
 
+export function usePublicLines(params?: LineListParams) {
+    return useQuery({
+        queryKey: QUERY_KEYS.lines(params),
+        queryFn: () => lineService.publicList(params),
+    });
+}
+
 
 export function useMyLines(params?: LineListParams) {
   return useQuery({

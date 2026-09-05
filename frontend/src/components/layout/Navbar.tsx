@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { PiBrainDuotone } from "react-icons/pi";
 import { navLinks } from "@/data/content";
 import Button from "@/components/ui/Button";
+import LinesNavDropdown from "@/components/ui/LinesNavDropdown";
 import { cn } from "@/lib/utils";
 
 export default function Navbar() {
@@ -43,15 +44,19 @@ export default function Navbar() {
               alt="لوگو سفیران اوج آرامش"
               className="h-14 w-14 rounded-full object-cover ring-1 ring-gold/30"
             />
-            {navLinks.map((link) => (
-              <a
-                key={link.id}
-                href={link.href}
-                className="relative text-caption font-medium text-cream/70 transition-colors duration-300 hover:text-gold focus-visible:outline-none focus-visible:text-gold after:absolute after:-bottom-1.5 after:right-0 after:h-px after:w-0 after:bg-gold after:transition-all after:duration-300 hover:after:w-full"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              link.id === "lines" ? (
+                <LinesNavDropdown key={link.id} label={link.label} />
+              ) : (
+                <a
+                  key={link.id}
+                  href={link.href}
+                  className="relative text-caption font-medium text-cream/70 transition-colors duration-300 hover:text-gold focus-visible:outline-none focus-visible:text-gold after:absolute after:-bottom-1.5 after:right-0 after:h-px after:w-0 after:bg-gold after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  {link.label}
+                </a>
+              )
+            )}
           </nav>
 
           {/* Logo text */}

@@ -19,6 +19,8 @@ import type {
   TestimonialItem,
 } from "@/types";
 
+
+
 export const navLinks: NavLink[] = [
   { id: "why", label: "چرا روان‌شناسی ورزشی", href: "#why" },
   { id: "services", label: "خدمات", href: "#services" },
@@ -26,6 +28,7 @@ export const navLinks: NavLink[] = [
   { id: "stats", label: "دستاوردها", href: "#stats" },
   { id: "testimonials", label: "نظرات ورزشکاران", href: "#testimonials" },
   { id: "faq", label: "پرسش‌های متداول", href: "#faq" },
+  {id: "lines", label: "بخش ها", href: `#` },
 ];
 
 export const services: ServiceItem[] = [

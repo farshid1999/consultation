@@ -123,3 +123,16 @@ export const CONVERSATION_ENDPOINTS = {
   messageCreate: (conversationId: string | number) =>
     `operations/conversations/${conversationId}/messages/`,
 };
+
+export const CONSULTATION_ENDPOINTS = {
+    form: (lineId: string | number) => `operations/cosultation/staff/lines/${lineId}/create-update/`,
+    submissions: (consultationId: string) => `operations/cosultation/staff/${consultationId}/submissions/`,
+    submissionDetail: (consultationId: string, memberId: string) =>
+        `operations/cosultation/member/${consultationId}/members/${memberId}/submit/`,
+    memberForm: (lineId: string) => `operations/cosultation/${lineId}/`,
+    submitResponse: (consultationId: string, memberId: string) =>
+        `operations/cosultation/${consultationId}/members/${memberId}/submit/`,
+
+    memberResponse: (consultationId: string, memberId: string) =>
+        `operations/cosultation/${consultationId}/members/${memberId}/submit/`,
+};

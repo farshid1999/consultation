@@ -48,22 +48,6 @@ class FeatureSerializer(serializers.ModelSerializer):
         )
 
 
-class LineListSerializer(serializers.ModelSerializer):
-    children = serializers.PrimaryKeyRelatedField(
-        many=True,
-        read_only=True,
-    )
-
-    class Meta:
-        model = Line
-        fields = (
-            "id",
-            "title",
-            "descriptions",
-            "parent",
-            "children",
-        )
-
 
 class LineChildSerializer(serializers.ModelSerializer):
     features = FeatureSerializer(
@@ -79,6 +63,24 @@ class LineChildSerializer(serializers.ModelSerializer):
             "descriptions",
             "parent",
             "features",
+        )
+
+
+
+class LineListSerializer(serializers.ModelSerializer):
+    children = LineChildSerializer(
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        model = Line
+        fields = (
+            "id",
+            "title",
+            "descriptions",
+            "parent",
+            "children",
         )
 
 
