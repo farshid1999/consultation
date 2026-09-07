@@ -156,11 +156,15 @@ class RoleListAPIView(GenericAPIView):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_user_role(request):
+    user = request.user
+    role_names = list(
+        user.user_roles.values_list("role__name", flat=True)
+    )
+
     return Response({
-        "is_staff": request.user.is_staff,
-        "roles": list(
-            request.user.roles.values_list("name", flat=True)
-        ),
+        "is_staff": user.is_staff,
+        "is_super": user.is_superuser,
+        "roles": role_names,
     })
 
 

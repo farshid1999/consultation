@@ -14,3 +14,10 @@ export interface UserRole {
   id: number;
   role: Role;
 }
+
+
+export interface UserRoleResponse {
+  is_staff: boolean;
+  is_super: boolean;
+  roles: string[]; // لیست نام نقش‌ها (مثلاً ["admin", "staff"])
+}

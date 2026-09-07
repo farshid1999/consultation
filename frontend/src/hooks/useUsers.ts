@@ -14,6 +14,10 @@ const KEYS = {
     detail: (id: number) => ["users", "detail", id] as const,
 };
 
+export const QUERY_KEYS = {
+  userRole: ["user-role"],
+};
+
 export const useUsers = (params?: ListQueryParams) =>
     useQuery<Paginated<UserListItem>>({
         queryKey: KEYS.list(params),
@@ -60,5 +64,15 @@ export const useDeleteUser = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: KEYS.all});
         },
+    });
+};
+
+
+export const useUserRole = () => {
+    return useQuery({
+        queryKey: QUERY_KEYS.userRole,
+        queryFn: () => users.getUserRole(),
+        staleTime: 1000 * 60 * 5, // کش ۵ دقیقه‌ای
+        retry: 1,
     });
 };
