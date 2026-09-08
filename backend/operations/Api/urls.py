@@ -232,6 +232,8 @@ consultation_form_urls = [
 # =========================
 
 urlpatterns = [
+    path("admin/",AdminDashboardStatsAPIView.as_view()),
+
     # -------------------------
     # Lines
     # -------------------------

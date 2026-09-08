@@ -2321,3 +2321,261 @@ class SubmitConsultationFormListAPIView(ListAPIView):
 
         raise PermissionDenied("مجوز این عملیات یافت نشد.")
 
+
+from datetime import timedelta
+
+from django.db.models import Count
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from accounts.models import Club, Staff, User, UserRole
+from operations.models import (
+    Appointment,
+    Assignment,
+    AssignmentRecipient,
+    AssignmentSubmission,
+    Content,
+    ContentRecipient,
+    ConsultationForm,
+    Conversation,
+    Line,
+    LineMember,
+    Message,
+    StaffLine,
+    SubmitConsultationForm,
+)
+
+
+class AdminDashboardStatsAPIView(APIView):
+    """
+    GET /api/admin/dashboard/
+
+    Query params اختیاری:
+      - days=30   بازه‌ی روند (trend) روزانه را مشخص می‌کند (پیش‌فرض 30 روز)
+    """
+
+    permission_classes = [IsAdminUser | IsStaff]
+
+    def get(self, request):
+        try:
+            days = int(request.query_params.get("days", 30))
+        except (TypeError, ValueError):
+            days = 30
+
+        now = timezone.now()
+        window_start = now - timedelta(days=days)
+        last_7_days = now - timedelta(days=7)
+
+        data = {
+            "generated_at": now.isoformat(),
+            "window_days": days,
+            "users": self.get_user_stats(window_start, last_7_days),
+            "lines": self.get_line_stats(),
+            "assignments": self.get_assignment_stats(),
+            "appointments": self.get_appointment_stats(now),
+            "conversations": self.get_conversation_stats(window_start),
+            "content": self.get_content_stats(),
+            "consultations": self.get_consultation_stats(),
+        }
+        return Response(data)
+
+    # ---------------------------------------------------------------
+    # Users
+    # ---------------------------------------------------------------
+    def get_user_stats(self, window_start, last_7_days):
+        total_users = User.objects.count()
+        students = User.objects.filter(is_student=True).count()
+        staff_count = Staff.objects.count()
+        active_users = User.objects.filter(is_active=True).count()
+
+        new_users_window = User.objects.filter(date_joined__gte=window_start).count()
+        new_users_7d = User.objects.filter(date_joined__gte=last_7_days).count()
+
+        signup_trend = (
+            User.objects.filter(date_joined__gte=window_start)
+            .annotate(day=TruncDate("date_joined"))
+            .values("day")
+            .annotate(count=Count("id"))
+            .order_by("day")
+        )
+
+        users_by_club = (
+            User.objects.exclude(club__isnull=True)
+            .values("club__id", "club__name")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:10]
+        )
+
+        users_by_city = (
+            User.objects.exclude(address__isnull=True)
+            .values("address__city")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:10]
+        )
+
+        users_by_role = (
+            UserRole.objects.values("role__id", "role__name")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+
+        return {
+            "total": total_users,
+            "students": students,
+            "non_students": total_users - students,
+            "staff_count": staff_count,
+            "active": active_users,
+            "inactive": total_users - active_users,
+            "new_in_window": new_users_window,
+            "new_last_7_days": new_users_7d,
+            "signup_trend": list(signup_trend),
+            "by_club": list(users_by_club),
+            "by_city": list(users_by_city),
+            "by_role": list(users_by_role),
+        }
+
+    # ---------------------------------------------------------------
+    # Lines
+    # ---------------------------------------------------------------
+    def get_line_stats(self):
+        total_lines = Line.objects.count()
+        total_memberships = LineMember.objects.count()
+        total_staff_assignments = StaffLine.objects.count()
+
+        top_lines_by_members = (
+            Line.objects.annotate(member_count=Count("members", distinct=True))
+            .values("id", "title", "member_count")
+            .order_by("-member_count")[:10]
+        )
+
+        top_lines_by_staff = (
+            Line.objects.annotate(staff_count=Count("staff_memberships", distinct=True))
+            .values("id", "title", "staff_count")
+            .order_by("-staff_count")[:10]
+        )
+
+        return {
+            "total_lines": total_lines,
+            "total_memberships": total_memberships,
+            "total_staff_assignments": total_staff_assignments,
+            "top_lines_by_members": list(top_lines_by_members),
+            "top_lines_by_staff": list(top_lines_by_staff),
+        }
+
+    # ---------------------------------------------------------------
+    # Assignments
+    # ---------------------------------------------------------------
+    def get_assignment_stats(self):
+        total_assignments = Assignment.objects.count()
+        total_recipients = AssignmentRecipient.objects.count()
+        total_submissions = AssignmentSubmission.objects.count()
+        pending = AssignmentRecipient.objects.filter(submission__isnull=True).count()
+
+        completion_rate = (
+            round((total_submissions / total_recipients) * 100, 1)
+            if total_recipients
+            else 0
+        )
+
+        assignments_by_line = (
+            Assignment.objects.values("line__id", "line__title")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:10]
+        )
+
+        return {
+            "total_assignments": total_assignments,
+            "total_recipients": total_recipients,
+            "total_submissions": total_submissions,
+            "pending_submissions": pending,
+            "completion_rate_percent": completion_rate,
+            "by_line": list(assignments_by_line),
+        }
+
+    # ---------------------------------------------------------------
+    # Appointments
+    # ---------------------------------------------------------------
+    def get_appointment_stats(self, now):
+        total_appointments = Appointment.objects.count()
+
+        by_status = (
+            Appointment.objects.values("status")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+
+        upcoming = Appointment.objects.filter(appointment_time__gte=now).count()
+        past = total_appointments - upcoming
+
+        top_staff = (
+            Appointment.objects.values(
+                "staff__id",
+                "staff__user__first_name",
+                "staff__user__last_name",
+            )
+            .annotate(count=Count("id"))
+            .order_by("-count")[:10]
+        )
+
+        return {
+            "total": total_appointments,
+            "upcoming": upcoming,
+            "past": past,
+            "by_status": list(by_status),
+            "top_staff_by_appointments": list(top_staff),
+        }
+
+    # ---------------------------------------------------------------
+    # Conversations / Messages
+    # ---------------------------------------------------------------
+    def get_conversation_stats(self, window_start):
+        total_conversations = Conversation.objects.count()
+        total_messages = Message.objects.count()
+
+        messages_trend = (
+            Message.objects.filter(created_at__gte=window_start)
+            .annotate(day=TruncDate("created_at"))
+            .values("day")
+            .annotate(count=Count("id"))
+            .order_by("day")
+        )
+
+        return {
+            "total_conversations": total_conversations,
+            "total_messages": total_messages,
+            "messages_trend": list(messages_trend),
+        }
+
+    # ---------------------------------------------------------------
+    # Content
+    # ---------------------------------------------------------------
+    def get_content_stats(self):
+        total_content = Content.objects.count()
+        total_recipients = ContentRecipient.objects.count()
+
+        by_line = (
+            Content.objects.values("line__id", "line__title")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:10]
+        )
+
+        return {
+            "total_content": total_content,
+            "total_recipients": total_recipients,
+            "by_line": list(by_line),
+        }
+
+    # ---------------------------------------------------------------
+    # Consultation forms
+    # ---------------------------------------------------------------
+    def get_consultation_stats(self):
+        total_forms = ConsultationForm.objects.count()
+        total_submissions = SubmitConsultationForm.objects.count()
+
+        return {
+            "total_forms": total_forms,
+            "total_submissions": total_submissions,
+        }
