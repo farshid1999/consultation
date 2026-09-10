@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/sections/Hero";
 import Footer from "@/components/layout/Footer";
 import SectionDivider from "@/components/layout/SectionDivider";
+import BackgroundAudioPlayer from "@/components/background/BackgroundAudioPlayer";
 
 // Below-the-fold sections are lazy-loaded to keep the initial hero paint fast.
 const WhySportsPsychology = dynamic(() => import("@/components/sections/WhySportsPsychology"));
@@ -16,24 +17,24 @@ const FAQ = dynamic(() => import("@/components/sections/FAQ"));
 const CTA = dynamic(() => import("@/components/sections/CTA"));
 
 export default function HomePage() {
-  return (
-    <main className="relative min-h-screen overflow-x-hidden bg-deep">
-      <NeuralBackground />
-      <Navbar />
+    return (
+        <main className="relative min-h-screen overflow-x-hidden bg-deep">
+            <NeuralBackground/>
+            <Navbar/>
 
-      <div className="relative z-10">
-        <Hero />
-        <WhySportsPsychology />
-        <Services />
-        <Process />
-        <Benefits />
-        <Stats />
-        <Testimonials />
-        <FAQ />
-        <CTA />
-        {/*<SectionDivider />*/}
-        <Footer />
-      </div>
-    </main>
-  );
+            <div className="relative z-10">
+                <Hero/>
+                <WhySportsPsychology/>
+                <Services/>
+                <Process/>
+                <Benefits/>
+                <Stats/>
+                <Testimonials/>
+                <FAQ/>
+                <CTA/>
+                {/*<SectionDivider />*/}
+                <Footer/>
+            </div>
+        </main>
+    );
 }

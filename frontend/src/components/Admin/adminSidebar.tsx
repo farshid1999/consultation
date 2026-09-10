@@ -5,6 +5,7 @@ import {usePathname, useRouter} from "next/navigation";
 import {FiUsers, FiGrid, FiLogOut, FiLayers, FiFileText, FiUserCheck} from "react-icons/fi";
 import {cn} from "@/lib/utils";
 import {useLogout} from "@/hooks/useAuth";
+import {IoSettingsOutline} from "react-icons/io5";
 
 const navItems = [
     { href: "/admin", label: "داشبورد", icon: FiGrid },
@@ -12,6 +13,7 @@ const navItems = [
     { href: "/admin/staff", label: "کارمندان", icon: FiUserCheck },
     { href: "/staff/content", label: "محتواها", icon: FiFileText },
     { href: "/staff/line", label: "بخش‌ها", icon: FiLayers },
+    { href: "/admin/settings", label: "تنظیمات", icon: IoSettingsOutline },
 ];
 
 export default function AdminSidebar() {

@@ -1,5 +1,7 @@
 from django.db import models
 
+from core.models import BaseModel
+
 
 class ContactRequest(models.Model):
     
@@ -35,3 +37,9 @@ class ContactRequest(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.contact_type}"
+
+
+
+class BackgroundMusic(BaseModel):
+    music = models.FileField()
+    is_active = models.BooleanField(default=True)

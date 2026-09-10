@@ -3,6 +3,7 @@ import { Vazirmatn } from "next/font/google";
 import { Toaster } from "sonner";
 import QueryProvider from "@/components/providers/QueryProvider";
 import "./globals.css";
+import BackgroundAudioPlayer from "@/components/background/BackgroundAudioPlayer";
 
 const vazirmatn = Vazirmatn({
   subsets: ["arabic"],
@@ -57,12 +58,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="fa" dir="rtl" className={vazirmatn.variable}>
+
       <body className="font-vazir antialiased">
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <QueryProvider>
+        <BackgroundAudioPlayer />
           {children}
           <Toaster position="top-center" richColors dir="rtl" />
         </QueryProvider>
