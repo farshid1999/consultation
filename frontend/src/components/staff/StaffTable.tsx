@@ -85,7 +85,7 @@ export default function StaffTable() {
 
         {/* دکمه افزودن */}
         <Link
-          href="/staff/create"
+          href="/admin/staff/create"
           className="flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-deep hover:bg-gold/90 transition-all shadow-lg shadow-gold/10"
         >
           <FiPlus aria-hidden="true" size={16} />
@@ -194,14 +194,14 @@ export default function StaffTable() {
                       ) : (
                         <>
                           <Link
-                            href={`/staff/${staff.id}`}
+                            href={`/admin/staff/${staff.id}`}
                             aria-label="مشاهده"
                             className="flex h-8 w-8 items-center justify-center rounded-lg text-cream/40 transition-all hover:bg-blue-400/10 hover:text-blue-400"
                           >
                             <FiEye size={16} aria-hidden="true" />
                           </Link>
                           <Link
-                            href={`/staff/${staff.id}/edit`}
+                            href={`/admin/staff/${staff.id}/edit`}
                             aria-label="ویرایش"
                             className="flex h-8 w-8 items-center justify-center rounded-lg text-cream/40 transition-all hover:bg-gold/10 hover:text-gold"
                           >
