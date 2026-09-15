@@ -166,3 +166,8 @@ export const APPOINTMENT_ENDPOINTS = {
   memberDetail: (id: string | number) =>
     `operations/member/appointments/${id}/`,
 };
+
+export const USER_ENDPOINTS = {
+  me: "accounts/users/me/", 
+ 
+};
