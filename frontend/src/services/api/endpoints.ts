@@ -147,3 +147,22 @@ export const SITESETTING_ENDPOINTS = {
   contactList: "sitesetting/contact/list/",
   contactDetail: (id: number) => `sitesetting/contact/${id}/`,
 };
+
+export const APPOINTMENT_ENDPOINTS = {
+  // ── CRUD ──
+  create: "operations/appointments/create/",
+  update: (id: string | number) => `operations/appointments/${id}/update/`,
+  delete: (id: string | number) => `operations/appointments/${id}/delete/`,
+
+  // ── Admin ──
+  adminList: "operations/admin/appointments/",
+
+  // ── Staff ──
+  staffList: "operations/staff/appointments/",
+  staffDetail: (id: string | number) => `operations/staff/appointments/${id}/`,
+
+  // ── Member ──
+  memberList: "operations/member/appointments/",
+  memberDetail: (id: string | number) =>
+    `operations/member/appointments/${id}/`,
+};
