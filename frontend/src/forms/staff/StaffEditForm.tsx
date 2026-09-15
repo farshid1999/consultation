@@ -136,22 +136,29 @@ export default function StaffEditForm({ staff }: { staff: StaffDetail }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-
+    <form 
+      onSubmit={handleSubmit(onSubmit)} 
+      noValidate 
+      className="flex flex-col gap-6 rounded-3xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-sm md:p-8"
+    >
       {/* نمایش تصویر فعلی پروفایل */}
       {staff.user.avatar && (
-        <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="flex items-center gap-4 rounded-xl border border-white/5 bg-white/[0.03] p-4">
           {/* eslint-disable-next-lines @next/next/no-img-element */}
-          <img src={staff.user.avatar} alt={staff.user.username} className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm" />
-          <p className="text-xs text-slate-500">
+          <img 
+            src={staff.user.avatar} 
+            alt={staff.user.username} 
+            className="h-12 w-12 rounded-full object-cover ring-2 ring-white/5" 
+          />
+          <p className="text-xs text-cream/50">
             تصویر فعلی پروفایل — برای تغییر، در بخش «اطلاعات شخصی» تصویر جدید بارگذاری کنید.
           </p>
         </div>
       )}
 
-      {/* باکس هشدار زرد رنگ با استایل روشن */}
-      <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 text-xs leading-relaxed text-amber-800 flex gap-3 items-start">
-        <span className="shrink-0 mt-0.5 text-amber-500">⚠️</span>
+      {/* باکس هشدار با استایل تم تیره */}
+      <div className="rounded-xl border border-gold/20 bg-gold/5 p-4 text-xs leading-relaxed text-gold/80 flex gap-3 items-start">
+        <span className="shrink-0 mt-0.5 text-gold">⚠️</span>
         <p>
           توجه: بخش «اطلاعات تکمیلی» در ویرایش به‌طور کامل جایگزین می‌شود. اگر برای موردی که قبلاً فایل داشته، فایل
           جدیدی انتخاب نکنید، فایل قبلی آن حذف خواهد شد.
@@ -167,22 +174,22 @@ export default function StaffEditForm({ staff }: { staff: StaffDetail }) {
       />
 
       {/* دکمه‌های عملیات */}
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6 mt-4">
+      <div className="flex items-center justify-end gap-3 border-t border-white/5 pt-6 mt-4">
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-xl border border-slate-200 px-6 py-3 text-sm font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+          className="rounded-xl border border-cream/10 bg-cream/5 px-6 py-3 text-sm font-medium text-cream/60 transition-all hover:border-cream/20 hover:bg-cream/10 hover:text-cream focus:outline-none"
         >
           انصراف
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-xl bg-gradient-to-br from-[#c9a24d] to-[#d4af37] px-8 py-3 text-sm font-bold text-white shadow-[0_4px_12px_rgba(201,162,77,0.3)] transition-all hover:shadow-[0_6px_16px_rgba(201,162,77,0.4)] hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          className="rounded-xl bg-gold px-8 py-3 text-sm font-bold text-deep shadow-lg shadow-gold/10 transition-all hover:bg-gold/90 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2">
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-deep/30 border-t-deep"></span>
               در حال ذخیره...
             </span>
           ) : (
@@ -193,5 +200,3 @@ export default function StaffEditForm({ staff }: { staff: StaffDetail }) {
     </form>
   );
 }
-
-
