@@ -9,9 +9,9 @@ import GlassCard from "@/components/ui/GlassCard";
 import { toPersianDigits } from "@/lib/utils";
 
 const featureList = [
-  "جلسات حضوری و آنلاین",
-  "برنامه‌ی اختصاصی برای هر ورزشکار",
-  "همراهی مستمر تا روز مسابقه",
+  "طراحی برنامه عمومی و تخصصی به صورت مستقل و با توجه به نیاز های هر ورزشکار",
+  "همراهی مستمر در طول دوران فعالیت ورزشی",
+  "پشتیبانی دائمی متخصصان در طول دوره",
 ];
 
 const cubeImages = [
@@ -202,11 +202,11 @@ export default function Hero() {
               className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/25 bg-gold/[0.08] px-4 py-1.5 text-caption font-medium text-gold"
             >
               <PiHeartbeatDuotone className="text-base" aria-hidden="true" />
-              روان‌شناسی ورزشی حرفه‌ای
+             یوگبال 
             </motion.div>
 
             <motion.h1 variants={fadeUp} className="text-4xl font-extrabold text-cream">
-              ذهنی که برای{" "}
+              ذهنی آرام به سوی{" "}
               <span className="relative inline-block text-gold">
                 قهرمانی
                 <svg
@@ -225,16 +225,14 @@ export default function Hero() {
                   />
                 </svg>
               </span>{" "}
-              آماده می‌شود
             </motion.h1>
 
-            <motion.p variants={fadeUp} className="mt-4 text-h3 font-medium text-cream/60">
+            {/* <motion.p variants={fadeUp} className="mt-4 text-h3 font-medium text-cream/60">
               پیش از بدن، ذهن باید برنده شود.
-            </motion.p>
+            </motion.p> */}
 
             <motion.p variants={fadeUp} className="mt-6 max-w-md text-body text-cream/65">
-              مشاوره‌ی تخصصی روان‌شناسی ورزشی برای ورزشکارانی که می‌خواهند در لحظه‌ی تصمیم،
-              آرام، متمرکز و مطمئن بمانند؛ از جلسات فردی تا همراهی تا روز مسابقه.
+              یوگبال متدی جامع و تخصصی برای ورزشکاران با رویکردی متفاوت از روز نخست تا آخرین روز فعالیت حرفه ای
             </motion.p>
 
             <motion.div variants={fadeUp} className="mt-9 flex flex-wrap items-center gap-4">

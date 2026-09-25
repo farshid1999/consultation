@@ -22,7 +22,7 @@ import type {
 
 
 export const navLinks: NavLink[] = [
-  { id: "why", label: "چرا روان‌شناسی ورزشی", href: "#why" },
+  { id: "why", label: "چرا یوگبال", href: "#why" },
   { id: "services", label: "خدمات", href: "#services" },
   { id: "process", label: "فرآیند مشاوره", href: "#process" },
   { id: "stats", label: "دستاوردها", href: "#stats" },

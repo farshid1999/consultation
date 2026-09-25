@@ -16,7 +16,7 @@ const points = [
   },
   {
     title: "علمی، نه شعاری",
-    text: "روان‌شناسی ورزشی مجموعه‌ای مستند و اثبات‌شده از تکنیک‌هاست، نه توصیه‌های انگیزشی سطحی.",
+    text: "یوگبال متد تخصصی جدیدی است که برای اولین بار در دنیا برای هر ورزشکار بصورت اختصاصی طراحی می شود و توانایی و تعادل ذهنی , جسمی و تکنیکی شما را در عمل به حداکثر می‌رساند",
   },
 ];
 
@@ -30,7 +30,7 @@ export default function WhySportsPsychology() {
       <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-2">
         <div>
           <RevealOnScroll direction="right">
-            <span className="text-caption font-semibold text-gold">چرا روان‌شناسی ورزشی</span>
+            <span className="text-caption font-semibold text-gold">چرا یوگبال</span>
           </RevealOnScroll>
           <RevealOnScroll direction="right" delay={0.08}>
             <h2 className="mt-4 max-w-lg text-h2 font-extrabold text-cream">
