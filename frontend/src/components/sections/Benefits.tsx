@@ -20,8 +20,7 @@ export default function Benefits() {
             </RevealOnScroll>
             <RevealOnScroll direction="right" delay={0.16}>
               <p className="mt-5 max-w-md text-body text-cream/60">
-                خروجی این همراهی، صرفاً آرامش لحظه‌ای نیست؛ تغییری پایدار در نحوه‌ی مواجهه‌ی شما
-                با فشار، شکست و موفقیت است.
+                خروجی این همراهی، صرفاً آرامش لحظه‌ای نیست؛ تغییری پایدار در نحوه مواجهه شما با چالش های پیش رو در مسیر موفقیت.
               </p>
             </RevealOnScroll>
           </div>

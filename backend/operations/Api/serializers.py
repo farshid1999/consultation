@@ -63,6 +63,9 @@ class LineChildSerializer(serializers.ModelSerializer):
             "descriptions",
             "parent",
             "features",
+            "is_required_content",
+            "is_required_assignment",
+            "is_required_form",
         )
 
 
@@ -81,6 +84,9 @@ class LineListSerializer(serializers.ModelSerializer):
             "descriptions",
             "parent",
             "children",
+            "is_required_content",
+            "is_required_assignment",
+            "is_required_form",
         )
 
 
@@ -104,6 +110,9 @@ class LineDetailSerializer(serializers.ModelSerializer):
             "parent",
             "features",
             "children",
+            "is_required_content",
+            "is_required_assignment",
+            "is_required_form",
         )
 
 
