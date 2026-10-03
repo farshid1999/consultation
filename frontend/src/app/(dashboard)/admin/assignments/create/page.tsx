@@ -8,7 +8,7 @@ import { z } from "zod";
 import { useCreateAssignment } from "@/hooks/useAssignment";
 // import { useDebounce } from "use-debounce";
 import { useLines, useLineMembers } from "@/hooks/useLines";
-import { Input, FileUploader } from "@/components/ui/Inputs";
+import { Input, FileUploader } from "@/components/ui/inputs";
 import { buildFormData, containsFile } from "@/services/api/formData";
 import {
   FiArrowRight,

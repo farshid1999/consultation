@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input, Switch } from "@/components/ui/Inputs";
+import { Input, Switch } from "@/components/ui/inputs";
 import { registerSchema, type RegisterFormValues } from "@/schemas/auth";
 import { useRegister } from "@/hooks/useAuth";
 import { FiUser, FiLock, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
