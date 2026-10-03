@@ -1553,6 +1553,9 @@ class LineAdmin(admin.ModelAdmin):
         "staff_count",
         "is_active",
         "created_at",
+        "is_required_content",
+        "is_required_assignment",
+        "is_required_form",
     )
     list_display_links = ("tree_title",)
     list_editable = ("is_active",)
