@@ -32,6 +32,10 @@ class Line(BaseModel):
         blank=True,
     )
 
+    is_required_content = models.BooleanField(default=True)
+    is_required_assignment = models.BooleanField(default=True)
+    is_required_form = models.BooleanField(default=True)
+
     def __str__(self):
         return self.title
 
@@ -438,6 +442,14 @@ class ContentRecipient(BaseModel):
         LineMember,
         on_delete=models.CASCADE,
         related_name="content_recipients",
+    )
+
+    conversation = models.OneToOneField(
+        "Conversation",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="content_recipient",
     )
 
     class Meta:

@@ -6,7 +6,7 @@ import { assignmentSubmissionSchema, type AssignmentSubmissionFormValues } from 
 import { useCreateSubmission, useUpdateSubmission } from "@/hooks/useAssignment";
 import { buildFormData, containsFile } from "@/services/api/formData";
 import { FiPlus, FiTrash2, FiFile } from "react-icons/fi";
-import { FileUploader } from "@/components/ui/Inputs"; // مسیر را بررسی کنید
+import { FileUploader } from "@/components/ui/inputs"; // مسیر را بررسی کنید
 import type { AssignmentSubmissionDetail } from "@/types/Assignment";
 
 interface AssignmentSubmissionFormProps {

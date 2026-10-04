@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { assignmentCreateSchema, type AssignmentCreateFormValues } from "@/schemas/assignment";
 import { useCreateAssignment } from "@/hooks/useAssignment";
-import { Input, Textarea } from "@/components/ui/Inputs";
+import { Input, Textarea } from "@/components/ui/inputs";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 
 interface AssignmentCreateFormProps {

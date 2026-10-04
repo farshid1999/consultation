@@ -11,7 +11,7 @@ import {tokenService} from "@/lib/auth/tokenService";
  *   path("api/accounts/", include("accounts.Api.v1.urls"))
  */
 export const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/";
+    process.env.NEXT_PUBLIC_API_BASE_URL
 
 /**
  * Adjust to match your actual SimpleJWT refresh endpoint if it differs.
@@ -21,11 +21,11 @@ export const API_BASE_URL =
 const REFRESH_ENDPOINT = "accounts/auth/refresh/";
 
 export const MEDIA_BASE_URL = (
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/"
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
 ).replace(/\/api\/?$/, "");
 
 export const apiClient = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
     headers: {
         Accept: "application/json",
     },

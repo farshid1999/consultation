@@ -15,6 +15,8 @@ import {
   FiX,
 } from "react-icons/fi";
 import type { LineDetail, Feature, LineChild } from "@/types";
+import {useUserRole} from "@/hooks/useUsers";
+import {useUserPath} from "@/hooks/useUserPath";
 
 /* ------------------------------------------------------------------ */
 /* پالت رنگی برای تفکیک بصری دسترسی‌های سریع و زیرمجموعه‌ها             */
@@ -201,16 +203,49 @@ function QuickAction({
 /* ------------------------------------------------------------------ */
 export default function LineDetailView({ line }: { line: LineDetail }) {
   const [descExpanded, setDescExpanded] = useState(false);
+
+  const { basePath } = useUserPath();
+
   const description = line.descriptions?.trim() || "";
   const isLongDescription = description.length > 220;
 
-  const quickActions = [
-    { href: `/staff/line/${line.id}/members`, icon: FiUsers, label: "اعضای بخش" },
-    { href: `/staff/line/${line.id}/staff`, icon: FiBriefcase, label: "کارمندان بخش" },
-    { href: `/staff/line/${line.id}/content/create`, icon: FiPlus, label: "ایجاد محتوا" },
-    { href: `/staff/line/${line.id}/content`, icon: FiFileText, label: "آرشیو محتوا" },
-    { href: `/staff/line/${line.id}/consultation`, icon: FiClipboard, label: "فرم‌ها و قراردادها" },
-    { href: `/staff/line/${line.id}/assignments`, icon: FiCheckCircle, label: "مدیریت تکالیف" },
+
+
+  if (!basePath) {
+    return null;
+  }
+
+const quickActions = [
+    {
+      href: `${basePath}/line/${line.id}/members`,
+      icon: FiUsers,
+      label: "اعضای بخش",
+    },
+    {
+      href: `${basePath}/line/${line.id}/staff`,
+      icon: FiBriefcase,
+      label: "کارمندان بخش",
+    },
+    {
+      href: `${basePath}/line/${line.id}/content/create`,
+      icon: FiPlus,
+      label: "ایجاد محتوا",
+    },
+    {
+      href: `${basePath}/line/${line.id}/content`,
+      icon: FiFileText,
+      label: "آرشیو محتوا",
+    },
+    {
+      href: `${basePath}/line/${line.id}/consultation`,
+      icon: FiClipboard,
+      label: "فرم‌ها و قراردادها",
+    },
+    {
+      href: `${basePath}/line/${line.id}/assignments`,
+      icon: FiCheckCircle,
+      label: "مدیریت تکالیف",
+    },
   ];
 
   return (

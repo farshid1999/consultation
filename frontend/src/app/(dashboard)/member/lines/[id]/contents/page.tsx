@@ -38,7 +38,7 @@ export default function MemberLineContentsPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-gold/20 pb-8">
           <div>
             <div className="flex items-center gap-2 text-xs text-gold/60 mb-2">
-              <Link href="/dashboard" className="hover:text-white transition-colors">داشبورد</Link>
+              <Link href="/" className="hover:text-white transition-colors">داشبورد</Link>
               <FiArrowRight size={12} className="rotate-180" />
               <span>محتوای بخش</span>
             </div>
@@ -81,7 +81,7 @@ export default function MemberLineContentsPage() {
             {contents.map((content) => (
               <Link
                 key={content.id}
-                href={`/dashboard/member/contents/${content.id}`}
+                href={`/member/contents/${content.id}`}
                 className="group block"
               >
                 <div className="h-full p-5 rounded-2xl bg-gradient-to-br from-deep-2/60 to-deep-2/30 border border-white/5 hover:border-gold/40 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden relative">

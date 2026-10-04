@@ -139,7 +139,7 @@ export const benefits: BenefitItem[] = [
   {
     id: "resilience",
     title: "تاب‌آوری پایدار",
-    description: "بازگشت سریع‌تر از شکست، آسیب یا نتایج ناامیدکننده، بدون از دست دادن انگیزه.",
+    description: "آرامش و اصلاح افکار مخرب و جايگزيني آن با آرامش درونی و انگیزه رشد شخصی.",
     icon: FiShield,
   },
   {
@@ -150,7 +150,7 @@ export const benefits: BenefitItem[] = [
   },
   {
     id: "growth",
-    title: "رشد بلندمدت هویت ورزشی",
+    title: "شکل گیری تصویری سالم و پایدار از خود منطبق با دنیای واقعی",
     description: "شکل‌گیری تصویری سالم و پایدار از خود، فراتر از نتیجه‌ی یک بازی یا یک فصل.",
     icon: FiTrendingUp,
   },
@@ -160,7 +160,7 @@ export const stats: StatItem[] = [
   { id: "athletes", value: 420, suffix: "+", label: "ورزشکار همراهی‌شده" },
   { id: "years", value: 12, suffix: "", label: "سال تجربه‌ی بالینی" },
   { id: "satisfaction", value: 96, suffix: "٪", label: "رضایت از روند مشاوره" },
-  { id: "federations", value: 8, suffix: "", label: "همکاری با فدراسیون‌ها" },
+  { id: "federations", value: 8, suffix: "", label: "همکاری با مربیان و مدارس ورزشی" },
 ];
 
 export const testimonials: TestimonialItem[] = [
@@ -193,7 +193,7 @@ export const testimonials: TestimonialItem[] = [
 export const faqs: FaqItem[] = [
   {
     id: "f1",
-    question: "روان‌شناسی ورزشی دقیقاً برای چه کسانی مناسب است؟",
+    question: "پاسخ دقیقاً برای چه کسانی مناسب است؟",
     answer:
       "از ورزشکاران حرفه‌ای و نیمه‌حرفه‌ای گرفته تا نوجوانان در حال رشد در یک رشته‌ی ورزشی؛ هرکسی که عملکردش تحت‌تأثیر ذهنش قرار می‌گیرد، می‌تواند از این مسیر بهره ببرد.",
   },
@@ -201,7 +201,7 @@ export const faqs: FaqItem[] = [
     id: "f2",
     question: "جلسات به چه شکل و با چه بازه‌ای برگزار می‌شود؟",
     answer:
-      "جلسات به‌صورت حضوری یا آنلاین و معمولاً هفتگی برگزار می‌شوند. بازه‌ی دقیق بر اساس اهداف شما و تقویم مسابقاتتان تنظیم می‌شود.",
+      "جلسات به‌صورت آنلاین و معمولاً هفتگی برگزار می‌شوند. بازه‌ی دقیق بر اساس اهداف شما و تقویم مسابقاتتان تنظیم می‌شود.",
   },
   {
     id: "f3",

@@ -80,7 +80,7 @@ export default function MemberContentPage() {
 // کامپوننت کارت محتوا با استایل لندینگ پیج
 function ContentCard({ content, icon }: { content: ContentListItem; icon: React.ReactNode }) {
   return (
-    <Link href={`/dashboard/member/contents/${content.id}`}>
+    <Link href={`/member/contents/${content.id}`}>
       <div className="group relative h-full p-6 rounded-[2rem] bg-gradient-to-br from-deep-2/60 to-deep-2/30 border border-white/5 hover:border-gold/40 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(201,162,77,0.15)] overflow-hidden">
 
         {/* افکت نوری پس‌زمینه */}

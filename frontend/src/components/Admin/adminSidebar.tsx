@@ -11,8 +11,9 @@ const navItems = [
     { href: "/admin", label: "داشبورد", icon: FiGrid },
     { href: "/admin/users", label: "کاربران", icon: FiUsers },
     { href: "/admin/staff", label: "کارمندان", icon: FiUserCheck },
-    { href: "/staff/content", label: "محتواها", icon: FiFileText },
-    { href: "/staff/line", label: "بخش‌ها", icon: FiLayers },
+    { href: "/admin/content", label: "محتواها", icon: FiFileText },
+    { href: "/admin/line", label: "بخش‌ها", icon: FiLayers },
+    { href: "/admin/assignments", label: "تکالیف", icon: FiLayers },
     { href: "/admin/settings", label: "تنظیمات", icon: IoSettingsOutline },
 ];
 

@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
     contentDetail: (id: number | string) => ["content-detail", id],
     memberListContents: (params?: ContentListParams) => ["member-contents", params],
     memberLineContents: (lineId: string | number, params?: ContentListParams) => ["member-line-contents", lineId, params],
+    memberContentDetail: (id: string | number) => ["member-content-detail", id],
 };
 
 export function useCreateContent() {
@@ -28,22 +29,22 @@ export function useCreateContent() {
 }
 
 export function useUpdateContent() {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: ContentUpdateInput }) =>
-      contentService.update(id, payload),
+    return useMutation({
+        mutationFn: ({id, payload}: { id: string; payload: ContentUpdateInput }) =>
+            contentService.update(id, payload),
 
-    onSuccess: () => {
-      toast.success("محتوا با موفقیت ویرایش شد.");
-      queryClient.invalidateQueries({ queryKey: ["staff-contents"] });
-      queryClient.invalidateQueries({ queryKey: ["content-detail"] });
-    },
-    onError: (err: any) => {
-      const message = err?.message || "خطا در ویرایش محتوا";
-      toast.error(message);
-    },
-  });
+        onSuccess: () => {
+            toast.success("محتوا با موفقیت ویرایش شد.");
+            queryClient.invalidateQueries({queryKey: ["staff-contents"]});
+            queryClient.invalidateQueries({queryKey: ["content-detail"]});
+        },
+        onError: (err: any) => {
+            const message = err?.message || "خطا در ویرایش محتوا";
+            toast.error(message);
+        },
+    });
 }
 
 export function useStaffContents(params?: ContentListParams) {
@@ -55,14 +56,14 @@ export function useStaffContents(params?: ContentListParams) {
 }
 
 export function useMemberContents(memberId: string | number, params?: ContentListParams) {
-  return useQuery({
-    queryKey: QUERY_KEYS.memberContents(memberId, params),
-    queryFn: () => contentService.getList({
-      ...params, // پارامترهای دیگر مثل search و ordering
-      member_id: String(memberId), // <--- این خط حیاتی است
-    }),
-    staleTime: 1000 * 60 * 5,
-  });
+    return useQuery({
+        queryKey: QUERY_KEYS.memberContents(memberId, params),
+        queryFn: () => contentService.getList({
+            ...params, // پارامترهای دیگر مثل search و ordering
+            member_id: String(memberId), // <--- این خط حیاتی است
+        }),
+        staleTime: 1000 * 60 * 5,
+    });
 }
 
 export function useLineContents(lineId: string | number | null) {
@@ -81,6 +82,7 @@ export function useContentDetail(id: number | string | null) {
     });
 }
 
+
 export function useMemberListContents(params?: ContentListParams) {
     return useQuery({
         queryKey: QUERY_KEYS.memberListContents(params),
@@ -89,10 +91,24 @@ export function useMemberListContents(params?: ContentListParams) {
     });
 }
 
-export function useMemberLineContents(params?: ContentListParams) {
+export function useMemberLineContents(
+    lineId: string,
+    params?: ContentListParams,
+) {
     return useQuery({
-        queryKey: QUERY_KEYS.memberLineContents(params),
-        queryFn: () => contentService.getMemberContents(params),
+        queryKey: QUERY_KEYS.memberLineContents(lineId, params),
+        queryFn: () =>
+            contentService.getMemberContents({...params, line_id: lineId}),
+        enabled: !!lineId,
         staleTime: 1000 * 60 * 5,
     });
+}
+
+
+export function useMemberContentDetail(id: string) {
+  return useQuery({
+    queryKey: QUERY_KEYS.memberContentDetail(id),
+    queryFn: () => contentService.getMemberContentDetail(id),
+    enabled: !!id,
+  });
 }

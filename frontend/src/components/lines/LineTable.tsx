@@ -18,6 +18,8 @@ import {
 } from "react-icons/fi";
 import { Input } from "@/components/ui/inputs";
 import { useLines } from "@/hooks/useLines";
+import { useUserPath } from "@/hooks/useUserPath";
+
 
 /* ------------------------------------------------------------------ */
 /* ساخت درخت والد/فرزند از روی لیست فلتی که از API می‌آید               */
@@ -69,45 +71,45 @@ function flattenTree(
 /* ------------------------------------------------------------------ */
 /* منوی عملیات — یک دکمه‌ی سه‌نقطه به‌جای شش آیکون جدا                  */
 /* ------------------------------------------------------------------ */
-function getLineActions(lineId: string) {
+function getLineActions(lineId: string, basePath: string) {
   return [
     {
-      href: `/staff/line/${lineId}`,
+      href: `${basePath}/line/${lineId}`,
       icon: FiEye,
       label: "مشاهده جزئیات",
       hint: "پروفایل کامل این بخش",
       accent: "text-blue-400",
     },
     {
-      href: `/staff/line/${lineId}/members`,
+      href: `${basePath}/line/${lineId}/members`,
       icon: FiUsers,
       label: "اعضای بخش",
       hint: "کاربران عادی این بخش",
       accent: "text-[#4ade80]",
     },
     {
-      href: `/staff/line/${lineId}/staff`,
+      href: `${basePath}/line/${lineId}/staff`,
       icon: FiBriefcase,
       label: "کارمندان بخش",
       hint: "کارمندان رسمی این بخش",
       accent: "text-purple-400",
     },
     {
-      href: `/staff/line/${lineId}/content/create`,
+      href: `${basePath}/line/${lineId}/content/create`,
       icon: FiPlus,
       label: "ایجاد محتوا",
       hint: "افزودن محتوای جدید به این بخش",
       accent: "text-gold",
     },
     {
-      href: `/staff/line/${lineId}/content`,
+      href: `${basePath}/line/${lineId}/content`,
       icon: FiFileText,
       label: "آرشیو محتوا",
       hint: "محتواهای منتشرشده‌ی این بخش",
       accent: "text-blue-400",
     },
     {
-      href: `/staff/line/${lineId}/consultation`,
+      href: `${basePath}/line/${lineId}/consultation`,
       icon: FiClipboard,
       label: "فرم‌ها و قراردادها",
       hint: "مدیریت فرم‌های مشاوره",
@@ -121,35 +123,71 @@ function LineActionsMenu({ lineId }: { lineId: string }) {
   const [position, setPosition] = useState<
     { top: number; left: number; maxHeight: number } | null
   >(null);
+
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const MENU_WIDTH = 256; // معادل w-64
-  const ITEM_HEIGHT = 58; // ارتفاع تقریبی هر گزینه، برای تصمیم‌گیری جهت باز شدن
+  const { basePath } = useUserPath();
+
+  const actions = basePath
+    ? getLineActions(lineId, basePath)
+    : [];
+
+  const MENU_WIDTH = 256;
+  const ITEM_HEIGHT = 58;
   const VIEWPORT_MARGIN = 16;
 
   function updatePosition() {
     if (!buttonRef.current) return;
+
     const rect = buttonRef.current.getBoundingClientRect();
-    const itemsCount = getLineActions(lineId).length;
+
+    const itemsCount = actions.length;
     const estimatedHeight = itemsCount * ITEM_HEIGHT + 8;
 
-    const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_MARGIN;
-    const spaceAbove = rect.top - VIEWPORT_MARGIN;
+    const spaceBelow =
+      window.innerHeight - rect.bottom - VIEWPORT_MARGIN;
 
-    // اگر پایین صفحه جا کافی برای کل منو نیست ولی بالا جای بیشتری هست، رو به بالا باز شود
-    const openUpward = spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
-    const availableSpace = openUpward ? spaceAbove : spaceBelow;
-    const maxHeight = Math.max(160, Math.min(estimatedHeight, availableSpace));
+    const spaceAbove =
+      rect.top - VIEWPORT_MARGIN;
 
-    let left = rect.left + rect.width / 2 - MENU_WIDTH / 2;
-    left = Math.max(12, Math.min(left, window.innerWidth - MENU_WIDTH - 12));
+    const openUpward =
+      spaceBelow < estimatedHeight &&
+      spaceAbove > spaceBelow;
+
+    const availableSpace =
+      openUpward ? spaceAbove : spaceBelow;
+
+    const maxHeight = Math.max(
+      160,
+      Math.min(estimatedHeight, availableSpace)
+    );
+
+    let left =
+      rect.left +
+      rect.width / 2 -
+      MENU_WIDTH / 2;
+
+    left = Math.max(
+      12,
+      Math.min(
+        left,
+        window.innerWidth - MENU_WIDTH - 12
+      )
+    );
 
     const top = openUpward
-      ? Math.max(VIEWPORT_MARGIN, rect.top - maxHeight - 8)
+      ? Math.max(
+          VIEWPORT_MARGIN,
+          rect.top - maxHeight - 8
+        )
       : rect.bottom + 8;
 
-    setPosition({ top, left, maxHeight });
+    setPosition({
+      top,
+      left,
+      maxHeight,
+    });
   }
 
   useEffect(() => {
@@ -159,6 +197,7 @@ function LineActionsMenu({ lineId }: { lineId: string }) {
 
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
+
       if (
         buttonRef.current &&
         !buttonRef.current.contains(target) &&
@@ -169,17 +208,44 @@ function LineActionsMenu({ lineId }: { lineId: string }) {
       }
     }
 
-    // با اسکرول یا تغییر اندازه، موقعیت و جهت منو باید دوباره محاسبه شود
-    window.addEventListener("scroll", updatePosition, true);
-    window.addEventListener("resize", updatePosition);
-    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener(
+      "scroll",
+      updatePosition,
+      true
+    );
+
+    window.addEventListener(
+      "resize",
+      updatePosition
+    );
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
 
     return () => {
-      window.removeEventListener("scroll", updatePosition, true);
-      window.removeEventListener("resize", updatePosition);
-      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener(
+        "scroll",
+        updatePosition,
+        true
+      );
+
+      window.removeEventListener(
+        "resize",
+        updatePosition
+      );
+
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
     };
-  }, [open]);
+  }, [open, actions.length]);
+
+  if (!basePath) {
+    return null;
+  }
 
   return (
     <>
@@ -209,7 +275,7 @@ function LineActionsMenu({ lineId }: { lineId: string }) {
             }}
             className="z-[100] overflow-y-auto overscroll-contain rounded-2xl border border-cream/10 bg-[#123832] py-1 shadow-2xl shadow-black/40"
           >
-            {getLineActions(lineId).map((action) => (
+            {actions.map((action) => (
               <Link
                 key={action.href}
                 href={action.href}
@@ -221,9 +287,15 @@ function LineActionsMenu({ lineId }: { lineId: string }) {
                 >
                   <action.icon size={15} />
                 </span>
+
                 <span className="min-w-0">
-                  <span className="block text-sm font-bold text-cream">{action.label}</span>
-                  <span className="block text-xs text-cream/45">{action.hint}</span>
+                  <span className="block text-sm font-bold text-cream">
+                    {action.label}
+                  </span>
+
+                  <span className="block text-xs text-cream/45">
+                    {action.hint}
+                  </span>
                 </span>
               </Link>
             ))}

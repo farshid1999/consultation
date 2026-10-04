@@ -8,7 +8,7 @@ export default function StaffDetailPage() {
   const params = useParams<{ id: string }>();
   
   // ✅ تبدیل محلی به Number برای سازگاری با هوک (بدون دست زدن به هوک)
-  const id = params.id ? Number(params.id) : null;
+  const id = params.id ? params.id : null;
   
   const { data, isLoading, isError } = useStaffDetail(id);
 

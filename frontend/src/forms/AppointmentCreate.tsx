@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { appointmentCreateSchema, type AppointmentCreateFormValues } from "@/schemas/appointment";
 import { useCreateAppointment } from "@/hooks/useAppointment";
-import { Input } from "@/components/ui/Inputs";
+import { Input } from "@/components/ui/inputs";
 
 interface AppointmentCreateFormProps {
   lineId: string;

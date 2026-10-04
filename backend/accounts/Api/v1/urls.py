@@ -50,9 +50,9 @@ user_urls = [
 staff_urls = [
     path("", StaffListAPIView.as_view(), name="staff-list"),
     path("create/", StaffCreateAPIView.as_view(), name="staff-create"),
-    path("<int:pk>/", StaffDetailAPIView.as_view(), name="staff-detail"),
-    path("<int:pk>/update/", StaffUpdateAPIView.as_view(), name="staff-update"),
-    path("<int:pk>/delete/", StaffDeleteAPIView.as_view(), name="staff-delete"),
+    path("<str:pk>/", StaffDetailAPIView.as_view(), name="staff-detail"),
+    path("<str:pk>/update/", StaffUpdateAPIView.as_view(), name="staff-update"),
+    path("<str:pk>/delete/", StaffDeleteAPIView.as_view(), name="staff-delete"),
 ]
 
 

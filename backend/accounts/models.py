@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -8,11 +9,11 @@ from core.models import BaseModel
 # Create your models here.
 
 
+
+
 def user_avatar_upload_path(instance, filename):
-    ext = os.path.splitext(filename)[1]
-
-    return f"users/{instance.id}/avatar/avatar{ext}"
-
+    ext = os.path.splitext(filename)[1].lower()
+    return f"users/avatars/{uuid.uuid4().hex}{ext}"
 
 def information_upload_path(instance, filename):
     ext = os.path.splitext(filename)[1]

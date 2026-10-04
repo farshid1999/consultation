@@ -180,15 +180,16 @@ staff_content_urls = [
 
 member_content_urls = [
     path(
-        "",
-        MemberContentListAPIView.as_view(),
-        name="member-content-list",
-    ),
-    path(
         "<str:pk>/",
         MemberContentDetailAPIView.as_view(),
         name="member-content-detail",
     ),
+    path(
+        "",
+        MemberContentListAPIView.as_view(),
+        name="member-content-list",
+    ),
+
 ]
 
 # =========================
