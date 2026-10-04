@@ -388,32 +388,37 @@ class StaffCreateSerializer(serializers.ModelSerializer):
 
 
 class StaffUpdateSerializer(serializers.ModelSerializer):
-    user = UserUpdateSerializer(required=False)
+    # فقط برای خروجی/ورودی خام؛ اعتبارسنجی را خودمان انجام می‌دهیم
+    user = serializers.DictField(required=False)
 
     class Meta:
         model = Staff
-
         fields = ["id", "user", "employee_code", "hire_date", "position"]
+
+    def validate(self, attrs):
+        user_data = attrs.get("user")
+        if user_data:
+            user_serializer = UserUpdateSerializer(
+                instance=self.instance.user,
+                data=user_data,
+                partial=True,
+                context=self.context,
+            )
+            user_serializer.is_valid(raise_exception=True)
+            attrs["_user_serializer"] = user_serializer
+        return attrs
 
     @transaction.atomic
     def update(self, instance, validated_data):
+        user_serializer = validated_data.pop("_user_serializer", None)
+        validated_data.pop("user", None)
 
-        user_data = validated_data.pop("user", None)
-
-        if user_data:
-            user_serializer = UserUpdateSerializer(
-                instance=instance.user, data=user_data, partial=True
-            )
-
-            user_serializer.is_valid(raise_exception=True)
-
+        if user_serializer:
             user_serializer.save()
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
         instance.save()
-
         return instance
 
 

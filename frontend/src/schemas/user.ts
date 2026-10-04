@@ -57,13 +57,13 @@ export const createUserSchema = z.object({
 export type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
 // ── Update User ───────────────────────────────────────────────────────────────
-
 export const updateUserSchema = createUserSchema
     .omit({password: true})
     .partial()
     .extend({
-        password: z.string().min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد").optional(),
+        password: z
+            .union([z.literal(""), z.string().min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد")])
+            .optional(),
     });
-
 
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;

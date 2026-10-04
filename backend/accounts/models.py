@@ -10,10 +10,10 @@ from core.models import BaseModel
 
 
 
+
 def user_avatar_upload_path(instance, filename):
     ext = os.path.splitext(filename)[1].lower()
     return f"users/avatars/{uuid.uuid4().hex}{ext}"
-
 
 def information_upload_path(instance, filename):
     ext = os.path.splitext(filename)[1]
