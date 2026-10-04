@@ -33,3 +33,6 @@ export type { AudioRecorderProps } from "./AudioRecorder";
 
 export { default as FieldWrapper } from "./FieldWrapper";
 export type { FieldWrapperProps } from "./FieldWrapper";
+
+export { default as  RichTextEditor} from "./RichTextEditor";
+export type { RichTextEditorProbs } from "./RichTextEditor";
