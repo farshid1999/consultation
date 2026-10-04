@@ -228,6 +228,62 @@ consultation_form_urls = [
 ]
 
 # =========================
+# Appointment URLs
+# =========================
+
+appointment_urls = [
+    path(
+        "create/",
+        AppointmentCreateAPIView.as_view(),
+        name="appointment-create",
+    ),
+    path(
+        "<str:pk>/update/",
+        AppointmentUpdateAPIView.as_view(),
+        name="appointment-update",
+    ),
+    path(
+        "<str:pk>/delete/",
+        AppointmentDestroyAPIView.as_view(),
+        name="appointment-delete",
+    ),
+]
+
+staff_appointment_urls = [
+    path(
+        "",
+        StaffAppointmentListAPIView.as_view(),
+        name="staff-appointment-list",
+    ),
+    path(
+        "<str:pk>/",
+        StaffAppointmentDetailAPIView.as_view(),
+        name="staff-appointment-detail",
+    ),
+]
+
+member_appointment_urls = [
+    path(
+        "",
+        MemberAppointmentListAPIView.as_view(),
+        name="member-appointment-list",
+    ),
+    path(
+        "<str:pk>/",
+        MemberAppointmentDetailAPIView.as_view(),
+        name="member-appointment-detail",
+    ),
+]
+
+admin_appointment_urls = [
+    path(
+        "",
+        AdminAppointmentListAPIView.as_view(),
+        name="admin-appointment-list",
+    ),
+]
+
+# =========================
 # Main URL List
 # =========================
 
@@ -299,4 +355,23 @@ urlpatterns = [
         "cosultation/",
         include(consultation_form_urls),
     ),
+# -------------------------
+# Appointments
+# -------------------------
+    path(
+        "appointments/",
+        include(appointment_urls),
+    ),
+    path(
+        "staff/appointments/",
+        include(staff_appointment_urls),
+),
+    path(
+        "member/appointments/",
+        include(member_appointment_urls),
+),
+    path(
+        "admin/appointments/",
+        include(admin_appointment_urls),
+),
 ]
