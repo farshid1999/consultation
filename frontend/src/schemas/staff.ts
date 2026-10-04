@@ -7,7 +7,10 @@ export const staffCreateSchema = z.object({
   employee_code: z.string().min(1, "کد پرسنلی الزامی است"),
   hire_date: z.date({ required_error: "تاریخ استخدام الزامی است" }),
   position: z.string().min(1, "سمت الزامی است"),
+
 });
+
+
 
 /** Mirrors StaffUpdateSerializer: everything optional (partial update). */
 export const staffUpdateSchema = z.object({

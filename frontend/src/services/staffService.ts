@@ -34,7 +34,7 @@ export const staffService = {
   },
 
   /** GET /accounts/staff/:id/ */
-  async detail(id: number): Promise<StaffDetail> {
+  async detail(id: string): Promise<StaffDetail> {
     try {
       const { data } = await apiClient.get<StaffDetail>(STAFF_ENDPOINTS.detail(id));
       return data;
@@ -64,7 +64,7 @@ export const staffService = {
   },
 
   /** PATCH /accounts/staff/:id/update/ — partial update, same file-detection rule as create. */
-  async update(id: number, payload: StaffUpdateInput): Promise<StaffMutationResult> {
+  async update(id: string, payload: StaffUpdateInput): Promise<StaffMutationResult> {
     try {
       const hasFile = containsFile(payload);
       const { data } = await apiClient.patch<StaffMutationResult>(
@@ -79,7 +79,7 @@ export const staffService = {
   },
 
   /** DELETE /accounts/staff/:id/delete/ */
-  async remove(id: number): Promise<{ message: string }> {
+  async remove(id: string): Promise<{ message: string }> {
     try {
       const { data } = await apiClient.delete<{ message: string }>(STAFF_ENDPOINTS.delete(id));
       return data;

@@ -17,6 +17,35 @@ from accounts.models import Role, Staff, User
 from core.permissions import IsAdminOrSuperUser
 
 
+
+class NestedFilePayloadMixin:
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
+
+    def get_payload(self, request):
+        if "data" in request.data:
+            payload = json.loads(request.data["data"])
+            self._inject_files(payload, request.FILES, "")
+            return payload
+        return request.data
+
+    def _inject_files(self, obj, files_dict, path):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                new_path = f"{path}[{key}]" if path else key
+                if (
+                    isinstance(value, str)
+                    and value.startswith("__FILE__")
+                    and new_path in files_dict
+                ):
+                    obj[key] = files_dict[new_path]
+                else:
+                    self._inject_files(value, files_dict, new_path)
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                self._inject_files(item, files_dict, f"{path}[{i}]")
+
+
+
 def get_tokens_for_user(user):
 
     refresh = RefreshToken.for_user(user)
@@ -434,21 +463,12 @@ class UserDeleteAPIView(GenericAPIView):
 import json
 
 
-class StaffCreateAPIView(GenericAPIView):
+class StaffCreateAPIView(NestedFilePayloadMixin, GenericAPIView):
     serializer_class = StaffCreateSerializer
-
     permission_classes = (IsAdminOrSuperUser,)
 
-    parser_classes = (JSONParser, MultiPartParser, FormParser)
-
     def post(self, request):
-        if "data" in request.data:
-            payload = json.loads(request.data["data"])
-            self._inject_files(payload, request.FILES, "")
-        else:
-            payload = request.data
-
-        serializer = self.get_serializer(data=payload)
+        serializer = self.get_serializer(data=self.get_payload(request))
         serializer.is_valid(raise_exception=True)
         staff = serializer.save()
         return Response(
@@ -456,41 +476,23 @@ class StaffCreateAPIView(GenericAPIView):
             status=status.HTTP_201_CREATED,
         )
 
-    def _inject_files(self, obj, files_dict, path):
-        if isinstance(obj, dict):
-            for key, value in obj.items():
-                new_path = f"{path}[{key}]" if path else key
-                if (
-                    isinstance(value, str)
-                    and value.startswith("__FILE__")
-                    and new_path in files_dict
-                ):
-                    obj[key] = files_dict[new_path]
-                else:
-                    self._inject_files(value, files_dict, new_path)
-        elif isinstance(obj, list):
-            for i, item in enumerate(obj):
-                self._inject_files(item, files_dict, f"{path}[{i}]")
 
-
-class StaffUpdateAPIView(GenericAPIView):
+class StaffUpdateAPIView(NestedFilePayloadMixin, GenericAPIView):
     serializer_class = StaffUpdateSerializer
-
     permission_classes = (IsAdminOrSuperUser,)
 
     def patch(self, request, pk):
-
         staff = get_object_or_404(Staff, pk=pk)
-
-        serializer = self.get_serializer(staff, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            staff, data=self.get_payload(request), partial=True
+        )
         serializer.is_valid(raise_exception=True)
         staff = serializer.save()
-
+        cache.delete(f"staff:detail:{pk}")
         return Response(
             StaffDetailSerializer(staff, context=self.get_serializer_context()).data,
             status=status.HTTP_200_OK,
         )
-
 
 class StaffListAPIView(GenericAPIView):
     serializer_class = StaffListSerializer

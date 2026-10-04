@@ -81,7 +81,7 @@ export default function StaffCreateForm() {
         referral_code: values.user.referral_code || undefined,
         address: values.user.address,
         club: values.user.club,
-        avatar: values.user.avatar ?? undefined,
+        avatar: values.user.avatar instanceof File ? values.user.avatar : undefined,
         bio: values.user.bio || undefined,
         birth_date: toApiDateString(values.user.birth_date ?? undefined) ?? null,
         informations: cleanInformations(values.user.informations),

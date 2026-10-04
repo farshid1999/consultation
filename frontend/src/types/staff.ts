@@ -4,7 +4,7 @@ import {PaginatedResponse} from "@/types/lineMember";
 
 /** Mirrors StaffListSerializer. */
 export interface StaffListItem {
-  id: number;
+  id: string;
   employee_code: string;
   position: string;
   /** ISO date string "YYYY-MM-DD". */
@@ -15,7 +15,7 @@ export interface StaffListItem {
 
 /** Mirrors StaffDetailSerializer. */
 export interface StaffDetail {
-  id: number;
+  id: string;
   employee_code: string;
   position: string;
   hire_date: string;
@@ -41,7 +41,7 @@ export interface StaffUpdateInput {
 
 /** What StaffCreateAPIView / StaffUpdateAPIView actually return (StaffUpdateSerializer shape in both cases). */
 export interface StaffMutationResult {
-  id: number;
+  id: string;
   user: UserDetail | UserCreateInput;
   employee_code: string;
   hire_date: string;
@@ -50,7 +50,7 @@ export interface StaffMutationResult {
 
 
 export interface StaffLine {
-  id: number;
+  id: string;
   staff: string; // همان StringRelatedField که نام کاربر را برمی‌گرداند
   user: UserDetail;
 

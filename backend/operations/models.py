@@ -444,6 +444,14 @@ class ContentRecipient(BaseModel):
         related_name="content_recipients",
     )
 
+    conversation = models.OneToOneField(
+        "Conversation",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="content_recipient",
+    )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(

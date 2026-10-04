@@ -115,7 +115,7 @@ export default function StaffEditForm({ staff }: { staff: StaffDetail }) {
         referral_code: values.user?.referral_code || undefined,
         address: values.user?.address,
         club: values.user?.club,
-        avatar: values.user?.avatar ?? undefined,
+        avatar: values.user?.avatar instanceof File ? values.user.avatar : undefined,
         bio: values.user?.bio || undefined,
         birth_date: toApiDateString(values.user?.birth_date ?? undefined) ?? undefined,
         informations: cleanInformations(values.user?.informations) as never,
@@ -171,6 +171,7 @@ export default function StaffEditForm({ staff }: { staff: StaffDetail }) {
         mode="edit"
         initialShowAddress={Boolean(staff.user.address)}
         initialShowClub={Boolean(staff.user.club)}
+        currentAvatarUrl={staff.user.avatar}
       />
 
       {/* دکمه‌های عملیات */}

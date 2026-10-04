@@ -1832,10 +1832,12 @@ class StaffContentDetailAPIView(generics.RetrieveAPIView):
 
 
 class MemberContentDetailAPIView(generics.RetrieveAPIView):
-    serializer_class = ContentDetailSerializer
+    serializer_class = MemberContentDetailSerializer
     permission_classes = [
         IsAuthenticated,
     ]
+
+
 
     def get_queryset(self):
         user = self.request.user
@@ -1848,10 +1850,10 @@ class MemberContentDetailAPIView(generics.RetrieveAPIView):
             )
             .select_related(
                 "line",
-                "media",
                 "parent",
             )
             .prefetch_related(
+                "media",
                 "recipients__member__user",
                 "children",
             )

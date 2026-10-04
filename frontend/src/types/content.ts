@@ -45,31 +45,39 @@ export interface ContentListParams {
   page?: number;
   page_size?: number;
   line?: string;
+  line_id?: string;
 }
 
 
 export interface MediaItem {
-  id: number;
-  file: string;
+  id: string;
+  file: string | null;
   text?: string;
 }
 
 export interface ContentRecipient {
-  id: number;
-  member: LineMember; // شامل user کامل است
+  id: string;
+  member: LineMember;
+  conversation: string | null; // جدید
 }
 
 export interface ContentDetail {
-  id: number;
+  id: string; // UUID است، نه number
   line: LineDetail;
   title: string;
   text: string | null;
   media: MediaItem[];
-  parent: number | null;
-  children: any[]; // یا تایپ مخصوص Children اگر دارید
+  parent: string | null;
+  children: any[];
   recipients: ContentRecipient[];
   created_at: string;
   updated_at: string;
+}
+
+
+export interface MemberContentDetail
+  extends Omit<ContentDetail, "recipients" | "children"> {
+  conversation: string | null;
 }
 
 export type ContentListResponse = PaginatedResponse<ContentListItem>;

@@ -24,6 +24,30 @@ from operations.models import (
 )
 
 
+
+
+
+def create_recipient_conversation(content, member):
+    """ساخت ContentRecipient همراه با Conversation (همان الگوی تکلیف)."""
+    conversation = Conversation.objects.create(line=content.line)
+
+    ConversationParticipant.objects.create(
+        conversation=conversation,
+        user=member.user,
+    )
+    for staff_line in content.line.staff_memberships.select_related("staff__user"):
+        ConversationParticipant.objects.get_or_create(
+            conversation=conversation,
+            user=staff_line.staff.user,
+        )
+
+    return ContentRecipient.objects.create(
+        content=content,
+        member=member,
+        conversation=conversation,
+    )
+
+
 class MediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Media
@@ -967,23 +991,17 @@ class ConversationListSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    sender = serializers.CharField(
-        source="sender.user",
-        read_only=True,
-    )
-
-    media = MediaSerializer(
-        read_only=True,
-    )
+    sender = serializers.CharField(source="sender.user", read_only=True)
+    is_mine = serializers.SerializerMethodField()
+    media = MediaSerializer(read_only=True)
 
     class Meta:
         model = Message
-        fields = (
-            "id",
-            "sender",
-            "media",
-            "created_at",
-        )
+        fields = ("id", "sender", "is_mine", "media", "created_at")
+
+    def get_is_mine(self, obj):
+        request = self.context.get("request")
+        return bool(request and obj.sender.user_id == request.user.id)
 
 
 class ConversationDetailSerializer(serializers.ModelSerializer):
@@ -1080,6 +1098,8 @@ class MessageCreateSerializer(serializers.ModelSerializer):
             sender=participant,
             media=media,
         )
+
+
 class ContentCreateSerializer(serializers.ModelSerializer):
     member_ids = serializers.PrimaryKeyRelatedField(
         source="members",
@@ -1165,15 +1185,8 @@ class ContentCreateSerializer(serializers.ModelSerializer):
             ]
         )
 
-        ContentRecipient.objects.bulk_create(
-            [
-                ContentRecipient(
-                    content=content,
-                    member=member,
-                )
-                for member in members
-            ]
-        )
+        for member in members:
+            create_recipient_conversation(content, member)
 
         return content
 
@@ -1295,11 +1308,24 @@ class ContentUpdateSerializer(serializers.ModelSerializer):
         # Recipients
         # --------------------------------
         if members is not None:
-            ContentRecipient.objects.filter(content=instance).delete()
-            ContentRecipient.objects.bulk_create([
-                ContentRecipient(content=instance, member=member)
-                for member in members
-            ])
+            new_ids = {m.id for m in members}
+            existing = {
+                r.member_id: r
+                for r in ContentRecipient.objects.filter(content=instance)
+            }
+
+            # حذف گیرنده‌های برداشته‌شده (و گفتگوی آن‌ها)
+            for member_id, rec in existing.items():
+                if member_id not in new_ids:
+                    conv = rec.conversation
+                    rec.delete()
+                    if conv:
+                        conv.delete()
+
+            # افزودن گیرنده‌های جدید
+            for member in members:
+                if member.id not in existing:
+                    create_recipient_conversation(instance, member)
 
         return instance
 
@@ -1325,10 +1351,7 @@ class ContentRecipientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ContentRecipient
-        fields = (
-            "id",
-            "member",
-        )
+        fields = ("id", "member", "conversation")
 
 
 class ContentDetailSerializer(serializers.ModelSerializer):
@@ -1343,19 +1366,14 @@ class ContentDetailSerializer(serializers.ModelSerializer):
 
     children = serializers.SerializerMethodField()
 
+    conversation = serializers.SerializerMethodField()
+
     class Meta:
         model = Content
         fields = (
-            "id",
-            "line",
-            "title",
-            "text",
-            "media",
-            "parent",
-            "children",
-            "recipients",
-            "created_at",
-            "updated_at",
+            "id", "line", "title", "text", "media", "parent",
+            "children", "recipients", "conversation",  # ← conversation اضافه شد
+            "created_at", "updated_at",
         )
 
     def get_children(self, obj):
@@ -1363,6 +1381,15 @@ class ContentDetailSerializer(serializers.ModelSerializer):
             obj.children.all(),
             many=True,
         ).data
+
+    def get_conversation(self, obj):
+        request = self.context.get("request")
+        if not request:
+            return None
+        rec = obj.recipients.filter(member__user=request.user).first()
+        conv_id = getattr(rec, "conversation_id", None)
+        return str(conv_id) if conv_id else None
+
 
 
 class ContentListSerializer(serializers.ModelSerializer):
@@ -1380,6 +1407,13 @@ class ContentListSerializer(serializers.ModelSerializer):
             "updated_at",
         )
 
+
+class MemberContentDetailSerializer(ContentDetailSerializer):
+    class Meta(ContentDetailSerializer.Meta):
+        fields = tuple(
+            f for f in ContentDetailSerializer.Meta.fields
+            if f not in ("recipients", "children")
+        )
 
 class FormSerializer(serializers.ModelSerializer):
     class Meta:

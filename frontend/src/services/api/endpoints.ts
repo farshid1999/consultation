@@ -44,6 +44,8 @@ export const CONTENT_ENDPOINTS = {
   memberList: `operations/member/contents/`,
   memberDetailContent: (id: number | string) =>
     `operations/member/contents/${id}/`,
+  memberDetail: (id: string) => `operations/member/contents/${id}/`,
+
 };
 
 export const ASSIGNMENT_ENDPOINTS = {

@@ -17,6 +17,8 @@ from accounts.models import (
 )
 from message.tasks import *
 
+from django.utils import timezone
+from django.core.cache import cache
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -190,6 +192,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
         fields = [
             "id",
+            "avatar",
             "username",
             "password",
             "first_name",
@@ -262,6 +265,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
         fields = [
             "id",
+            "avatar",
             "username",
             "password",
             "first_name",
@@ -589,8 +593,6 @@ class SendOTPSerializer(serializers.Serializer):
 
         return {"phone_number": phone_number}
 
-
-from django.utils import cache, timezone
 
 
 class VerifyOTPSerializer(serializers.Serializer):
