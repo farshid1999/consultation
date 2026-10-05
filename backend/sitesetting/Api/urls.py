@@ -1,8 +1,14 @@
 from django.urls import path
 from .views import (
+    BackgroundMusicView,
     ContactRequestCreateView,
+    ContactRequestDetailView,
     ContactRequestListView,
-    ContactRequestDetailView, BackgroundMusicView,
+    SliderDetailView,
+    SliderImageCreateView,
+    SliderImageDetailView,
+    SliderListCreateView,
+    SliderPublicView,
 )
 
 urlpatterns = [
@@ -13,5 +19,22 @@ urlpatterns = [
         "background-music/",
         BackgroundMusicView.as_view(),
         name="background-music"
+    ),
+
+    # اسلایدر (عمومی)
+    path("sliders/public/<slug:key>/", SliderPublicView.as_view(), name="slider-public"),
+
+    # اسلایدر (مدیریتی)
+    path("sliders/", SliderListCreateView.as_view(), name="slider-list"),
+    path("sliders/<int:pk>/", SliderDetailView.as_view(), name="slider-detail"),
+    path(
+        "sliders/<int:slider_id>/images/",
+        SliderImageCreateView.as_view(),
+        name="slider-image-create",
+    ),
+    path(
+        "sliders/images/<int:pk>/",
+        SliderImageDetailView.as_view(),
+        name="slider-image-detail",
     ),
 ]
