@@ -1,26 +1,25 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation"; // 1. ایمپورت useRouter
-import { Input } from "@/components/ui/inputs"; // اصلاح مسیر Inputs (حروف کوچک)
+import { Input } from "@/components/ui/inputs";
 import { loginSchema, type LoginFormValues } from "@/schemas/auth";
-import { useLogin, useUserRole } from "@/hooks/useAuth"; // 2. ایمپورت صحیح هوک نقش
+import { useLogin } from "@/hooks/useAuth";
 import { tokenService } from "@/lib/auth/tokenService";
 import { FiUser, FiLock } from "react-icons/fi";
-import { queryClient } from "@/lib/react-query"; // فرض بر وجود کلاینت کوئری برای اینوالید کردن کش
 
 export interface LoginFormProps {
   onSuccess?: () => void;
+  onGoToRegister?: () => void;
 }
 
-export default function LoginForm({ onSuccess }: LoginFormProps) {
+export default function LoginForm({
+  onSuccess,
+  onGoToRegister,
+}: LoginFormProps) {
   const router = useRouter();
   const { mutate: login, isPending, error } = useLogin();
-
-  // ما از این هوک برای خواندن داده استفاده نمی‌کنیم، بلکه برای دسترسی به تابع refetch استفاده می‌کنیم
-  // یا می‌توانیم مستقیماً سرویس را صدا بزنیم.
-  // روش تمیزتر: استفاده از هوک و فراخوانی دستی آن پس از لاگین
 
   const {
     register,
@@ -33,41 +32,27 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   const onSubmit = (data: LoginFormValues) => {
     login(data, {
       onSuccess: async (res) => {
-        if (res?.access) {
-          tokenService.setAccessToken(res.access);
+        if (!res?.access) return;
+        tokenService.setAccessToken(res.access);
 
-          // 3. دریافت نقش‌های کاربر بلافاصله پس از لاگین
-          // برای اطمینان از اینکه کش قدیمی نیست، می‌توانیم کش را پاک کنیم یا مستقیماً سرویس را صدا بزنیم
-          try {
-            // فرض بر این است که سرویس auth متد getUserRole دارد
-            import("@/services/user").then(async ({ users }) => {
-              const roleData = await users.getUserRole();
+        try {
+          const { users } = await import("@/services/user");
+          const roleData = await users.getUserRole();
 
-              const isAdmin = roleData.roles.includes("admin");
-              const isStaff = roleData.is_staff;
-              const isSuper = roleData.is_super;
-              if (isSuper) {
-                router.push("/admin");
-              }else if (isAdmin) {
-                router.push("/admin"); // مسیر صفحه ادمین
-              } else if (isStaff) {
-                router.push("/staff"); // مسیر صفحه استاف
-              } else {
-                router.push("/member"); // مسیر صفحه ممبر
-              }
-
-              onSuccess?.();
-            });
-          } catch (err) {
-            console.error("Failed to fetch user role", err);
-            // در صورت خطا، به یک صفحه پیش‌فرض بروید
-            router.push("/login");
+          if (roleData.is_super || roleData.roles.includes("admin")) {
+            router.push("/admin");
+          } else if (roleData.is_staff) {
+            router.push("/staff");
+          } else {
+            router.push("/member");
           }
+        } catch (err) {
+          console.error("Failed to fetch user role", err);
+          router.push("/member");
         }
+
+        onSuccess?.();
       },
-      onError: (err) => {
-        console.error(err);
-      }
     });
   };
 
@@ -92,7 +77,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
       {error && (
         <p className="text-xs text-red-400 text-right">
-          {(error as any)?.non_field_errors?.[0] ?? "نام کاربری یا رمز عبور اشتباه است."}
+          {(error as any)?.non_field_errors?.[0] ??
+            "نام کاربری یا رمز عبور اشتباه است."}
         </p>
       )}
 
@@ -103,6 +89,20 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       >
         {isPending ? "در حال ورود..." : "ورود"}
       </button>
+
+      <p className="text-center text-sm text-cream/60">
+        حساب کاربری ندارید؟{" "}
+        <button
+          type="button"
+          onClick={() => {
+            if (onGoToRegister) onGoToRegister();
+            else router.push("/register");
+          }}
+          className="font-semibold text-gold transition-opacity hover:opacity-80"
+        >
+          ثبت‌نام کنید
+        </button>
+      </p>
     </form>
   );
 }

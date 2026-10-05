@@ -199,6 +199,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "phone_number",
+            "national_id",
             "land_line",
             "is_student",
             "degree",
@@ -212,9 +213,34 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "bio",
             "birth_date",
             "informations",
+            "coach_name",
+            "activity_history",
         ]
 
-        extra_kwargs = {"password": {"write_only": True}}
+        extra_kwargs = {
+            "password": {"write_only": True, "required": False},
+            "username": {"required": False},
+            "national_id": {
+                "required": True,
+                "allow_null": False,
+                "allow_blank": False,
+            },
+        }
+
+    def validate(self, attrs):
+        # اگر نام کاربری/رمز داده نشد، از کد ملی و شماره موبایل ساخته می‌شود
+        if not attrs.get("username"):
+            username = attrs["national_id"]
+            if User.objects.filter(username=username).exists():
+                raise serializers.ValidationError(
+                    {"national_id": "این کد ملی قبلاً ثبت شده است."}
+                )
+            attrs["username"] = username
+
+        if not attrs.get("password"):
+            attrs["password"] = attrs["phone_number"]
+
+        return attrs
 
     @transaction.atomic
     def create(self, validated_data):
@@ -272,6 +298,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "phone_number",
+            "national_id",
             "land_line",
             "is_student",
             "degree",
@@ -285,6 +312,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "bio",
             "birth_date",
             "informations",
+            "coach_name",
+            "activity_history",
         ]
 
         extra_kwargs = {"password": {"write_only": True, "required": False}}
@@ -435,6 +464,7 @@ class UserListSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "phone_number",
+            "national_id",
             "is_student",
             "club",
             "address",
@@ -458,6 +488,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "password",
             "groups",
             "user_permissions",
+            "coach_name",
+            "activity_history",
         )
 
 
@@ -490,24 +522,37 @@ class StaffDetailSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     club = ClubSerializer()
-    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
+        extra_kwargs = {
+            "national_id": {
+                "required": True,
+                "allow_null": False,
+                "allow_blank": False,
+            }
+        }
         fields = (
-            "username",
-            "password",
             "first_name",
             "last_name",
             "email",
             "phone_number",
+            "national_id",
             "is_student",
             "degree",
             "job",
             "sport_discipline",
+            "coach_name",
+            "activity_history",
             "professional_background",
             "club",
         )
+
+    def validate_national_id(self, value):
+        # چون username برابر کد ملی می‌شود، نباید با username موجود تداخل کند
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("این کد ملی قبلاً ثبت شده است.")
+        return value
 
     @transaction.atomic
     def create(self, validated_data):
@@ -515,14 +560,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         address_data = club_data.pop("address")
 
         address = Address.objects.create(**address_data)
-
         club = Club.objects.create(address=address, **club_data)
 
-        password = validated_data.pop("password")
-
         user = User(**validated_data)
+        user.username = validated_data["national_id"]
         user.club = club
-        user.set_password(password)
+        user.set_password(validated_data["phone_number"])
         user.save()
 
         return user

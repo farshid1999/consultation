@@ -1,5 +1,5 @@
 import {z} from "zod";
-
+import {isValidNationalId} from "@/schemas/auth";
 // ── Shared ────────────────────────────────────────────────────────────────────
 
 export const addressSchema = z.object({
@@ -28,11 +28,10 @@ const avatarField = z
 
 
 export const createUserSchema = z.object({
-    username: z
+    national_id: z
         .string()
-        .min(3, "نام کاربری باید حداقل ۳ کاراکتر باشد")
-        .max(50, "نام کاربری نباید بیشتر از ۵۰ کاراکتر باشد"),
-    password: z.string().min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد"),
+        .min(1, "کد ملی الزامی است")
+        .refine(isValidNationalId, "کد ملی معتبر وارد کنید"),
     first_name: z.string().min(1, "نام الزامی است"),
     last_name: z.string().min(1, "نام خانوادگی الزامی است"),
     email: z.string().email("ایمیل معتبر وارد کنید"),
@@ -44,6 +43,8 @@ export const createUserSchema = z.object({
     degree: z.string().max(100).optional(),
     job: z.string().max(100).optional(),
     sport_discipline: z.string().max(100).optional(),
+    coach_name: z.string().max(150).optional(),
+    activity_history: z.string().optional(),
     professional_background: z.string().optional(),
     referral_code: z.string().optional(),
     bio: z.string().optional(),
@@ -58,9 +59,13 @@ export type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
 // ── Update User ───────────────────────────────────────────────────────────────
 export const updateUserSchema = createUserSchema
-    .omit({password: true})
     .partial()
     .extend({
+        // کاربران قدیمی کد ملی ندارند، پس خالی هم مجاز است
+        national_id: z
+            .union([z.literal(""), z.string().refine(isValidNationalId, "کد ملی معتبر وارد کنید")])
+            .optional(),
+        username: z.string().min(3, "نام کاربری باید حداقل ۳ کاراکتر باشد").max(50).optional(),
         password: z
             .union([z.literal(""), z.string().min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد")])
             .optional(),

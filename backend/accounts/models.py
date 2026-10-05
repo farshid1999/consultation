@@ -2,6 +2,7 @@ import os
 import uuid
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from core.models import BaseModel
@@ -14,6 +15,22 @@ from core.models import BaseModel
 def user_avatar_upload_path(instance, filename):
     ext = os.path.splitext(filename)[1].lower()
     return f"users/avatars/{uuid.uuid4().hex}{ext}"
+
+def validate_national_id(value):
+    """اعتبارسنجی کد ملی ایران (۱۰ رقم + رقم کنترل)"""
+    if not value.isdigit() or len(value) != 10:
+        raise ValidationError("کد ملی باید ۱۰ رقم باشد.")
+
+    # کدهای تکراری مثل 1111111111 نامعتبرند
+    if len(set(value)) == 1:
+        raise ValidationError("کد ملی نامعتبر است.")
+
+    check = int(value[9])
+    total = sum(int(value[i]) * (10 - i) for i in range(9)) % 11
+    valid = (total < 2 and check == total) or (total >= 2 and check == 11 - total)
+    if not valid:
+        raise ValidationError("کد ملی نامعتبر است.")
+
 
 def information_upload_path(instance, filename):
     ext = os.path.splitext(filename)[1]
@@ -97,6 +114,14 @@ class User(AbstractUser):
         max_length=20,
     )
 
+    national_id = models.CharField(
+        max_length=10,
+        unique=True,
+        null=True,
+        blank=True,
+        validators=[validate_national_id],
+    )
+
     land_line = models.CharField(max_length=20, blank=True, null=True)
 
     is_student = models.BooleanField(
@@ -108,6 +133,10 @@ class User(AbstractUser):
     job = models.CharField(max_length=100, null=True, blank=True)
 
     sport_discipline = models.CharField(max_length=100, blank=True, null=True)
+
+    coach_name = models.CharField(max_length=150, blank=True, null=True)
+
+    activity_history = models.TextField(blank=True, null=True)
 
     professional_background = models.TextField(blank=True, null=True)
 

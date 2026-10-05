@@ -20,7 +20,7 @@ export default function AuthModal({
   defaultTab = "login",
 }: AuthModalProps) {
   const [tab, setTab] = useState<"login" | "register">(defaultTab);
-
+  console.log("[AuthModal] render | tab:", tab);
   return (
     <AnimatePresence>
       {isOpen && (
@@ -78,7 +78,16 @@ export default function AuthModal({
                   transition={{ duration: 0.18 }}
                 >
                   {tab === "login" ? (
-                    <LoginForm onSuccess={onClose} />
+                    <LoginForm
+                      onSuccess={onClose}
+                      onGoToRegister={() => {
+                        console.log(
+                          "[AuthModal] onGoToRegister called, current tab:",
+                          tab,
+                        );
+                        setTab("register");
+                      }}
+                    />
                   ) : (
                     <RegisterForm onGoToLogin={() => setTab("login")} />
                   )}

@@ -35,6 +35,9 @@ export interface UserDetail {
   degree: string;
   job: string;
   sport_discipline: string;
+  national_id: string | null;
+  coach_name: string | null;
+  activity_history: string | null;
   professional_background: string;
   referral_code: string;
   avatar: string | null;

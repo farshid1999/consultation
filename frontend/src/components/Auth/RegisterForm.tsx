@@ -26,6 +26,7 @@ export default function RegisterForm({
   onSuccess,
   onGoToLogin,
 }: RegisterFormProps) {
+  console.log("[RegisterForm] render | onGoToLogin:", typeof onGoToLogin);
   const { mutate: submitRegister, isPending, error } = useRegister();
   const [registeredUser, setRegisteredUser] = useState<{
     username: string;
@@ -45,7 +46,10 @@ export default function RegisterForm({
   const onSubmit = (data: RegisterFormValues) => {
     submitRegister(data, {
       onSuccess: () => {
-        setRegisteredUser({ username: data.username, password: data.password });
+        setRegisteredUser({
+          username: data.national_id,
+          password: data.phone_number,
+        });
         onSuccess?.();
       },
     });
@@ -75,17 +79,19 @@ export default function RegisterForm({
 
         <div className="w-full rounded-xl bg-cream/5 border border-cream/10 p-4 space-y-3 text-right">
           <div className="flex justify-between items-center">
-            <span className="text-cream/50 text-sm">نام کاربری</span>
+            <span className="text-cream/50 text-sm">نام کاربری (کد ملی)</span>
             <span className="text-cream font-medium">
               {registeredUser.username}
             </span>
           </div>
           <div className="w-full h-px bg-cream/10" />
           <div className="flex justify-between items-center gap-2">
-            <span className="text-cream/50 text-sm">رمز عبور</span>
+            <span className="text-cream/50 text-sm">
+              رمز عبور (شماره موبایل)
+            </span>
             <div className="flex items-center gap-2">
-              <span className="text-cream font-medium tracking-widest">
-                {"•".repeat(registeredUser.password.length)}
+              <span className="text-cream font-medium">
+                {registeredUser.password}
               </span>
               <button
                 onClick={handleCopy}
@@ -116,21 +122,14 @@ export default function RegisterForm({
           اطلاعات حساب
         </legend>
         <Input
-          label="نام کاربری"
-          placeholder="نام کاربری"
+          label="کد ملی"
+          placeholder="کد ملی ۱۰ رقمی (نام کاربری شما)"
+          inputMode="numeric"
+          maxLength={10}
           leftIcon={<FiUser />}
           required
-          error={errors.username?.message}
-          {...field("username")}
-        />
-        <Input
-          label="رمز عبور"
-          type="password"
-          placeholder="رمز عبور"
-          leftIcon={<FiLock />}
-          required
-          error={errors.password?.message}
-          {...field("password")}
+          error={errors.national_id?.message}
+          {...field("national_id")}
         />
         <Input
           label="ایمیل"
@@ -176,6 +175,18 @@ export default function RegisterForm({
           placeholder="رشته ورزشی خود را وارد کنید"
           error={errors.sport_discipline?.message}
           {...field("sport_discipline")}
+        />
+        <Input
+          label="نام مربی"
+          placeholder="نام مربی خود را وارد کنید"
+          error={errors.coach_name?.message}
+          {...field("coach_name")}
+        />
+        <Input
+          label="سابقه فعالیت"
+          placeholder="مثلاً: ۵ سال فعالیت در رشته کاراته"
+          error={errors.activity_history?.message}
+          {...field("activity_history")}
         />
         <Input
           label="شغل"
@@ -261,6 +272,23 @@ export default function RegisterForm({
       >
         {isPending ? "در حال ثبت‌نام..." : "ثبت‌نام"}
       </button>
+
+      <p className="text-center text-sm text-cream/60">
+        حساب کاربری دارید؟{" "}
+        <button
+          type="button"
+          onClick={() => {
+            console.log(
+              "[RegisterForm] login link clicked | onGoToLogin:",
+              typeof onGoToLogin,
+            );
+            onGoToLogin?.();
+          }}
+          className="font-semibold text-gold transition-opacity hover:opacity-80"
+        >
+          وارد شوید
+        </button>
+      </p>
     </form>
   );
 }
