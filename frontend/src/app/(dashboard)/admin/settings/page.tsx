@@ -2,8 +2,18 @@
 
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { FiMusic, FiPlay, FiPause } from "react-icons/fi";
-import { useBackgroundMusic, useUpdateBackgroundMusic } from "@/hooks/useSettings";
+import Link from "next/link";
+import {
+  FiMusic,
+  FiPlay,
+  FiPause,
+  FiImage,
+  FiChevronLeft,
+} from "react-icons/fi";
+import {
+  useBackgroundMusic,
+  useUpdateBackgroundMusic,
+} from "@/hooks/useSettings";
 import FormSection from "@/forms/FormSection";
 import GlassCard from "@/components/ui/GlassCard";
 
@@ -44,18 +54,38 @@ export default function AdminSettingsPage() {
   };
 
   if (isLoading) {
-    return <div className="p-10 text-center text-cream">در حال بارگذاری...</div>;
+    return (
+      <div className="p-10 text-center text-cream">در حال بارگذاری...</div>
+    );
   }
 
   return (
     <main dir="rtl" className="mx-auto max-w-4xl px-6 py-10">
       <h1 className="text-3xl font-extrabold text-cream mb-8">تنظیمات عمومی</h1>
+      <Link
+        href="/admin/settings/sliders"
+        className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-cream/10 bg-cream/[0.06] p-5 transition-colors hover:border-gold/40"
+      >
+        <div className="flex items-center gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gold/10 text-gold">
+            <FiImage size={20} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-cream">اسلایدرهای سایت</p>
+            <p className="mt-0.5 text-xs text-cream/50">
+              مدیریت تصاویر و کپشن اسلایدرها، مثل بخش «چرا یوگبال»
+            </p>
+          </div>
+        </div>
+        <FiChevronLeft className="text-cream/40" aria-hidden="true" />
+      </Link>
 
       <GlassCard className="p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-
-          <FormSection title="موزیک پس‌زمینه" description="فایل صوتی برای پخش در کل سایت">
-
+          <FormSection
+            title="موزیک پس‌زمینه"
+            description="فایل صوتی برای پخش در کل سایت"
+          >
             {/* وضعیت فعال/غیرفعال */}
             <div className="flex items-center gap-3 mb-6">
               <label className="relative inline-flex items-center cursor-pointer">
@@ -71,7 +101,9 @@ export default function AdminSettingsPage() {
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold"></div>
-                      <span className="ml-3 text-sm font-medium text-cream">پخش موزیک فعال باشد</span>
+                      <span className="ml-3 text-sm font-medium text-cream">
+                        پخش موزیک فعال باشد
+                      </span>
                     </>
                   )}
                 />
@@ -86,7 +118,9 @@ export default function AdminSettingsPage() {
                 render={({ field }) => (
                   <div className="space-y-4">
                     <FiMusic size={40} className="mx-auto text-cream/40" />
-                    <p className="text-sm text-cream/60">فایل MP3 جدید را اینجا بکشید یا کلیک کنید</p>
+                    <p className="text-sm text-cream/60">
+                      فایل MP3 جدید را اینجا بکشید یا کلیک کنید
+                    </p>
                     <input
                       type="file"
                       accept="audio/*"
@@ -112,10 +146,13 @@ export default function AdminSettingsPage() {
                     </p>
                   </div>
                 </div>
-                <audio controls src={previewUrl || currentMusic?.music} className="h-8 w-48" />
+                <audio
+                  controls
+                  src={previewUrl || currentMusic?.music}
+                  className="h-8 w-48"
+                />
               </div>
             )}
-
           </FormSection>
 
           <div className="flex justify-end pt-4 border-t border-cream/10">
@@ -127,7 +164,6 @@ export default function AdminSettingsPage() {
               {updateMusic.isPending ? "در حال ذخیره..." : "ذخیره تنظیمات"}
             </button>
           </div>
-
         </form>
       </GlassCard>
     </main>

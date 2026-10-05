@@ -1,5 +1,5 @@
-import axios, {AxiosError, type InternalAxiosRequestConfig} from "axios";
-import {tokenService} from "@/lib/auth/tokenService";
+import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
+import { tokenService } from "@/lib/auth/tokenService";
 
 /**
  * Base URL for the Django backend, e.g. "https://api.example.com/api/".
@@ -10,8 +10,7 @@ import {tokenService} from "@/lib/auth/tokenService";
  * (e.g. "accounts/staff/"), matching the Django include structure:
  *   path("api/accounts/", include("accounts.Api.v1.urls"))
  */
-export const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 /**
  * Adjust to match your actual SimpleJWT refresh endpoint if it differs.
@@ -21,22 +20,22 @@ export const API_BASE_URL =
 const REFRESH_ENDPOINT = "accounts/auth/refresh/";
 
 export const MEDIA_BASE_URL = (
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
 ).replace(/\/api\/?$/, "");
 
 export const apiClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-    headers: {
-        Accept: "application/json",
-    },
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  headers: {
+    Accept: "application/json",
+  },
 });
 
 apiClient.interceptors.request.use((config) => {
-    const token = tokenService.getAccessToken();
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+  const token = tokenService.getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // --- 401 handling: try exactly one silent refresh, then give up. ---
@@ -58,65 +57,67 @@ let refreshPromise: Promise<string | null> | null = null;
 //   }
 // }
 
-
 async function refreshAccessToken(): Promise<string | null> {
-    try {
-        const refresh = tokenService.getRefreshToken();
+  try {
+    const refresh = tokenService.getRefreshToken();
 
-        if (!refresh) {
-            tokenService.clearTokens();
-            return null;
-        }
-
-        const {data} = await axios.post<{ access: string }>(
-            `${API_BASE_URL}${REFRESH_ENDPOINT}`,
-            {
-                refresh,
-            },
-        );
-
-        tokenService.setAccessToken(data.access);
-
-        return data.access;
-    } catch {
-        tokenService.clearTokens();
-        return null;
+    if (!refresh) {
+      tokenService.clearTokens();
+      return null;
     }
+
+    const { data } = await axios.post<{ access: string }>(
+      `${API_BASE_URL}${REFRESH_ENDPOINT}`,
+      {
+        refresh,
+      },
+    );
+
+    tokenService.setAccessToken(data.access);
+
+    return data.access;
+  } catch {
+    tokenService.clearTokens();
+    return null;
+  }
 }
 
 interface RetriableConfig extends InternalAxiosRequestConfig {
-    _retry?: boolean;
+  _retry?: boolean;
 }
 
 apiClient.interceptors.response.use(
-    (response) => response,
-    async (error: AxiosError) => {
-        const originalRequest = error.config as RetriableConfig | undefined;
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as RetriableConfig | undefined;
 
-        if (
-            error.response?.status === 401 &&
-            originalRequest &&
-            !originalRequest._retry
-        ) {
-            originalRequest._retry = true;
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
 
-            // Coalesce concurrent 401s into a single refresh call.
-            refreshPromise = refreshPromise ?? refreshAccessToken();
-            const newAccessToken = await refreshPromise;
-            refreshPromise = null;
+      // Coalesce concurrent 401s into a single refresh call.
+      refreshPromise = refreshPromise ?? refreshAccessToken();
+      const newAccessToken = await refreshPromise;
+      refreshPromise = null;
 
-            if (newAccessToken) {
-                originalRequest.headers = originalRequest.headers ?? {};
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-                return apiClient(originalRequest);
-            }
+      if (newAccessToken) {
+        originalRequest.headers = originalRequest.headers ?? {};
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return apiClient(originalRequest);
+      }
 
-            // Refresh failed — the user is no longer authenticated.
-            if (typeof window !== "undefined") {
-                window.location.href = "/login";
-            }
+      // Refresh failed — the user is no longer authenticated.
+      if (typeof window !== "undefined") {
+        const publicPaths = ["/", "/login", "/register"];
+        if (!publicPaths.includes(window.location.pathname)) {
+          window.location.href = "/login";
         }
+      }
+    }
 
-        return Promise.reject(error);
-    },
+    return Promise.reject(error);
+  },
 );
