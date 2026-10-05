@@ -15,9 +15,8 @@ export interface PublicSlider {
 }
 
 // ── مدیریتی (خروجی SliderAdminSerializer) ─────────────────────────────
-export interface SliderImage {
-  id: number;
-  slider: number;
+export interface Slider {
+  id: string;
   image: string;
   caption_title: string;
   caption_text: string;
