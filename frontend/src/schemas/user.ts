@@ -1,4 +1,5 @@
 import {z} from "zod";
+import {informationSchema} from "@/schemas/information";
 
 // ── Shared ────────────────────────────────────────────────────────────────────
 
@@ -52,6 +53,7 @@ export const createUserSchema = z.object({
     avatar: avatarField,
     address: addressSchema.optional(),
     club: clubSchema.optional(),
+    informations: z.array(informationSchema).optional(),
 });
 
 export type CreateUserFormValues = z.infer<typeof createUserSchema>;

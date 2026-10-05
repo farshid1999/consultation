@@ -136,28 +136,37 @@ class InformationSerializer(serializers.ModelSerializer):
             context=self.context,
         ).data
 
-
 class InformationCreateSerializer(serializers.ModelSerializer):
     children = serializers.ListField(child=serializers.DictField(), required=False)
+    existing_file = serializers.CharField(required=False, allow_null=True, write_only=True)
 
     class Meta:
         model = Information
-        fields = ["title", "text", "file", "children"]
+        fields = ["title", "text", "file", "children", "existing_file"]
 
     @transaction.atomic
     def create(self, validated_data):
-
         children = validated_data.pop("children", [])
+        existing_file = validated_data.pop("existing_file", None)
 
         information = Information.objects.create(**validated_data)
 
+        # فایل جدید ندارد ولی فایل قبلی را می‌خواهیم نگه داریم
+        if existing_file and not information.file:
+            # آدرس کامل را به مسیر نسبی داخل MEDIA_ROOT تبدیل کن
+            from django.conf import settings
+            from urllib.parse import urlparse
+
+            path = urlparse(existing_file).path
+            media_url = settings.MEDIA_URL  # مثل /media/
+            if path.startswith(media_url):
+                information.file.name = path[len(media_url):]
+                information.save(update_fields=["file"])
+
         for child in children:
             child_serializer = InformationCreateSerializer(data=child)
-
             child_serializer.is_valid(raise_exception=True)
-
             child_information = child_serializer.save()
-
             child_information.parent = information
             child_information.save()
 
@@ -396,6 +405,7 @@ class StaffUpdateSerializer(serializers.ModelSerializer):
         fields = ["id", "user", "employee_code", "hire_date", "position"]
 
     def validate(self, attrs):
+
         user_data = attrs.get("user")
         if user_data:
             user_serializer = UserUpdateSerializer(
@@ -410,6 +420,8 @@ class StaffUpdateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
+        print(validated_data)
+
         user_serializer = validated_data.pop("_user_serializer", None)
         validated_data.pop("user", None)
 
@@ -637,3 +649,58 @@ class VerifyOTPSerializer(serializers.Serializer):
         attrs["user"] = user
 
         return attrs
+
+
+
+
+
+
+
+
+class PublicInformationSerializer(serializers.ModelSerializer):
+    children = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Information
+        fields = ("id", "title", "text", "file", "children")
+
+    def get_children(self, obj):
+        return PublicInformationSerializer(
+            obj.children.all(), many=True, context=self.context
+        ).data
+
+
+class PublicStaffLineSerializer(serializers.Serializer):
+    id = serializers.UUIDField(source="line.id")
+    title = serializers.CharField(source="line.title")
+
+
+class PublicStaffSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source="user.first_name", read_only=True)
+    last_name = serializers.CharField(source="user.last_name", read_only=True)
+    avatar = serializers.ImageField(source="user.avatar", read_only=True)
+    bio = serializers.CharField(source="user.bio", read_only=True)
+    degree = serializers.CharField(source="user.degree", read_only=True)
+    informations = serializers.SerializerMethodField()
+    lines = PublicStaffLineSerializer(
+        source="line_memberships", many=True, read_only=True
+    )
+
+    class Meta:
+        model = Staff
+        fields = (
+            "id",
+            "first_name",
+            "last_name",
+            "avatar",
+            "position",
+            "degree",
+            "bio",
+            "lines",
+            "informations",
+        )
+
+    def get_informations(self, obj):
+        # فقط ریشه‌ها؛ فرزندان داخل خود سریالایزر می‌آیند
+        roots = [i for i in obj.user.informations.all() if i.parent_id is None]
+        return PublicInformationSerializer(roots, many=True, context=self.context).data

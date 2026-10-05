@@ -6,6 +6,8 @@ import Footer from "@/components/layout/Footer";
 import SectionDivider from "@/components/layout/SectionDivider";
 import BackgroundAudioPlayer from "@/components/background/BackgroundAudioPlayer";
 
+const Partners = dynamic(() => import("@/components/sections/Partners"));
+
 // Below-the-fold sections are lazy-loaded to keep the initial hero paint fast.
 const WhySportsPsychology = dynamic(() => import("@/components/sections/WhySportsPsychology"));
 const Services = dynamic(() => import("@/components/sections/Services"));
@@ -24,9 +26,23 @@ export default function HomePage() {
 
             <div className="relative z-10">
                 <Hero/>
+                <Partners
+                    title="همراهان ما"
+                    subtitle="مجموعه‌هایی که در مسیر رشد، کنار ما هستند"
+                    items={[
+                        {name: "روانشناسی", logo: "/ravan.jpg"},
+                        {name: "موسقی تراپی", logo: "/music.jpg"},
+                        {name: "پشتیبانی", logo: "/poshtiban.jpg"},
+                        {name: "یوگبال", logo: "/yogbal.jpg"},
+                    ]}
+                />
                 <WhySportsPsychology/>
+
                 <Services/>
                 <Process/>
+                <Stats/>
+
+                <Testimonials/>
                 <Benefits/>
                 <Stats/>
                 <Testimonials/>

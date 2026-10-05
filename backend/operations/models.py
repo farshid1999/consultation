@@ -35,6 +35,7 @@ class Line(BaseModel):
     is_required_content = models.BooleanField(default=True)
     is_required_assignment = models.BooleanField(default=True)
     is_required_form = models.BooleanField(default=True)
+    is_required_appointment = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title

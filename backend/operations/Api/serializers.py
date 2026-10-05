@@ -111,6 +111,7 @@ class LineListSerializer(serializers.ModelSerializer):
             "is_required_content",
             "is_required_assignment",
             "is_required_form",
+            "is_required_appointment"
         )
 
 
@@ -137,6 +138,7 @@ class LineDetailSerializer(serializers.ModelSerializer):
             "is_required_content",
             "is_required_assignment",
             "is_required_form",
+            "is_required_appointment"
         )
 
 

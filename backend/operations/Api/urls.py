@@ -206,8 +206,7 @@ admin_content_urls = [
 
 consultation_form_urls = [
     path("staff/lines/<str:line_id>/create-update/", ConsultationFormAPIView.as_view(), name="consultation-form", ),
-    path("staff/<str:consultation_id>/submissions/", SubmitConsultationFormListAPIView.as_view(),
-         name="consultation-form-submissions", ),
+    path("staff/<str:consultation_id>/submissions/", SubmitConsultationFormListAPIView.as_view(),name="consultation-form-submissions", ),
 
     path("staff/consultation-forms/<str:consultation_id>/members/<str:member_id>/submit/",
          StaffSubmitConsultationFormDetailView.as_view(), name="staff-submit-consultation-form-detail", ),

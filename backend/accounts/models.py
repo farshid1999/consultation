@@ -16,9 +16,8 @@ def user_avatar_upload_path(instance, filename):
     return f"users/avatars/{uuid.uuid4().hex}{ext}"
 
 def information_upload_path(instance, filename):
-    ext = os.path.splitext(filename)[1]
-
-    return f"informations/{instance.id}/{filename}"
+    ext = os.path.splitext(filename)[1].lower()
+    return f"informations/{uuid.uuid4().hex}{ext}"
 
 
 from datetime import timedelta

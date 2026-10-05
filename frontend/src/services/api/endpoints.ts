@@ -173,3 +173,10 @@ export const USER_ENDPOINTS = {
   me: "accounts/users/me/", 
  
 };
+
+
+
+export const PUBLIC_STAFF_ENDPOINTS = {
+  list: "accounts/public/staff/",
+  detail: (id: string) => `accounts/public/staff/${id}/`,
+};

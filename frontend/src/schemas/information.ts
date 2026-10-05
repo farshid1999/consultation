@@ -1,10 +1,11 @@
-import { z } from "zod";
+import {z} from "zod";
 
 export interface InformationFormValues {
-  title: string;
-  text?: string;
-  file?: File | null;
-  children?: InformationFormValues[];
+    title: string;
+    text?: string;
+    file?: File | null;
+    children?: InformationFormValues[];
+    existing_file?: string | null;
 }
 
 /**
@@ -15,6 +16,7 @@ export interface InformationFormValues {
  * here because a schema can't reference itself directly during
  * definition.
  */
+
 export const informationSchema: z.ZodType<InformationFormValues> = z.lazy(() =>
   z.object({
     title: z.string().min(1, "عنوان الزامی است"),
@@ -23,6 +25,7 @@ export const informationSchema: z.ZodType<InformationFormValues> = z.lazy(() =>
       .custom<File>((val) => val instanceof File, { message: "فایل نامعتبر است" })
       .nullable()
       .optional(),
+    existing_file: z.string().nullable().optional(), // جدید
     children: z.array(informationSchema).optional(),
   })
 );

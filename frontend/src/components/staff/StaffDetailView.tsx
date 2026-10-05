@@ -93,7 +93,7 @@ export default function StaffDetailView({ staff }: { staff: StaffDetail }) {
           </div>
 
           <Link
-            href={`/staff/${staff.id}/edit`}
+            href={`/publicstaff/${staff.id}/edit`}
             className="flex items-center justify-center gap-2 rounded-xl bg-gold px-6 py-3 text-sm font-bold text-deep shadow-lg shadow-gold/10 transition-all hover:bg-gold/90 hover:-translate-y-0.5"
           >
             <FiEdit2 aria-hidden="true" />
