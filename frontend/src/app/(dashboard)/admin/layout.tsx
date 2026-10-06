@@ -4,9 +4,13 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { tokenService } from "@/lib/auth/tokenService";
 import AdminSidebar from "@/components/Admin/adminSidebar";
-import "@/styles/light.css"
+import "@/styles/light.css";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
 
   useEffect(() => {
@@ -18,7 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen flex" dir="rtl">
       <AdminSidebar />
-      <main className="flex-1 overflow-auto p-8">
+      <main className="min-w-0 flex-1 overflow-auto p-4 pt-20 md:p-8">
         {children}
       </main>
     </div>
