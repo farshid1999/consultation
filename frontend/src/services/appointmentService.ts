@@ -1,86 +1,94 @@
-import { apiClient } from "@/lib/axios";
-import { APPOINTMENT_ENDPOINTS } from "@/services/api/endpoints";
+import {apiClient} from "@/lib/axios";
+import {APPOINTMENT_ENDPOINTS} from "@/services/api/endpoints";
 import type {
-  AppointmentListItem,
-  AppointmentDetail,
-  AppointmentCreateInput,
-  AppointmentUpdateInput,
+    AppointmentListItem,
+    AppointmentDetail,
+    AppointmentCreateInput,
+    AppointmentUpdateInput,
 } from "@/types/Appointment";
-import type { Paginated, ListQueryParams } from "@/types";
+import type {Paginated, ListQueryParams} from "@/types";
 
 export const appointmentService = {
-  // ── Admin ──────────────────────────────────────────────────────────────────
+    // ── Admin ──────────────────────────────────────────────────────────────────
 
-  adminList: async (
-    params?: ListQueryParams,
-  ): Promise<Paginated<AppointmentListItem>> => {
-    const res = await apiClient.get<Paginated<AppointmentListItem>>(
-      APPOINTMENT_ENDPOINTS.adminList,
-      { params },
-    );
-    return res.data;
-  },
+    adminList: async (
+        params?: ListQueryParams,
+    ): Promise<Paginated<AppointmentListItem>> => {
+        const res = await apiClient.get<Paginated<AppointmentListItem>>(
+            APPOINTMENT_ENDPOINTS.adminList,
+            {params},
+        );
+        return res.data;
+    },
 
-  // ── Staff ──────────────────────────────────────────────────────────────────
+    // ── Staff ──────────────────────────────────────────────────────────────────
 
-  staffList: async (
-    params?: ListQueryParams,
-  ): Promise<Paginated<AppointmentListItem>> => {
-    const res = await apiClient.get<Paginated<AppointmentListItem>>(
-      APPOINTMENT_ENDPOINTS.staffList,
-      { params },
-    );
-    return res.data;
-  },
+    staffList: async (
+        params?: ListQueryParams,
+    ): Promise<Paginated<AppointmentListItem>> => {
+        const res = await apiClient.get<Paginated<AppointmentListItem>>(
+            APPOINTMENT_ENDPOINTS.staffList,
+            {params},
+        );
+        return res.data;
+    },
 
-  staffDetail: async (id: string | number): Promise<AppointmentDetail> => {
-    const res = await apiClient.get<AppointmentDetail>(
-      APPOINTMENT_ENDPOINTS.staffDetail(id),
-    );
-    return res.data;
-  },
+    staffDetail: async (id: string | number): Promise<AppointmentDetail> => {
+        const res = await apiClient.get<AppointmentDetail>(
+            APPOINTMENT_ENDPOINTS.staffDetail(id),
+        );
+        return res.data;
+    },
 
-  // ── Member ─────────────────────────────────────────────────────────────────
+    // ── Member ─────────────────────────────────────────────────────────────────
 
-  memberList: async (
-    params?: ListQueryParams,
-  ): Promise<Paginated<AppointmentListItem>> => {
-    const res = await apiClient.get<Paginated<AppointmentListItem>>(
-      APPOINTMENT_ENDPOINTS.memberList,
-      { params },
-    );
-    return res.data;
-  },
+    memberList: async (
+        params?: ListQueryParams,
+    ): Promise<Paginated<AppointmentListItem>> => {
+        const res = await apiClient.get<Paginated<AppointmentListItem>>(
+            APPOINTMENT_ENDPOINTS.memberList,
+            {params},
+        );
+        return res.data;
+    },
 
-  memberDetail: async (id: string | number): Promise<AppointmentDetail> => {
-    const res = await apiClient.get<AppointmentDetail>(
-      APPOINTMENT_ENDPOINTS.memberDetail(id),
-    );
-    return res.data;
-  },
+    memberDetail: async (id: string | number): Promise<AppointmentDetail> => {
+        const res = await apiClient.get<AppointmentDetail>(
+            APPOINTMENT_ENDPOINTS.memberDetail(id),
+        );
+        return res.data;
+    },
 
-  // ── CRUD ───────────────────────────────────────────────────────────────────
+    async createRequest(data: { line_id: string; description?: string }): Promise<AppointmentDetail> {
+        const {data: response} = await apiClient.post("operations/member/appointments/request/", {
+            line: data.line_id,
+            description: data.description,
+        });
+        return response;
+    },
 
-  create: async (data: AppointmentCreateInput): Promise<AppointmentDetail> => {
-    const res = await apiClient.post<AppointmentDetail>(
-      APPOINTMENT_ENDPOINTS.create,
-      data,
-    );
-    return res.data;
-  },
+    // ── CRUD ───────────────────────────────────────────────────────────────────
 
-  update: async (
-    id: string | number,
-    data: AppointmentUpdateInput,
-  ): Promise<AppointmentDetail> => {
-    const res = await apiClient.patch<AppointmentDetail>(
-      APPOINTMENT_ENDPOINTS.update(id),
-      data,
-    );
-    return res.data;
-  },
+    create: async (data: AppointmentCreateInput): Promise<AppointmentDetail> => {
+        const res = await apiClient.post<AppointmentDetail>(
+            APPOINTMENT_ENDPOINTS.create,
+            data,
+        );
+        return res.data;
+    },
 
-  delete: async (id: string | number): Promise<void> => {
-    await apiClient.delete(APPOINTMENT_ENDPOINTS.delete(id));
-  },
+    update: async (
+        id: string | number,
+        data: AppointmentUpdateInput,
+    ): Promise<AppointmentDetail> => {
+        const res = await apiClient.patch<AppointmentDetail>(
+            APPOINTMENT_ENDPOINTS.update(id),
+            data,
+        );
+        return res.data;
+    },
+
+    delete: async (id: string | number): Promise<void> => {
+        await apiClient.delete(APPOINTMENT_ENDPOINTS.delete(id));
+    },
 };

@@ -53,7 +53,7 @@ export interface StaffLine {
   id: string;
   staff: string; // همان StringRelatedField که نام کاربر را برمی‌گرداند
   user: UserDetail;
-
+  staff_id: string;
   // فیلدهای جدید از مدل Staff
   employee_code: string;
   hire_date: string; // تاریخ به صورت رشته ISO از بک‌اند می‌آید

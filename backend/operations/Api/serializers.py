@@ -1,6 +1,7 @@
 import json
 
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 from accounts.Api.v1.serializer import UserDetailSerializer
@@ -227,20 +228,36 @@ class RemoveLineMembersSerializer(serializers.Serializer):
 
         return attrs
 
-
 class StaffLineSerializer(serializers.ModelSerializer):
     staff = serializers.StringRelatedField()
+    staff_id = serializers.UUIDField(source="staff.id", read_only=True)
+
     user = UserDetailSerializer(source="staff.user", read_only=True)
 
-    # اضافه کردن فیلدهای استاف
-    employee_code = serializers.CharField(source="staff.employee_code", read_only=True)
-    hire_date = serializers.DateField(source="staff.hire_date", read_only=True)
-    position = serializers.CharField(source="staff.position", read_only=True)
+    employee_code = serializers.CharField(
+        source="staff.employee_code",
+        read_only=True
+    )
+    hire_date = serializers.DateField(
+        source="staff.hire_date",
+        read_only=True
+    )
+    position = serializers.CharField(
+        source="staff.position",
+        read_only=True
+    )
 
     class Meta:
         model = StaffLine
-        fields = ("id", "staff", "user", "employee_code", "hire_date", "position")
-
+        fields = (
+            "id",
+            "staff",
+            "staff_id",
+            "user",
+            "employee_code",
+            "hire_date",
+            "position",
+        )
 
 class AddLineStaffSerializer(serializers.Serializer):
     staff_ids = serializers.PrimaryKeyRelatedField(
@@ -1661,9 +1678,10 @@ class SubmitConsultationFormListSerializer(serializers.ModelSerializer):
 # ───────────────────────────────────────────
 
 class AppointmentListSerializer(serializers.ModelSerializer):
-    member = serializers.StringRelatedField()
-    staff = serializers.StringRelatedField()
     line = serializers.StringRelatedField()
+    member = serializers.StringRelatedField(allow_null=True)
+    staff = serializers.StringRelatedField(allow_null=True)
+    requested_by = serializers.StringRelatedField(allow_null=True)
 
     class Meta:
         model = Appointment
@@ -1671,29 +1689,77 @@ class AppointmentListSerializer(serializers.ModelSerializer):
             "id",
             "line",
             "member",
+            "requested_by",
             "staff",
             "status",
+            "description",
             "appointment_time",
             "created_at",
         )
 
 
 class AppointmentDetailSerializer(serializers.ModelSerializer):
-    member = LineMemberSerializer(read_only=True)
-    staff = StaffLineSerializer(read_only=True)  # یا یک StaffDetailSerializer جداگانه
     line = serializers.StringRelatedField()
+    member = LineMemberSerializer(read_only=True)
+    staff = StaffLineSerializer(read_only=True)
+    requested_by = serializers.SerializerMethodField()
+    requester_name = serializers.SerializerMethodField()
+    staff_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
-        fields = (
-            "id",
-            "line",
-            "member",
-            "staff",
-            "status",
-            "appointment_time",
-            "created_at",
-            "updated_at",
+        fields  = (
+            "id", "line", "line_id", "member", "requested_by", "requester_name",
+            "staff", "staff_name", "status", "description",
+            "appointment_time", "created_at", "updated_at",
+        )
+
+    @staticmethod
+    def _name(user):
+        if user is None:
+            return None
+        return f"{user.first_name} {user.last_name}".strip() or str(user)
+
+    def get_requested_by(self, obj):
+        u = obj.requested_by
+        return {"id": str(u.pk), "name": self._name(u)} if u else None
+
+    def get_requester_name(self, obj):
+        u = obj.requested_by or (obj.member.user if obj.member else None)
+        return self._name(u)
+
+    def get_staff_name(self, obj):
+        return self._name(obj.staff.user) if obj.staff else None
+
+
+class MemberAppointmentRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = ("id", "line", "description")
+        read_only_fields = ("id",)
+
+    def validate_line(self, value):
+        user = self.context["request"].user
+
+        # ۱) اگر کاربر از قبل عضو این لاین است، نیازی به درخواست نیست
+        if LineMember.objects.filter(user=user, line=value).exists():
+            raise serializers.ValidationError("شما قبلاً عضو این لاین هستید.")
+
+        # ۲) جلوگیری از درخواست تکراری در حال انتظار
+        if Appointment.objects.filter(
+            requested_by=user, line=value, status=Appointment.Status.PENDING
+        ).exists():
+            raise serializers.ValidationError("شما قبلاً برای این لاین درخواست فعالی ثبت کرده‌اید.")
+
+        return value
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        return Appointment.objects.create(
+            requested_by=user,
+            member=None,
+            status=Appointment.Status.PENDING,
+            **validated_data,
         )
 
 
@@ -1740,30 +1806,82 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
         return attrs
 
 
+
 class AppointmentUpdateSerializer(serializers.ModelSerializer):
+    staff = serializers.PrimaryKeyRelatedField(
+        queryset=Staff.objects.all(), required=False, allow_null=True
+    )
+
     class Meta:
         model = Appointment
-        fields = (
-            "id",
-            "status",
-            "appointment_time",
-        )
+        fields = ("id", "status", "staff", "appointment_time")
         read_only_fields = ("id",)
 
     def validate(self, attrs):
-        appointment_time = attrs.get("appointment_time")
+        instance = self.instance
 
-        if appointment_time:
-            staff = self.instance.staff
+        # مقدار نهایی بعد از اعمال تغییرات (برای PATCH فیلدهای نفرستاده از instance می‌آیند)
+        staff = attrs.get("staff", instance.staff)
+        appointment_time = attrs.get("appointment_time", instance.appointment_time)
+        new_status = attrs.get("status", instance.status)
 
+        # staff باید عضو همان لاین باشد
+        if staff and not StaffLine.objects.filter(staff=staff, line=instance.line).exists():
+            raise serializers.ValidationError({"staff": "این Staff عضو این لاین نیست."})
+
+        # زمان نباید در گذشته باشد (فقط وقتی زمان تغییر کرده)
+        if "appointment_time" in attrs and appointment_time and appointment_time < timezone.now():
+            raise serializers.ValidationError({"appointment_time": "زمان نوبت نمی‌تواند در گذشته باشد."})
+
+        # تأیید فقط با staff و زمان
+        if new_status == Appointment.Status.CONFIRMED:
+            errors = {}
+            if not staff:
+                errors["staff"] = "برای تأیید نوبت، تعیین Staff الزامی است."
+            if not appointment_time:
+                errors["appointment_time"] = "برای تأیید نوبت، تعیین زمان الزامی است."
+            if errors:
+                raise serializers.ValidationError(errors)
+
+        # تداخل زمانی (فقط وقتی هر دو مقدار موجود باشند)
+        if staff and appointment_time:
             conflict = Appointment.objects.filter(
                 staff=staff,
                 appointment_time=appointment_time,
-            ).exclude(pk=self.instance.pk).exists()
+            ).exclude(
+                pk=instance.pk
+            ).exclude(
+                status=Appointment.Status.CANCELED
+            ).exists()
 
             if conflict:
                 raise serializers.ValidationError(
-                    {"appointment_time": "این Staff در این زمان appointment دیگری دارد."}
+                    {"appointment_time": "این Staff در این زمان نوبت دیگری دارد."}
                 )
 
         return attrs
+
+    def update(self, instance, validated_data):
+        # اگر staff و زمان ست شدند و status صریحاً نیامده، خودکار تأیید شود
+        staff = validated_data.get("staff", instance.staff)
+        appointment_time = validated_data.get("appointment_time", instance.appointment_time)
+
+        if (
+            "status" not in validated_data
+            and instance.status == Appointment.Status.PENDING
+            and staff
+            and appointment_time
+        ):
+            validated_data["status"] = Appointment.Status.CONFIRMED
+
+        if (
+                validated_data.get("status") == Appointment.Status.CONFIRMED
+                and instance.member is None
+                and instance.requested_by
+        ):
+            member, _ = LineMember.objects.get_or_create(
+                user=instance.requested_by, line=instance.line
+            )
+            validated_data["member"] = member
+
+        return super().update(instance, validated_data)

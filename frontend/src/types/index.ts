@@ -13,3 +13,4 @@ export * from "./dashboard";
 export * from "./settings";
 export * from "./publicStaff";
 export * from "./slider";
+export * from "./Appointment";

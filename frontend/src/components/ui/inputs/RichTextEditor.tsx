@@ -1,22 +1,13 @@
 "use client";
 
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import {
-  ClassicEditor,
-  Essentials,
-  Paragraph,
-  Heading,
-  Bold,
-  Italic,
-  Underline,
-  Link,
-  List,
-  BlockQuote,
-  Undo,
-} from "ckeditor5";
-import faTranslations from "ckeditor5/translations/fa.js";
-import "ckeditor5/ckeditor5.css";
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
+
+const CKEditor = dynamic(
+  () => import("@ckeditor/ckeditor5-react").then((mod) => mod.CKEditor),
+  { ssr: false }
+);
 
 interface RichTextEditorProps {
   label?: string;
@@ -28,26 +19,36 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({
-  label,
-  value,
-  onChange,
-  onBlur,
-  error,
-  className,
+  label, value, onChange, onBlur, error, className,
 }: RichTextEditorProps) {
+  const [cfg, setCfg] = useState<typeof import("@/lib/ckeditor-config") | null>(null);
+
+  useEffect(() => {
+    import("@/lib/ckeditor-config").then(setCfg);
+  }, []);
+
+  if (!cfg) {
+    return (
+      <div className={cn("flex flex-col gap-1.5", className)}>
+        {label && <label className="text-xs text-cream/60">{label}</label>}
+        <div className="h-32 rounded-xl bg-deep-2/30 border border-cream/10 animate-pulse" />
+      </div>
+    );
+  }
+
   return (
     <div className={cn("flex flex-col gap-1.5", className)} dir="rtl">
       {label && <label className="text-xs text-cream/60">{label}</label>}
 
-      <div className={cn("rich-editor rounded-xl", error && "ring-1 ring-red-400/60")}>
+      <div className={cn("rich-editor rounded-xl overflow-hidden", error && "ring-1 ring-red-400/60")}>
         <CKEditor
-          editor={ClassicEditor}
+          editor={cfg.ClassicEditor}
           data={value ?? ""}
           config={{
             licenseKey: "GPL",
+            plugins: cfg.editorPlugins,
+            translations: cfg.editorTranslations,
             language: { ui: "fa", content: "fa" },
-            translations: [faTranslations],
-            plugins: [Essentials, Paragraph, Heading, Bold, Italic, Underline, Link, List, BlockQuote, Undo],
             toolbar: [
               "undo", "redo", "|",
               "heading", "|",

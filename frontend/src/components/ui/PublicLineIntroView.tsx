@@ -212,10 +212,14 @@ export default function PublicLineIntroView({ line }: { line: LineDetail }) {
           )}
 
           <div className="mt-8 flex flex-wrap items-center gap-5">
-            <Button variant="primary" className="px-6 py-3 text-sm">
+            {/* تغییر دکمه به لینک */}
+            <Link
+              href={`/member/appointment/request?lineId=${line.id}`}
+              className="inline-flex items-center justify-center rounded-full bg-gold px-6 py-3 text-sm font-bold text-deep transition-opacity hover:opacity-90"
+            >
               رزرو جلسه
               <FiArrowUpLeft className="mr-1" size={16} />
-            </Button>
+            </Link>
 
             {line.children.length > 0 && (
               <a
@@ -226,6 +230,7 @@ export default function PublicLineIntroView({ line }: { line: LineDetail }) {
               </a>
             )}
           </div>
+
         </motion.div>
 
         {/* ویژگی‌ها — چیدمان ستونی (masonry)، بدون قاب یکنواخت برای همه */}

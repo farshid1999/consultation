@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from .views import *
+from operations.Api.views import *
 
 # =========================
 # Line URLs
@@ -94,9 +94,12 @@ assignment_urls = [
 # =========================
 staff_assignment_urls = [
     path("lines/<str:line_id>/", StaffAssignmentListAPIView.as_view(), name="staff-assignment-list"),
-    path("lines/<str:line_id>/<str:assignment_id>/", StaffAssignmentDetailAPIView.as_view(), name="staff-assignment-detail"), # ✅ تغییر به str
-    path("lines/<str:line_id>/<str:assignment_id>/submissions/", StaffAssignmentSubmissionListAPIView.as_view(), name="staff-assignment-submission-list"),
-    path("lines/<str:line_id>/<str:assignment_id>/submissions/<str:submission_id>/", StaffAssignmentSubmissionDetailAPIView.as_view(), name="staff-assignment-submission-detail"), # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/", StaffAssignmentDetailAPIView.as_view(),
+         name="staff-assignment-detail"),  # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/", StaffAssignmentSubmissionListAPIView.as_view(),
+         name="staff-assignment-submission-list"),
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/<str:submission_id>/",
+         StaffAssignmentSubmissionDetailAPIView.as_view(), name="staff-assignment-submission-detail"),  # ✅ تغییر به str
 ]
 
 # =========================
@@ -104,11 +107,17 @@ staff_assignment_urls = [
 # =========================
 member_assignment_urls = [
     path("lines/<str:line_id>/", MemberAssignmentListAPIView.as_view(), name="member-assignment-list"),
-    path("lines/<str:line_id>/<str:assignment_id>/", MemberAssignmentDetailAPIView.as_view(), name="member-assignment-detail"), # ✅ تغییر به str
-    path("<str:assignment_id>/submit/", AssignmentSubmissionCreateAPIView.as_view(), name="assignment-submission-create"), # ✅ تغییر به str
-    path("<str:assignment_id>/submission/", AssignmentSubmissionUpdateAPIView.as_view(), name="assignment-submission-update"), # ✅ تغییر به str
-    path("lines/<str:line_id>/<str:assignment_id>/submissions/", MemberAssignmentSubmissionListAPIView.as_view(), name="member-assignment-submission-list"), # ✅ تغییر به str
-    path("lines/<str:line_id>/<str:assignment_id>/submissions/<str:submission_id>/", MemberAssignmentSubmissionDetailAPIView.as_view(), name="member-assignment-submission-detail"), # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/", MemberAssignmentDetailAPIView.as_view(),
+         name="member-assignment-detail"),  # ✅ تغییر به str
+    path("<str:assignment_id>/submit/", AssignmentSubmissionCreateAPIView.as_view(),
+         name="assignment-submission-create"),  # ✅ تغییر به str
+    path("<str:assignment_id>/submission/", AssignmentSubmissionUpdateAPIView.as_view(),
+         name="assignment-submission-update"),  # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/", MemberAssignmentSubmissionListAPIView.as_view(),
+         name="member-assignment-submission-list"),  # ✅ تغییر به str
+    path("lines/<str:line_id>/<str:assignment_id>/submissions/<str:submission_id>/",
+         MemberAssignmentSubmissionDetailAPIView.as_view(), name="member-assignment-submission-detail"),
+    # ✅ تغییر به str
 ]
 # =========================
 # Admin Assignment Submission URLs
@@ -122,7 +131,7 @@ admin_assignment_submission_urls = [
 # =========================
 conversation_urls = [
     path("", MemberConversationCreateAPIView.as_view(), name="member-conversation-create"),
-    
+
     path("<str:conversation_id>/messages/", MessageCreateAPIView.as_view(), name="message-create"),
 ]
 
@@ -136,7 +145,6 @@ staff_conversation_urls = [
 member_conversation_urls = [
     path("<str:pk>/", MemberConversationDetailAPIView.as_view(), name="member-conversation-detail"),
 ]
-
 
 # =========================
 # Content URLs
@@ -206,15 +214,13 @@ admin_content_urls = [
 
 consultation_form_urls = [
     path("staff/lines/<str:line_id>/create-update/", ConsultationFormAPIView.as_view(), name="consultation-form", ),
-    path("staff/<str:consultation_id>/submissions/", SubmitConsultationFormListAPIView.as_view(),name="consultation-form-submissions", ),
+    path("staff/<str:consultation_id>/submissions/", SubmitConsultationFormListAPIView.as_view(),
+         name="consultation-form-submissions", ),
 
     path("staff/consultation-forms/<str:consultation_id>/members/<str:member_id>/submit/",
          StaffSubmitConsultationFormDetailView.as_view(), name="staff-submit-consultation-form-detail", ),
 
-
     path("<str:line_id>/", ConsultationFormDetailView.as_view(), ),
-
-
 
     path("member/<str:consultation_id>/members/<str:member_id>/submit/",
          MemberSubmitConsultationFormDetailView.as_view(), name="member-submit-consultation-form-detail", ),
@@ -263,16 +269,9 @@ staff_appointment_urls = [
 ]
 
 member_appointment_urls = [
-    path(
-        "",
-        MemberAppointmentListAPIView.as_view(),
-        name="member-appointment-list",
-    ),
-    path(
-        "<str:pk>/",
-        MemberAppointmentDetailAPIView.as_view(),
-        name="member-appointment-detail",
-    ),
+    path("", MemberAppointmentListAPIView.as_view(), name="member-appointment-list"),
+    path("request/", MemberAppointmentRequestCreateAPIView.as_view(), name="member-appointment-request"),
+    path("<str:pk>/", MemberAppointmentDetailAPIView.as_view(), name="member-appointment-detail"),
 ]
 
 admin_appointment_urls = [
@@ -288,7 +287,7 @@ admin_appointment_urls = [
 # =========================
 
 urlpatterns = [
-    path("admin/",AdminDashboardStatsAPIView.as_view()),
+    path("admin/", AdminDashboardStatsAPIView.as_view()),
 
     # -------------------------
     # Lines
@@ -355,9 +354,9 @@ urlpatterns = [
         "cosultation/",
         include(consultation_form_urls),
     ),
-# -------------------------
-# Appointments
-# -------------------------
+    # -------------------------
+    # Appointments
+    # -------------------------
     path(
         "appointments/",
         include(appointment_urls),
@@ -365,13 +364,13 @@ urlpatterns = [
     path(
         "staff/appointments/",
         include(staff_appointment_urls),
-),
+    ),
     path(
         "member/appointments/",
         include(member_appointment_urls),
-),
+    ),
     path(
         "admin/appointments/",
         include(admin_appointment_urls),
-),
+    ),
 ]
