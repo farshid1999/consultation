@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {usePathname, useRouter} from "next/navigation";
-import {FiUsers, FiGrid, FiLogOut, FiLayers, FiFileText, FiUserCheck} from "react-icons/fi";
+import {FiUsers, FiGrid, FiLogOut, FiLayers, FiFileText, FiUserCheck,FiMessageSquare} from "react-icons/fi";
 import {cn} from "@/lib/utils";
 import {useLogout} from "@/hooks/useAuth";
 
@@ -10,6 +10,7 @@ const navItems = [
     { href: "/staff", label: "داشبورد", icon: FiGrid },
     { href: "/staff/content", label: "محتواها", icon: FiFileText },
     { href: "/staff/line", label: "بخش‌ها", icon: FiLayers },
+    {href : "/staff/contacts", label: "پشتیبانی", icon:FiMessageSquare }
 ];
 
 export default function StaffSidebar() {

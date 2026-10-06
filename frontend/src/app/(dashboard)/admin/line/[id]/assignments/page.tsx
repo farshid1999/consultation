@@ -4,13 +4,19 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useStaffAssignments } from "@/hooks/useAssignment";
 import Link from "next/link";
-import { FiArrowRight, FiSearch, FiEye, FiMessageSquare, FiPlus } from "react-icons/fi";
+import {
+  FiArrowRight,
+  FiSearch,
+  FiEye,
+  FiMessageSquare,
+  FiPlus,
+} from "react-icons/fi";
 import { useDebounce } from "use-debounce";
 
 export default function StaffAssignmentsPage() {
   const params = useParams();
   const router = useRouter();
-  
+
   const lineId = params.id as string;
 
   const [search, setSearch] = useState("");
@@ -40,14 +46,28 @@ export default function StaffAssignmentsPage() {
             </p>
           </div>
         </div>
+
+        <Link
+          href="/admin/assignments/create"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold text-deep text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          <FiPlus size={15} />
+          تکلیف جدید
+        </Link>
       </div>
 
       {/* Search */}
       <div className="relative max-w-sm">
-        <FiSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/30" size={15} />
+        <FiSearch
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/30"
+          size={15}
+        />
         <input
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           placeholder="جستجو در عنوان تکالیف..."
           className="w-full rounded-xl border border-cream/10 bg-cream/5 py-2.5 pr-9 pl-4 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold/50"
         />
@@ -58,28 +78,45 @@ export default function StaffAssignmentsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/5 bg-white/[0.01]">
-              <th className="text-right px-5 py-3.5 text-cream/50 font-medium">عنوان</th>
-              <th className="text-right px-5 py-3.5 text-cream/50 font-medium">توضیحات</th>
-              <th className="px-5 py-3.5 text-center text-cream/50 font-medium">عملیات</th>
+              <th className="text-right px-5 py-3.5 text-cream/50 font-medium">
+                عنوان
+              </th>
+              <th className="text-right px-5 py-3.5 text-cream/50 font-medium">
+                توضیحات
+              </th>
+              <th className="px-5 py-3.5 text-center text-cream/50 font-medium">
+                عملیات
+              </th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={3} className="text-center py-12 text-cream/30 text-sm">
+                <td
+                  colSpan={3}
+                  className="text-center py-12 text-cream/30 text-sm"
+                >
                   <span className="h-6 w-6 animate-spin rounded-full border-2 border-gold/30 border-t-gold inline-block"></span>
                 </td>
               </tr>
             ) : data?.results?.length === 0 ? (
               <tr>
-                <td colSpan={3} className="text-center py-12 text-cream/30 text-sm">
+                <td
+                  colSpan={3}
+                  className="text-center py-12 text-cream/30 text-sm"
+                >
                   تکلیفی برای این بخش تعریف نشده است
                 </td>
               </tr>
             ) : (
               data?.results?.map((assignment) => (
-                <tr key={assignment.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
-                  <td className="px-5 py-4 text-cream font-medium">{assignment.title}</td>
+                <tr
+                  key={assignment.id}
+                  className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group"
+                >
+                  <td className="px-5 py-4 text-cream font-medium">
+                    {assignment.title}
+                  </td>
                   <td className="px-5 py-4 text-cream/50 max-w-xs truncate">
                     {assignment.description || "—"}
                   </td>
@@ -93,7 +130,7 @@ export default function StaffAssignmentsPage() {
                       >
                         <FiEye size={16} />
                       </Link>
-                      
+
                       {/* ✅ دکمه مشاهده پاسخ‌های اعضا */}
                       <Link
                         href={`/admin/line/${lineId}/assignments/${assignment.id}/submissions`}
