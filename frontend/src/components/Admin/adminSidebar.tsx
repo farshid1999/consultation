@@ -9,6 +9,7 @@ import {
   FiLayers,
   FiFileText,
   FiUserCheck,
+  FiMessageSquare,
 } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 import { useLogout } from "@/hooks/useAuth";
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/admin/content", label: "محتواها", icon: FiFileText },
   { href: "/admin/line", label: "بخش‌ها", icon: FiLayers },
   { href: "/admin/assignments", label: "تکالیف", icon: FiLayers },
+  { href: "/admin/contacts", label: "پشتیبانی" , icon: FiMessageSquare},
   { href: "/admin/settings", label: "تنظیمات", icon: IoSettingsOutline },
 ];
 
