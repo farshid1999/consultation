@@ -61,6 +61,7 @@ class BackgroundMusicView(APIView):
         serializer = BackgroundMusicSerializer(
             instance=music,
             data=request.data,
+            partial=True,
             context={"request": request}
         )
 
