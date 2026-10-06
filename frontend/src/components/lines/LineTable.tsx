@@ -15,11 +15,11 @@ import {
   FiChevronDown,
   FiCornerDownLeft,
   FiFolder,
+  FiCheckSquare,
 } from "react-icons/fi";
 import { Input } from "@/components/ui/inputs";
 import { useLines } from "@/hooks/useLines";
 import { useUserPath } from "@/hooks/useUserPath";
-
 
 /* ------------------------------------------------------------------ */
 /* ساخت درخت والد/فرزند از روی لیست فلتی که از API می‌آید               */
@@ -57,7 +57,7 @@ function flattenTree(
   nodes: TreeLine[],
   depth: number,
   collapsed: Set<string>,
-  out: { node: TreeLine; depth: number }[] = []
+  out: { node: TreeLine; depth: number }[] = [],
 ) {
   nodes.forEach((node) => {
     out.push({ node, depth });
@@ -109,6 +109,13 @@ function getLineActions(lineId: string, basePath: string) {
       accent: "text-blue-400",
     },
     {
+      href: `${basePath}/line/${lineId}/assignments`,
+      icon: FiCheckSquare,
+      label: "مدیریت تکالیف",
+      hint: "تعریف و پیگیری تکالیف این بخش",
+      accent: "text-[#4ade80]",
+    },
+    {
       href: `${basePath}/line/${lineId}/consultation`,
       icon: FiClipboard,
       label: "فرم‌ها و قراردادها",
@@ -120,18 +127,18 @@ function getLineActions(lineId: string, basePath: string) {
 
 function LineActionsMenu({ lineId }: { lineId: string }) {
   const [open, setOpen] = useState(false);
-  const [position, setPosition] = useState<
-    { top: number; left: number; maxHeight: number } | null
-  >(null);
+  const [position, setPosition] = useState<{
+    top: number;
+    left: number;
+    maxHeight: number;
+  } | null>(null);
 
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { basePath } = useUserPath();
 
-  const actions = basePath
-    ? getLineActions(lineId, basePath)
-    : [];
+  const actions = basePath ? getLineActions(lineId, basePath) : [];
 
   const MENU_WIDTH = 256;
   const ITEM_HEIGHT = 58;
@@ -145,42 +152,22 @@ function LineActionsMenu({ lineId }: { lineId: string }) {
     const itemsCount = actions.length;
     const estimatedHeight = itemsCount * ITEM_HEIGHT + 8;
 
-    const spaceBelow =
-      window.innerHeight - rect.bottom - VIEWPORT_MARGIN;
+    const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_MARGIN;
 
-    const spaceAbove =
-      rect.top - VIEWPORT_MARGIN;
+    const spaceAbove = rect.top - VIEWPORT_MARGIN;
 
-    const openUpward =
-      spaceBelow < estimatedHeight &&
-      spaceAbove > spaceBelow;
+    const openUpward = spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
 
-    const availableSpace =
-      openUpward ? spaceAbove : spaceBelow;
+    const availableSpace = openUpward ? spaceAbove : spaceBelow;
 
-    const maxHeight = Math.max(
-      160,
-      Math.min(estimatedHeight, availableSpace)
-    );
+    const maxHeight = Math.max(160, Math.min(estimatedHeight, availableSpace));
 
-    let left =
-      rect.left +
-      rect.width / 2 -
-      MENU_WIDTH / 2;
+    let left = rect.left + rect.width / 2 - MENU_WIDTH / 2;
 
-    left = Math.max(
-      12,
-      Math.min(
-        left,
-        window.innerWidth - MENU_WIDTH - 12
-      )
-    );
+    left = Math.max(12, Math.min(left, window.innerWidth - MENU_WIDTH - 12));
 
     const top = openUpward
-      ? Math.max(
-          VIEWPORT_MARGIN,
-          rect.top - maxHeight - 8
-        )
+      ? Math.max(VIEWPORT_MARGIN, rect.top - maxHeight - 8)
       : rect.bottom + 8;
 
     setPosition({
@@ -208,38 +195,18 @@ function LineActionsMenu({ lineId }: { lineId: string }) {
       }
     }
 
-    window.addEventListener(
-      "scroll",
-      updatePosition,
-      true
-    );
+    window.addEventListener("scroll", updatePosition, true);
 
-    window.addEventListener(
-      "resize",
-      updatePosition
-    );
+    window.addEventListener("resize", updatePosition);
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      window.removeEventListener(
-        "scroll",
-        updatePosition,
-        true
-      );
+      window.removeEventListener("scroll", updatePosition, true);
 
-      window.removeEventListener(
-        "resize",
-        updatePosition
-      );
+      window.removeEventListener("resize", updatePosition);
 
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [open, actions.length]);
 
@@ -300,7 +267,7 @@ function LineActionsMenu({ lineId }: { lineId: string }) {
               </Link>
             ))}
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -313,7 +280,11 @@ export default function LineTable() {
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
-  const { data: rawLines, isLoading, isError } = useLines({ search: search || undefined });
+  const {
+    data: rawLines,
+    isLoading,
+    isError,
+  } = useLines({ search: search || undefined });
 
   const rows = useMemo(() => {
     const tree = buildLineTree((rawLines ?? []) as RawLine[]);
@@ -358,7 +329,10 @@ export default function LineTable() {
             <tbody className="divide-y divide-cream/5">
               {isLoading && (
                 <tr>
-                  <td colSpan={4} className="px-5 py-12 text-center text-cream/40">
+                  <td
+                    colSpan={4}
+                    className="px-5 py-12 text-center text-cream/40"
+                  >
                     <span className="spinner-brand inline-block h-6 w-6 animate-spin rounded-full border-2" />
                   </td>
                 </tr>
@@ -366,7 +340,10 @@ export default function LineTable() {
 
               {isError && (
                 <tr>
-                  <td colSpan={4} className="px-5 py-12 text-center text-red-400">
+                  <td
+                    colSpan={4}
+                    className="px-5 py-12 text-center text-red-400"
+                  >
                     دریافت اطلاعات با خطا مواجه شد.
                   </td>
                 </tr>
@@ -374,7 +351,10 @@ export default function LineTable() {
 
               {!isLoading && !isError && rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-5 py-12 text-center text-cream/40">
+                  <td
+                    colSpan={4}
+                    className="px-5 py-12 text-center text-cream/40"
+                  >
                     هیچ بخشی یافت نشد.
                   </td>
                 </tr>
@@ -394,11 +374,18 @@ export default function LineTable() {
                   >
                     {/* عنوان با تورفتگی بر اساس عمق، برای نشان دادن سلسله‌مراتب */}
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2" style={{ paddingRight: depth * 24 }}>
+                      <div
+                        className="flex items-center gap-2"
+                        style={{ paddingRight: depth * 24 }}
+                      >
                         {hasChildren ? (
                           <button
                             onClick={() => toggleCollapse(node.id)}
-                            aria-label={isCollapsed ? "نمایش زیرمجموعه‌ها" : "پنهان کردن زیرمجموعه‌ها"}
+                            aria-label={
+                              isCollapsed
+                                ? "نمایش زیرمجموعه‌ها"
+                                : "پنهان کردن زیرمجموعه‌ها"
+                            }
                             className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-cream/40 transition-colors hover:bg-white/5 hover:text-gold"
                           >
                             <FiChevronDown
@@ -408,11 +395,17 @@ export default function LineTable() {
                           </button>
                         ) : (
                           <span className="flex h-6 w-6 shrink-0 items-center justify-center text-cream/20">
-                            {isChild ? <FiCornerDownLeft size={13} /> : <FiFolder size={14} />}
+                            {isChild ? (
+                              <FiCornerDownLeft size={13} />
+                            ) : (
+                              <FiFolder size={14} />
+                            )}
                           </span>
                         )}
 
-                        <span className={`font-bold ${isChild ? "text-cream/80" : "text-cream"}`}>
+                        <span
+                          className={`font-bold ${isChild ? "text-cream/80" : "text-cream"}`}
+                        >
                           {node.title}
                         </span>
 
@@ -427,7 +420,9 @@ export default function LineTable() {
                     {/* توضیحات */}
                     <td className="px-5 py-3.5 text-cream/70">
                       {node.descriptions ? (
-                        <span className="line-clamp-1">{node.descriptions}</span>
+                        <span className="line-clamp-1">
+                          {node.descriptions}
+                        </span>
                       ) : (
                         <span className="text-cream/30">—</span>
                       )}
