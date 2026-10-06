@@ -1,69 +1,76 @@
 "use client";
 
-import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   FiCalendar,
   FiUser,
   FiClock,
   FiChevronLeft,
-  FiEdit3,
   FiCheckCircle,
   FiXCircle,
-  FiSave,
 } from "react-icons/fi";
-import { useStaffAppointmentDetail, useUpdateAppointment } from "@/hooks/useAppointment";
-import { useLineStaff } from "@/hooks/useLines"; // فرض بر وجود این هوک برای گرفتن لیست استاف‌های لاین
+
+import { useStaffAppointmentDetail } from "@/hooks/useAppointment";
 import GlassCard from "@/components/ui/GlassCard";
-import Modal from "@/components/ui/modals/Modal"; // کامپوننت مودال پروژه شما
-import { Input, Select } from "@/components/ui/inputs";
 import type { AppointmentDetail } from "@/types/Appointment";
 
 // ─── توابع کمکی نمایش نام ──────────────────────────────────────
+
 function getRequesterName(a: AppointmentDetail): string {
-  if ((a as any).requester_name) return (a as any).requester_name;
-  if (a.requested_by?.name) return a.requested_by.name;
+  if ((a as any).requester_name) {
+    return (a as any).requester_name;
+  }
+
+  if (a.requested_by?.name) {
+    return a.requested_by.name;
+  }
+
   const u = a.member?.user;
+
   if (u) {
     const full = `${u.first_name ?? ""} ${u.last_name ?? ""}`.trim();
-    if (full) return full;
+
+    if (full) {
+      return full;
+    }
   }
+
   return "نامشخص";
 }
 
 function getStaffName(a: AppointmentDetail): string | null {
-  if ((a as any).staff_name) return (a as any).staff_name;
+  if ((a as any).staff_name) {
+    return (a as any).staff_name;
+  }
+
   const u = a.staff?.user;
+
   if (u) {
     const full = `${u.first_name ?? ""} ${u.last_name ?? ""}`.trim();
-    if (full) return full;
+
+    if (full) {
+      return full;
+    }
   }
+
   return a.staff ? "نامشخص" : null;
 }
 
-// ─── اسکیمای اعتبارسنجی فرم ویرایش ─────────────────────────────
-const updateSchema = z.object({
-  status: z.enum(["pending", "confirmed", "canceled"]).optional(),
-  appointment_time: z.string().optional().or(z.literal("")),
-  staff: z.string().optional().or(z.literal("")),
-});
+// ─── کامپوننت اصلی ─────────────────────────────────────────────
 
-type UpdateFormValues = z.infer<typeof updateSchema>;
-
-// ─── کامپوننت اصلی صفحه ────────────────────────────────────────
 export default function StaffAppointmentDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const { data: appointment, isLoading } = useStaffAppointmentDetail(params.id);
+  const { data: appointment, isLoading } =
+    useStaffAppointmentDetail(params.id);
 
   if (isLoading) {
     return (
-      <main dir="rtl" className="mx-auto max-w-4xl px-6 py-10 flex justify-center">
+      <main
+        dir="rtl"
+        className="mx-auto max-w-4xl px-6 py-10 flex justify-center"
+      >
         <span className="spinner-brand h-8 w-8 animate-spin rounded-full border-2 inline-block" />
       </main>
     );
@@ -71,16 +78,22 @@ export default function StaffAppointmentDetailPage() {
 
   if (!appointment) {
     return (
-      <main dir="rtl" className="mx-auto max-w-4xl px-6 py-10 text-center text-cream/60">
+      <main
+        dir="rtl"
+        className="mx-auto max-w-4xl px-6 py-10 text-center text-cream/60"
+      >
         نوبت مورد نظر یافت نشد.
       </main>
     );
   }
 
   return (
-    <main dir="rtl" className="mx-auto max-w-4xl px-6 py-10 space-y-8">
+    <main
+      dir="rtl"
+      className="mx-auto max-w-4xl px-6 py-10 space-y-8"
+    >
       {/* هدر */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.back()}
@@ -88,45 +101,57 @@ export default function StaffAppointmentDetailPage() {
           >
             <FiChevronLeft size={20} />
           </button>
+
           <div>
-            <h1 className="text-2xl font-extrabold text-cream">جزئیات نوبت</h1>
+            <h1 className="text-2xl font-extrabold text-cream">
+              جزئیات نوبت
+            </h1>
+
             <p className="text-xs text-cream/40 mt-1">
               کد رهگیری: {appointment.id.slice(0, 8)}
             </p>
           </div>
         </div>
-
-        <button
-          onClick={() => setIsEditOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-gold/10 border border-gold/20 px-4 py-2 text-sm font-bold text-gold hover:bg-gold/20 transition-all"
-        >
-          <FiEdit3 size={16} />
-          تنظیم زمان و وضعیت
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* ستون اصلی */}
         <div className="md:col-span-2 space-y-6">
-          {/* متقاضی */}
+
+          {/* اطلاعات متقاضی */}
           <GlassCard className="p-6">
             <h3 className="text-sm font-bold text-gold mb-4 flex items-center gap-2">
-              <FiUser size={16} /> اطلاعات متقاضی
+              <FiUser size={16} />
+              اطلاعات متقاضی
             </h3>
+
             <div className="space-y-3 text-sm">
               <div className="flex justify-between border-b border-cream/5 pb-2">
-                <span className="text-cream/60">نام:</span>
+                <span className="text-cream/60">
+                  نام:
+                </span>
+
                 <span className="text-cream font-medium">
                   {getRequesterName(appointment)}
                 </span>
               </div>
+
               <div className="flex justify-between border-b border-cream/5 pb-2">
-                <span className="text-cream/60">بخش مربوطه:</span>
-                <span className="text-cream font-medium">{appointment.line}</span>
+                <span className="text-cream/60">
+                  بخش مربوطه:
+                </span>
+
+                <span className="text-cream font-medium">
+                  {appointment.line}
+                </span>
               </div>
+
               {appointment.description && (
                 <div className="pt-2">
-                  <span className="text-cream/60 block mb-1">توضیحات درخواست:</span>
+                  <span className="text-cream/60 block mb-1">
+                    توضیحات درخواست:
+                  </span>
+
                   <p className="text-cream/80 bg-deep-2/30 p-3 rounded-lg text-xs leading-relaxed">
                     {appointment.description}
                   </p>
@@ -138,26 +163,49 @@ export default function StaffAppointmentDetailPage() {
           {/* زمان و کارشناس */}
           <GlassCard className="p-6">
             <h3 className="text-sm font-bold text-gold mb-4 flex items-center gap-2">
-              <FiClock size={16} /> زمان و کارشناس
+              <FiClock size={16} />
+              زمان و کارشناس
             </h3>
+
             <div className="space-y-3 text-sm">
               <div className="flex justify-between border-b border-cream/5 pb-2">
-                <span className="text-cream/60">کارشناس تعیین شده:</span>
-                <span className={`font-medium ${getStaffName(appointment) ? "text-cream" : "text-cream/40"}`}>
+                <span className="text-cream/60">
+                  کارشناس تعیین شده:
+                </span>
+
+                <span
+                  className={`font-medium ${
+                    getStaffName(appointment)
+                      ? "text-cream"
+                      : "text-cream/40"
+                  }`}
+                >
                   {getStaffName(appointment) ?? "هنوز تعیین نشده"}
                 </span>
               </div>
+
               <div className="flex justify-between pt-2">
-                <span className="text-cream/60">زمان نوبت:</span>
+                <span className="text-cream/60">
+                  زمان نوبت:
+                </span>
+
                 <span
                   className={`font-medium flex items-center gap-2 ${
-                    appointment.appointment_time ? "text-cream" : "text-cream/40"
+                    appointment.appointment_time
+                      ? "text-cream"
+                      : "text-cream/40"
                   }`}
                 >
                   {appointment.appointment_time ? (
                     <>
-                      <FiCalendar size={14} className="text-gold" />
-                      {new Date(appointment.appointment_time).toLocaleString("fa-IR")}
+                      <FiCalendar
+                        size={14}
+                        className="text-gold"
+                      />
+
+                      {new Date(
+                        appointment.appointment_time
+                      ).toLocaleString("fa-IR")}
                     </>
                   ) : (
                     "تعیین نشده"
@@ -204,150 +252,15 @@ export default function StaffAppointmentDetailPage() {
             <p className="text-xs text-cream/40 mt-4 border-t border-cream/10 pt-4">
               تاریخ ثبت درخواست:
               <br />
-              {new Date(appointment.created_at).toLocaleDateString("fa-IR")}
+
+              {new Date(
+                appointment.created_at
+              ).toLocaleDateString("fa-IR")}
             </p>
           </GlassCard>
         </div>
       </div>
-
-      {/* مودال ویرایش */}
-      <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="ویرایش نوبت">
-        <EditAppointmentForm
-          appointment={appointment}
-          onSuccess={() => setIsEditOpen(false)}
-        />
-      </Modal>
     </main>
-  );
-}
-
-// ─── کامپوننت فرم ویرایش ───────────────────────────────────────
-function EditAppointmentForm({ appointment, onSuccess }: { appointment: AppointmentDetail; onSuccess: () => void }) {
-  const updateMutation = useUpdateAppointment(appointment.id);
-
-  // نکته: برای گرفتن لیست استاف‌های همان لاین، نیاز به line_id داریم.
-  // اگر در تایپ AppointmentDetail فیلد line_id ندارید، باید از سریالایزر بک‌اند اضافه شود.
-  // در اینجا فرض می‌کنیم line_id در آبجکت appointment موجود است یا از طریق هوک دیگری گرفته می‌شود.
-  // اگر line فقط StringRelatedField است، ممکن است نیاز باشد line_id را جداگانه پاس دهید.
-  const lineId = (appointment as any).line_id;
-  const { data: staffData } = useLineStaff(lineId);
-
-  const { control, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<UpdateFormValues>({
-    resolver: zodResolver(updateSchema),
-    defaultValues: {
-      status: appointment.status,
-      appointment_time: appointment.appointment_time
-        ? new Date(appointment.appointment_time).toISOString().slice(0, 16)
-        : "",
-      staff: appointment.staff?.id || "",
-    },
-  });
-
-  const onSubmit = async (values: UpdateFormValues) => {
-    try {
-      await updateMutation.mutateAsync({
-        status: values.status,
-        appointment_time: values.appointment_time || null,
-        staff: values.staff || null,
-      });
-      onSuccess();
-    } catch (err: any) {
-      // مدیریت خطاهای بک‌اند
-      if (err.fieldErrors) {
-        Object.entries(err.fieldErrors).forEach(([field, messages]) => {
-          setError(field as keyof UpdateFormValues, {
-            type: "server",
-            message: Array.isArray(messages) ? messages[0] : String(messages),
-          });
-        });
-      } else {
-        // خطای عمومی
-        setError("root", {
-          message: err.message || "خطا در ذخیره تغییرات"
-        });
-      }
-    }
-  };
-
-  const staffOptions = staffData?.results?.map((s: any) => ({
-    value: s.id,
-    label: `${s.user.first_name} ${s.user.last_name}`.trim() || s.employee_code,
-  })) || [];
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 mt-2">
-
-      <Controller
-        name="staff"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Select
-            label="کارشناس مسئول"
-            options={staffOptions}
-            value={field.value}
-            onChange={field.onChange}
-            error={fieldState.error?.message}
-            placeholder="انتخاب کارشناس..."
-          />
-        )}
-      />
-
-      <Controller
-        name="appointment_time"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Input
-            type="datetime-local"
-            label="زمان نوبت"
-            {...field}
-            error={fieldState.error?.message}
-            className="dir-ltr text-left"
-          />
-        )}
-      />
-
-      <Controller
-        name="status"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Select
-            label="وضعیت نوبت"
-            options={[
-              { value: "pending", label: "در انتظار" },
-              { value: "confirmed", label: "تأیید شده" },
-              { value: "canceled", label: "لغو شده" },
-            ]}
-            value={field.value}
-            onChange={field.onChange}
-            error={fieldState.error?.message}
-          />
-        )}
-      />
-
-      {errors.root && (
-        <p className="text-xs text-red-400 bg-red-500/10 p-2 rounded text-center">
-          {errors.root.message}
-        </p>
-      )}
-
-      <div className="flex justify-end gap-3 pt-4 border-t border-cream/10">
-        <button
-          type="button"
-          onClick={onSuccess}
-          className="px-4 py-2 text-sm text-cream/60 hover:text-cream transition-colors"
-        >
-          انصراف
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting || updateMutation.isPending}
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-b from-gold-soft to-gold px-6 py-2 text-sm font-bold text-deep shadow-gold transition-opacity disabled:opacity-60"
-        >
-          <FiSave size={16} />
-          {updateMutation.isPending ? "ذخیره..." : "ذخیره تغییرات"}
-        </button>
-      </div>
-    </form>
   );
 }
 
@@ -370,3 +283,4 @@ function HourglassIcon({ size }: { size: number }) {
     </svg>
   );
 }
+

@@ -18,7 +18,7 @@ export default function LogoCard({ logo, name, href }: Props) {
           alt={name}
           fill
           sizes="112px"
-          className="object-contain p-2"
+          className="h-28 w-28 rounded-full object-contain"
         />
       </div>
       <h3 className="text-sm font-bold leading-6 text-cream md:text-base">{name}</h3>
