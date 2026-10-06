@@ -26,14 +26,14 @@ urlpatterns = [
 
     # اسلایدر (مدیریتی)
     path("sliders/", SliderListCreateView.as_view(), name="slider-list"),
-    path("sliders/<int:pk>/", SliderDetailView.as_view(), name="slider-detail"),
+    path("sliders/<uuid:pk>/", SliderDetailView.as_view(), name="slider-detail"),
     path(
-        "sliders/<int:slider_id>/images/",
+        "sliders/<uuid:slider_id>/images/",
         SliderImageCreateView.as_view(),
         name="slider-image-create",
     ),
     path(
-        "sliders/images/<int:pk>/",
+        "sliders/images/<uuid:pk>/",
         SliderImageDetailView.as_view(),
         name="slider-image-detail",
     ),

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +17,10 @@ const sliderSchema = z
       .string()
       .min(1, "کلید الزامی است.")
       .max(100, "کلید حداکثر ۱۰۰ کاراکتر باشد.")
-      .regex(/^[-a-zA-Z0-9_]+$/, "فقط حروف انگلیسی، عدد، خط تیره و آندرلاین مجاز است."),
+      .regex(
+        /^[-a-zA-Z0-9_]+$/,
+        "فقط حروف انگلیسی، عدد، خط تیره و آندرلاین مجاز است.",
+      ),
     title: z.string().max(150, "عنوان حداکثر ۱۵۰ کاراکتر باشد."),
     is_active: z.boolean(),
     start_at: z.date().nullable(),
@@ -52,9 +56,16 @@ interface SliderFormProps {
   slider?: Slider;
   isPending: boolean;
   onSubmit: (values: SliderFormValues) => Promise<unknown>;
+  children?: ReactNode;
 }
 
-export default function SliderForm({ mode, slider, isPending, onSubmit }: SliderFormProps) {
+export default function SliderForm({
+  mode,
+  slider,
+  isPending,
+  onSubmit,
+  children,
+}: SliderFormProps) {
   const {
     register,
     control,
@@ -97,7 +108,9 @@ export default function SliderForm({ mode, slider, isPending, onSubmit }: Slider
               dir="ltr"
               required
               readOnly={mode === "edit"}
-              className={mode === "edit" ? "cursor-not-allowed opacity-60" : undefined}
+              className={
+                mode === "edit" ? "cursor-not-allowed opacity-60" : undefined
+              }
               placeholder="why-sports-psychology"
               helperText={
                 mode === "edit"
@@ -188,6 +201,8 @@ export default function SliderForm({ mode, slider, isPending, onSubmit }: Slider
           </div>
         </FormSection>
 
+        {children}
+
         <div className="flex items-center justify-end gap-3 border-t border-cream/10 pt-6">
           <Link
             href="/admin/settings/sliders"
@@ -203,8 +218,8 @@ export default function SliderForm({ mode, slider, isPending, onSubmit }: Slider
             {isPending
               ? "در حال ذخیره..."
               : mode === "create"
-              ? "ساخت اسلایدر"
-              : "ذخیره تغییرات"}
+                ? "ساخت اسلایدر"
+                : "ذخیره تغییرات"}
           </button>
         </div>
       </GlassCard>
