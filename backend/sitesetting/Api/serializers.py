@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from sitesetting.models import ContactRequest, BackgroundMusic
+from sitesetting.models import (
+    BackgroundMusic,
+    ContactRequest,
+    Slider,
+    SliderImage,
+)
 
 
 class ContactRequestSerializer(serializers.ModelSerializer):
@@ -59,3 +64,76 @@ class BackgroundMusicSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+    
+    
+class SliderImagePublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SliderImage
+        fields = ["id", "image", "caption_title", "caption_text", "order"]
+
+
+class SliderPublicSerializer(serializers.ModelSerializer):
+    images = SliderImagePublicSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Slider
+        fields = ["key", "title", "interval_seconds", "images"]
+
+
+class SliderImageAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SliderImage
+        fields = [
+            "id",
+            "slider",
+            "image",
+            "caption_title",
+            "caption_text",
+            "order",
+            "is_active",
+        ]
+        read_only_fields = ["id", "slider"]
+        extra_kwargs = {"image": {"required": False}}
+
+    def validate(self, attrs):
+        # هنگام ساخت، عکس اجباری است؛ هنگام ویرایش می‌تواند ارسال نشود
+        if self.instance is None and not attrs.get("image"):
+            raise serializers.ValidationError({"image": "انتخاب عکس الزامی است."})
+        return attrs
+
+
+class SliderAdminSerializer(serializers.ModelSerializer):
+    images = SliderImageAdminSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Slider
+        fields = [
+            "id",
+            "key",
+            "title",
+            "is_active",
+            "start_at",
+            "end_at",
+            "interval_seconds",
+            "images",
+        ]
+        read_only_fields = ["id"]
+
+    def validate(self, attrs):
+        start = attrs.get("start_at", getattr(self.instance, "start_at", None))
+        end = attrs.get("end_at", getattr(self.instance, "end_at", None))
+
+        if start and end and end <= start:
+            raise serializers.ValidationError(
+                {"end_at": "زمان پایان باید بعد از زمان شروع باشد."}
+            )
+
+        interval = attrs.get(
+            "interval_seconds", getattr(self.instance, "interval_seconds", 5)
+        )
+        if interval < 1:
+            raise serializers.ValidationError(
+                {"interval_seconds": "فاصله‌ی تعویض باید حداقل ۱ ثانیه باشد."}
+            )
+
+        return attrs

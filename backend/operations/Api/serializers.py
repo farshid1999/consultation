@@ -20,7 +20,7 @@ from operations.models import (
     Media,
     Message,
     StaffLine,
-    SubmissionMedia, Form, ConsultationForm, SubmitConsultationForm,
+    SubmissionMedia, Form, ConsultationForm, SubmitConsultationForm,Appointment,
 )
 
 
@@ -1655,3 +1655,115 @@ class SubmitConsultationFormListSerializer(serializers.ModelSerializer):
             "forms",
             "created_at",
         ]
+
+# ───────────────────────────────────────────
+# Appointment Serializers
+# ───────────────────────────────────────────
+
+class AppointmentListSerializer(serializers.ModelSerializer):
+    member = serializers.StringRelatedField()
+    staff = serializers.StringRelatedField()
+    line = serializers.StringRelatedField()
+
+    class Meta:
+        model = Appointment
+        fields = (
+            "id",
+            "line",
+            "member",
+            "staff",
+            "status",
+            "appointment_time",
+            "created_at",
+        )
+
+
+class AppointmentDetailSerializer(serializers.ModelSerializer):
+    member = LineMemberSerializer(read_only=True)
+    staff = StaffLineSerializer(read_only=True)  # یا یک StaffDetailSerializer جداگانه
+    line = serializers.StringRelatedField()
+
+    class Meta:
+        model = Appointment
+        fields = (
+            "id",
+            "line",
+            "member",
+            "staff",
+            "status",
+            "appointment_time",
+            "created_at",
+            "updated_at",
+        )
+
+
+class AppointmentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = (
+            "id",
+            "line",
+            "member",
+            "staff",
+            "status",
+            "appointment_time",
+        )
+        read_only_fields = ("id",)
+
+    def validate(self, attrs):
+        line = attrs["line"]
+        member = attrs["member"]
+        staff = attrs["staff"]
+        appointment_time = attrs["appointment_time"]
+
+        # member باید عضو همین line باشد
+        if member.line_id != line.id:
+            raise serializers.ValidationError(
+                {"member": "این عضو متعلق به این Line نیست."}
+            )
+
+        # staff باید عضو همین line باشد
+        if not StaffLine.objects.filter(staff=staff, line=line).exists():
+            raise serializers.ValidationError(
+                {"staff": "این Staff به این Line دسترسی ندارد."}
+            )
+
+        # staff در همان زمان appointment دیگری نداشته باشد
+        if Appointment.objects.filter(
+            staff=staff,
+            appointment_time=appointment_time,
+        ).exists():
+            raise serializers.ValidationError(
+                {"appointment_time": "این Staff در این زمان appointment دیگری دارد."}
+            )
+
+        return attrs
+
+
+class AppointmentUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = (
+            "id",
+            "status",
+            "appointment_time",
+        )
+        read_only_fields = ("id",)
+
+    def validate(self, attrs):
+        appointment_time = attrs.get("appointment_time")
+
+        if appointment_time:
+            staff = self.instance.staff
+
+            conflict = Appointment.objects.filter(
+                staff=staff,
+                appointment_time=appointment_time,
+            ).exclude(pk=self.instance.pk).exists()
+
+            if conflict:
+                raise serializers.ValidationError(
+                    {"appointment_time": "این Staff در این زمان appointment دیگری دارد."}
+                )
+
+        return attrs

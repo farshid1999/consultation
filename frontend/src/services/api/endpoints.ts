@@ -169,6 +169,20 @@ export const APPOINTMENT_ENDPOINTS = {
     `operations/member/appointments/${id}/`,
 };
 
+export const SLIDER_ENDPOINTS = {
+  // عمومی
+  public: (key: string) => `sitesetting/sliders/public/${key}/`,
+
+  // مدیریتی
+  list: "sitesetting/sliders/",
+  detail: (id: number | string) => `sitesetting/sliders/${id}/`,
+
+  // تصاویر
+  imageCreate: (sliderId: number | string) =>
+    `sitesetting/sliders/${sliderId}/images/`,
+  imageDetail: (id: number | string) => `sitesetting/sliders/images/${id}/`,
+};
+
 export const USER_ENDPOINTS = {
   me: "accounts/users/me/", 
  

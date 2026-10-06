@@ -30,58 +30,160 @@ export default function CreateUserPage() {
 
   return (
     <div className="space-y-6">
-
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link href="/admin/users" className="text-cream/40 hover:text-cream transition-colors">
+        <Link
+          href="/admin/users"
+          className="text-cream/40 hover:text-cream transition-colors"
+        >
           <FiArrowRight size={20} />
         </Link>
         <div>
           <h1 className="text-2xl font-semibold text-cream">افزودن کاربر</h1>
-          <p className="text-cream/40 text-sm mt-1">اطلاعات کاربر جدید را وارد کنید</p>
+          <p className="text-cream/40 text-sm mt-1">
+            اطلاعات کاربر جدید را وارد کنید
+          </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
-
         <section className="space-y-4">
-          <h2 className="text-sm font-semibold text-gold border-b border-cream/10 pb-2">اطلاعات حساب</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="نام کاربری" placeholder="نام کاربری" required error={errors.username?.message} {...field("username")} />
-            <Input label="رمز عبور" type="password" placeholder="رمز عبور" required error={errors.password?.message} {...field("password")} />
-          </div>
-          <Input label="ایمیل" type="email" placeholder="example@email.com" error={errors.email?.message} {...field("email")} />
+          <h2 className="text-sm font-semibold text-gold border-b border-cream/10 pb-2">
+            اطلاعات حساب
+          </h2>
+          <Input
+            label="کد ملی (نام کاربری)"
+            placeholder="کد ملی ۱۰ رقمی"
+            inputMode="numeric"
+            maxLength={10}
+            required
+            error={errors.national_id?.message}
+            {...field("national_id")}
+          />
+          <p className="text-xs text-cream/40">
+            نام کاربری برابر کد ملی و رمز عبور برابر شماره موبایل خواهد بود.
+          </p>
+          <Input
+            label="ایمیل"
+            type="email"
+            placeholder="example@email.com"
+            error={errors.email?.message}
+            {...field("email")}
+          />
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-sm font-semibold text-gold border-b border-cream/10 pb-2">اطلاعات شخصی</h2>
+          <h2 className="text-sm font-semibold text-gold border-b border-cream/10 pb-2">
+            اطلاعات شخصی
+          </h2>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="نام" placeholder="نام" error={errors.first_name?.message} {...field("first_name")} />
-            <Input label="نام خانوادگی" placeholder="نام خانوادگی" error={errors.last_name?.message} {...field("last_name")} />
+            <Input
+              label="نام"
+              placeholder="نام"
+              error={errors.first_name?.message}
+              {...field("first_name")}
+            />
+            <Input
+              label="نام خانوادگی"
+              placeholder="نام خانوادگی"
+              error={errors.last_name?.message}
+              {...field("last_name")}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="شماره موبایل" placeholder="09123456789" error={errors.phone_number?.message} {...field("phone_number")} />
-            <Input label="تلفن ثابت" placeholder="021..." error={errors.land_line?.message} {...field("land_line")} />
+            <Input
+              label="شماره موبایل (رمز عبور)"
+              placeholder="09123456789"
+              required
+              error={errors.phone_number?.message}
+              {...field("phone_number")}
+            />
+            <Input
+              label="تلفن ثابت"
+              placeholder="021..."
+              error={errors.land_line?.message}
+              {...field("land_line")}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="شغل" placeholder="شغل" error={errors.job?.message} {...field("job")} />
-            <Input label="مدرک تحصیلی" placeholder="مدرک تحصیلی" error={errors.degree?.message} {...field("degree")} />
+            <Input
+              label="شغل"
+              placeholder="شغل"
+              error={errors.job?.message}
+              {...field("job")}
+            />
+            <Input
+              label="مدرک تحصیلی"
+              placeholder="مدرک تحصیلی"
+              error={errors.degree?.message}
+              {...field("degree")}
+            />
           </div>
-          <Input label="رشته ورزشی" placeholder="رشته ورزشی" error={errors.sport_discipline?.message} {...field("sport_discipline")} />
-          <Switch label="دانشجو" description="آیا این کاربر دانشجو است؟" {...field("is_student")} />
+          <Input
+            label="رشته ورزشی"
+            placeholder="رشته ورزشی"
+            error={errors.sport_discipline?.message}
+            {...field("sport_discipline")}
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="نام مربی"
+              placeholder="نام مربی"
+              error={errors.coach_name?.message}
+              {...field("coach_name")}
+            />
+            <Input
+              label="سابقه فعالیت"
+              placeholder="سابقه فعالیت"
+              error={errors.activity_history?.message}
+              {...field("activity_history")}
+            />
+          </div>
+          <Switch
+            label="دانشجو"
+            description="آیا این کاربر دانشجو است؟"
+            {...field("is_student")}
+          />
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-sm font-semibold text-gold border-b border-cream/10 pb-2">آدرس</h2>
+          <h2 className="text-sm font-semibold text-gold border-b border-cream/10 pb-2">
+            آدرس
+          </h2>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="کشور" placeholder="کشور" error={errors.address?.country?.message} {...field("address.country")} />
-            <Input label="استان" placeholder="استان" error={errors.address?.province?.message} {...field("address.province")} />
+            <Input
+              label="کشور"
+              placeholder="کشور"
+              error={errors.address?.country?.message}
+              {...field("address.country")}
+            />
+            <Input
+              label="استان"
+              placeholder="استان"
+              error={errors.address?.province?.message}
+              {...field("address.province")}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Input label="شهر" placeholder="شهر" error={errors.address?.city?.message} {...field("address.city")} />
-            <Input label="کد پستی" placeholder="کد پستی" error={errors.address?.postal_code?.message} {...field("address.postal_code")} />
+            <Input
+              label="شهر"
+              placeholder="شهر"
+              error={errors.address?.city?.message}
+              {...field("address.city")}
+            />
+            <Input
+              label="کد پستی"
+              placeholder="کد پستی"
+              error={errors.address?.postal_code?.message}
+              {...field("address.postal_code")}
+            />
           </div>
-          <Input label="آدرس" placeholder="آدرس دقیق" error={errors.address?.street?.message} {...field("address.street")} />
+          <Input
+            label="آدرس"
+            placeholder="آدرس دقیق"
+            error={errors.address?.street?.message}
+            {...field("address.street")}
+          />
         </section>
 
         {error && (
@@ -105,7 +207,6 @@ export default function CreateUserPage() {
             انصراف
           </Link>
         </div>
-
       </form>
     </div>
   );

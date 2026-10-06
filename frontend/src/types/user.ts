@@ -1,7 +1,10 @@
 import type { Address, AddressInput } from "./address";
 import type { Club, ClubInput } from "./club";
 import type { InformationInput, InformationRead } from "./information";
-import type { CreateUserFormValues, UpdateUserFormValues } from "@/schemas/user";
+import type {
+  CreateUserFormValues,
+  UpdateUserFormValues,
+} from "@/schemas/user";
 
 /** Mirrors UserListSerializer — used inside StaffListSerializer. */
 export interface UserListItem {
@@ -33,9 +36,12 @@ export interface UserDetail {
   land_line: string | null;
   is_student: boolean;
   degree: string | null;
-  job: string | null;
-  sport_discipline: string | null;
-  professional_background: string | null;
+  job: string;
+  sport_discipline: string;
+  national_id: string | null;
+  coach_name: string | null;
+  activity_history: string | null;
+  professional_background: string;
   referral_code: string | null;
   address: Address | null;
   club: Club | null;
@@ -51,7 +57,6 @@ export interface UserDetail {
 }
 
 /** Mirrors UserCreateSerializer exactly. */
-
 
 /**
  * Mirrors UserUpdateSerializer — identical field list to create, but every

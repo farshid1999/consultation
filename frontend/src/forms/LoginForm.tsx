@@ -10,9 +10,14 @@ import { FiUser, FiLock } from "react-icons/fi";
 
 export interface LoginFormProps {
   onSuccess?: () => void;
+  onGoToRegister?: () => void;
 }
 
-export default function LoginForm({ onSuccess }: LoginFormProps) {
+export default function LoginForm({
+  onSuccess,
+  onGoToRegister,
+}: LoginFormProps) {
+  console.log("[LoginForm] render | onGoToRegister:", typeof onGoToRegister);
   const { mutate: login, isPending, error } = useLogin();
 
   const {
@@ -53,7 +58,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
       {error && (
         <p className="text-xs text-red-400 text-right">
-          {(error as any)?.non_field_errors?.[0] ?? "نام کاربری یا رمز عبور اشتباه است."}
+          {(error as any)?.non_field_errors?.[0] ??
+            "نام کاربری یا رمز عبور اشتباه است."}
         </p>
       )}
 
@@ -64,6 +70,23 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       >
         {isPending ? "در حال ورود..." : "ورود"}
       </button>
+
+      <p className="text-center text-sm text-cream/60">
+        حساب کاربری ندارید؟{" "}
+        <button
+          type="button"
+          onClick={() => {
+            console.log(
+              "[LoginForm] register link clicked | onGoToRegister:",
+              typeof onGoToRegister,
+            );
+            onGoToRegister?.();
+          }}
+          className="font-semibold text-gold transition-opacity hover:opacity-80"
+        >
+          ثبت‌نام کنید
+        </button>
+      </p>
     </form>
   );
 }

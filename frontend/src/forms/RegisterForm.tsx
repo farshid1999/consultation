@@ -9,9 +9,14 @@ import { FiUser, FiLock, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
 
 export interface RegisterFormProps {
   onSuccess?: () => void;
+  onGoToLogin?: () => void;
 }
 
-export default function RegisterForm({ onSuccess }: RegisterFormProps) {
+export default function RegisterForm({
+  onSuccess,
+  onGoToLogin,
+}: RegisterFormProps) {
+  console.log("[RegisterForm] render | onGoToLogin:", typeof onGoToLogin);
   const { mutate: submitRegister, isPending, error } = useRegister();
 
   const {
@@ -33,10 +38,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
-
       {/* ── اطلاعات حساب ── */}
       <fieldset className="space-y-4">
-        <legend className="text-sm font-semibold text-gold mb-2">اطلاعات حساب</legend>
+        <legend className="text-sm font-semibold text-gold mb-2">
+          اطلاعات حساب
+        </legend>
 
         <Input
           label="نام کاربری"
@@ -70,7 +76,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       {/* ── اطلاعات شخصی ── */}
       <fieldset className="space-y-4">
-        <legend className="text-sm font-semibold text-gold mb-2">اطلاعات شخصی</legend>
+        <legend className="text-sm font-semibold text-gold mb-2">
+          اطلاعات شخصی
+        </legend>
 
         <div className="grid grid-cols-2 gap-4">
           <Input
@@ -128,7 +136,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       {/* ── اطلاعات باشگاه ── */}
       <fieldset className="space-y-4">
-        <legend className="text-sm font-semibold text-gold mb-2">اطلاعات باشگاه</legend>
+        <legend className="text-sm font-semibold text-gold mb-2">
+          اطلاعات باشگاه
+        </legend>
 
         <Input
           label="نام باشگاه"
@@ -194,6 +204,23 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
       >
         {isPending ? "در حال ثبت‌نام..." : "ثبت‌نام"}
       </button>
+
+      <p className="text-center text-sm text-cream/60">
+        حساب کاربری دارید؟{" "}
+        <button
+          type="button"
+          onClick={() => {
+            console.log(
+              "[RegisterForm] login link clicked | onGoToLogin:",
+              typeof onGoToLogin,
+            );
+            onGoToLogin?.();
+          }}
+          className="font-semibold text-gold transition-opacity hover:opacity-80"
+        >
+          وارد شوید
+        </button>
+      </p>
     </form>
   );
 }
