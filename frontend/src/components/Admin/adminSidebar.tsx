@@ -24,6 +24,7 @@ const navItems = [
   { href: "/admin/assignments", label: "تکالیف", icon: FiLayers },
   { href: "/admin/contacts", label: "پشتیبانی" , icon: FiMessageSquare},
   { href: "/admin/settings", label: "تنظیمات", icon: IoSettingsOutline },
+    {href: "/admin/appointment", label: "رزرو ها", icon: FiUserCheck},
 ];
 
 export default function AdminSidebar() {

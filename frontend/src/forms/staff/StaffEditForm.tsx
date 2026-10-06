@@ -16,6 +16,7 @@ function mapInformation(info: InformationRead): InformationFormValues {
         title: info.title,
         text: info.text ?? "",
         file: null,
+        existing_file: info.file ?? null, // جدید
         children: info.children?.map(mapInformation) ?? [],
     };
 }
@@ -71,12 +72,13 @@ function mapDetailToFormValues(staff: StaffDetail): StaffUpdateFormValues {
     };
 }
 
-function cleanInformations(items?: InformationFormValues[]): InformationFormValues[] {
+function cleanInformations(items?: InformationFormValues[]): any[] {
     return (items ?? []).map((item) => ({
         title: item.title,
         text: item.text || undefined,
         file: item.file ?? undefined,
-        children: item.children && item.children.length > 0 ? cleanInformations(item.children) : undefined,
+        existing_file: !item.file ? item.existing_file ?? undefined : undefined,
+        children: item.children?.length ? cleanInformations(item.children) : undefined,
     }));
 }
 
@@ -88,7 +90,7 @@ export default function StaffEditForm({staff}: { staff: StaffDetail }) {
         control,
         handleSubmit,
         setError,
-        formState: {errors, isSubmitting},
+        formState: {errors, isSubmitting, dirtyFields},
     } = useForm<StaffUpdateFormValues>({
         resolver: zodResolver(staffUpdateSchema),
         defaultValues: mapDetailToFormValues(staff),
@@ -96,13 +98,16 @@ export default function StaffEditForm({staff}: { staff: StaffDetail }) {
 
 
     const onSubmit = async (values: StaffUpdateFormValues) => {
-
+        console.log("informations in form:", values.user?.informations);
         const u = values.user;
         const orig = staff.user;
+        const infoTouched = Boolean(dirtyFields.user?.informations);
+
         const payload: StaffUpdateInput = {
             employee_code: values.employee_code,
             position: values.position,
             hire_date: toApiDateString(values.hire_date ?? undefined),
+
 
             user: {
                 username: u?.username !== orig.username ? u?.username : undefined,
@@ -123,14 +128,16 @@ export default function StaffEditForm({staff}: { staff: StaffDetail }) {
                 club: values.user?.club,
                 bio: values.user?.bio || undefined,
                 birth_date: toApiDateString(values.user?.birth_date ?? undefined) ?? undefined,
-                informations: cleanInformations(values.user?.informations) as never,
+                informations: infoTouched
+                    ? (cleanInformations(values.user?.informations) as never)
+                    : undefined,
             },
         };
 
         try {
             await updateStaff.mutateAsync(payload);
             toast.success("تغییرات با موفقیت ذخیره شد.");
-            router.push(`/staff/${staff.id}`);
+            router.back();
         } catch (err) {
             const apiError = err as ApiError;
             toast.error(apiError.message ?? "ذخیره‌ی تغییرات با خطا مواجه شد.");

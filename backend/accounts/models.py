@@ -33,9 +33,8 @@ def validate_national_id(value):
 
 
 def information_upload_path(instance, filename):
-    ext = os.path.splitext(filename)[1]
-
-    return f"informations/{instance.id}/{filename}"
+    ext = os.path.splitext(filename)[1].lower()
+    return f"informations/{uuid.uuid4().hex}{ext}"
 
 
 from datetime import timedelta

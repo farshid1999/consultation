@@ -1,50 +1,58 @@
-import type { UserDetail } from "./user";
+import { UserDetail } from "./user";
 
-// ── Appointment ───────────────────────────────────────────────────────────────
+export type AppointmentStatus = "pending" | "confirmed" | "canceled";
 
 export interface AppointmentListItem {
-  id: number;
+  id: string;
   line: string;
-  member: string;
-  staff: string;
-  status: string;
-  appointment_time: string;
+  member: string | null;
+  requested_by: string | null;
+  staff: string | null;
+  status: AppointmentStatus;
+  description: string | null;
+  appointment_time: string | null;
   created_at: string;
-}
-
-export interface AppointmentDetail {
-  id: number;
-  line: string;
-  member: AppointmentMember;
-  staff: AppointmentStaff;
-  status: string;
-  appointment_time: string;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface AppointmentMember {
-  id: number;
+  id: string;
   user: UserDetail;
 }
 
 export interface AppointmentStaff {
-  id: number;
+  id: string;
   user: UserDetail;
   employee_code: string;
   hire_date: string;
   position: string;
 }
 
+export interface AppointmentDetail
+  extends Omit<AppointmentListItem, "member" | "staff" | "requested_by"> {
+  member: AppointmentMember | null;
+  staff: AppointmentStaff | null;
+  requested_by: { id: string; name: string } | null;
+  requester_name: string | null;
+  staff_name: string | null;
+  updated_at: string;
+  line_id: string;
+}
+
+export interface AppointmentRequestInput {
+  line_id: string;
+  description?: string;
+}
+
 export interface AppointmentCreateInput {
   line: string;
   member: string;
   staff: string;
-  status: string;
+  status: AppointmentStatus;
   appointment_time: string;
 }
 
 export interface AppointmentUpdateInput {
-  status?: string;
-  appointment_time?: string;
+  status?: "pending" | "confirmed" | "canceled";
+  appointment_time?: string | null;
+  staff?: string | null; // UUID کارشناس
 }

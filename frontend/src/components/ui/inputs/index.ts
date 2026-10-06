@@ -34,9 +34,11 @@ export type { AudioRecorderProps } from "./AudioRecorder";
 export { default as FieldWrapper } from "./FieldWrapper";
 export type { FieldWrapperProps } from "./FieldWrapper";
 
-export { default as  RichTextEditor} from "./RichTextEditor";
-export type { RichTextEditorProbs } from "./RichTextEditor";
+export { default as RichTextEditor } from "./RichTextEditor";
+export type { RichTextEditorProps } from "./RichTextEditor";   // fixed typo "Probs" → "Props"
 
-export { default as  AvatarUpload} from "./RichTextEditor";
-export type { AvatarUpload } from "./RichTextEditor";
+export { default as AvatarUpload } from "./AvatarUpload";
+export type { AvatarUploadProps } from "./AvatarUpload";      // ← renamed type
 
+export { default as Button } from "./Button";
+export type { ButtonProps } from "./Button";

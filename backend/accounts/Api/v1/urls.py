@@ -14,7 +14,6 @@ auth_urls = [
     path("logout/", LogoutView.as_view(), name="logout"),
 ]
 
-
 # =========================
 # Role URLs
 # =========================
@@ -25,9 +24,8 @@ role_urls = [
     path("<int:pk>/", RoleDetailAPIView.as_view(), name="role-detail"),
     path("<int:pk>/update/", RoleUpdateAPIView.as_view(), name="role-update"),
     path("<int:pk>/delete/", RoleDeleteAPIView.as_view(), name="role-delete"),
-    path("get-user-role/",get_user_role,name="get-user-role"),
+    path("get-user-role/", get_user_role, name="get-user-role"),
 ]
-
 
 # =========================
 # User URLs
@@ -42,7 +40,6 @@ user_urls = [
     path("me/", CurrentUserAPIView.as_view(), name="current-user"),
 ]
 
-
 # =========================
 # Staff URLs
 # =========================
@@ -55,6 +52,10 @@ staff_urls = [
     path("<str:pk>/delete/", StaffDeleteAPIView.as_view(), name="staff-delete"),
 ]
 
+public_staff_urls = [
+    path("", PublicStaffListAPIView.as_view(), name="public-staff-list"),
+    path("<uuid:pk>/", PublicStaffDetailAPIView.as_view(), name="public-staff-detail"),
+]
 
 # =========================
 # Main URL List
@@ -64,4 +65,5 @@ urlpatterns = [
     path("roles/", include(role_urls)),
     path("users/", include(user_urls)),
     path("staff/", include(staff_urls)),
+    path("public/staff/", include(public_staff_urls)),
 ]

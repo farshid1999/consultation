@@ -7,6 +7,7 @@ import type {
   AppointmentUpdateInput,
 } from "@/types/Appointment";
 import type { Paginated, ListQueryParams } from "@/types";
+import {toast} from "sonner";
 
 const KEYS = {
   adminList: (params?: ListQueryParams) =>
@@ -66,6 +67,19 @@ export const useMemberAppointmentDetail = (id: string | number) =>
     enabled: !!id,
   });
 
+
+export const useCreateAppointmentRequest = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { line_id: string; description?: string }) =>
+      appointmentService.createRequest(data),
+    onSuccess: () => {
+      toast.success("درخواست نوبت شما با موفقیت ثبت شد.");
+      queryClient.invalidateQueries({ queryKey: KEYS.memberList() });
+    },
+  });
+};
+
 // ── Mutations ─────────────────────────────────────────────────────────────────
 
 export const useCreateAppointment = () => {
@@ -80,10 +94,23 @@ export const useCreateAppointment = () => {
 
 export const useUpdateAppointment = (id: string | number) => {
   const queryClient = useQueryClient();
-  return useMutation<AppointmentDetail, Error, AppointmentUpdateInput>({
-    mutationFn: (data) => appointmentService.update(id, data),
+
+  return useMutation({
+    mutationFn: (data: AppointmentUpdateInput) =>
+      appointmentService.update(id, data),
+
     onSuccess: () => {
+      toast.success("نوبت با موفقیت بروزرسانی شد.");
+      // اینوالید کردن کوئری‌های مرتبط برای رفرش شدن لیست و جزئیات
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["appointment", id] });
+    },
+
+    onError: (err: any) => {
+      // خطا توسط فرم هندل می‌شود، اما یک توست کلی هم نمایش می‌دهیم
+      if (!err.fieldErrors) {
+        toast.error(err.message || "خطا در بروزرسانی نوبت");
+      }
     },
   });
 };

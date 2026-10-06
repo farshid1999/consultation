@@ -35,6 +35,7 @@ class Line(BaseModel):
     is_required_content = models.BooleanField(default=True)
     is_required_assignment = models.BooleanField(default=True)
     is_required_form = models.BooleanField(default=True)
+    is_required_appointment = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
@@ -339,29 +340,47 @@ class SubmitConsultationForm(BaseModel):
 
 
 class Appointment(BaseModel):
-    line = models.ForeignKey(
-        Line,
+    class Status(models.TextChoices):
+        PENDING = "pending", "در انتظار"
+        CONFIRMED = "confirmed", "تأیید شده"
+        CANCELED = "canceled", "لغو شده"
+
+    line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name="appointments")
+
+
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="appointments",
+        related_name="appointment_requests",
+        null=True,
+        blank=True,
     )
 
+    # فقط وقتی کاربر عضو لاین است یا بعد از تأیید عضو شد
     member = models.ForeignKey(
         LineMember,
         on_delete=models.CASCADE,
         related_name="appointments",
+        null=True,
+        blank=True,
     )
+    description = models.TextField(blank=True, null=True)
 
     staff = models.ForeignKey(
         Staff,
         on_delete=models.CASCADE,
         related_name="appointments",
+        null=True,
+        blank=True,
     )
 
     status = models.CharField(
         max_length=255,
+        choices=Status.choices,
+        default=Status.PENDING,
     )
 
-    appointment_time = models.DateTimeField()
+    appointment_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Appointment #{self.pk}"

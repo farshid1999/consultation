@@ -1,5 +1,5 @@
 from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Q, F
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -2587,6 +2587,14 @@ class AdminDashboardStatsAPIView(APIView):
 # Appointment Views
 # ───────────────────────────────────────────
 
+class MemberAppointmentRequestCreateAPIView(generics.CreateAPIView):
+    serializer_class = MemberAppointmentRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
 class AppointmentCreateAPIView(generics.CreateAPIView):
     serializer_class = AppointmentCreateSerializer
     permission_classes = [IsStaff | IsAdminOrSuperUser]
@@ -2595,28 +2603,14 @@ class AppointmentCreateAPIView(generics.CreateAPIView):
         serializer.save()
 
 
+
 class AppointmentUpdateAPIView(generics.UpdateAPIView):
     serializer_class = AppointmentUpdateSerializer
     permission_classes = [IsStaff | IsAdminOrSuperUser]
     lookup_field = "pk"
 
     def get_queryset(self):
-        user = self.request.user
-        staff = getattr(user, "staff", None)
-
-        if user.is_superuser or user.user_roles.filter(role__name="admin").exists():
-            return Appointment.objects.select_related(
-                "line", "member", "staff"
-            )
-
-        if not staff:
-            return Appointment.objects.none()
-
-        return Appointment.objects.filter(
-            line__staff_memberships__staff=staff,
-        ).select_related(
-            "line", "member", "staff"
-        ).distinct()
+        return appointments_for_user(self.request.user)
 
 
 class AppointmentDestroyAPIView(generics.DestroyAPIView):
@@ -2624,162 +2618,145 @@ class AppointmentDestroyAPIView(generics.DestroyAPIView):
     lookup_field = "pk"
 
     def get_queryset(self):
-        user = self.request.user
-        staff = getattr(user, "staff", None)
-
-        if user.is_superuser or user.user_roles.filter(role__name="admin").exists():
-            return Appointment.objects.all()
-
-        if not staff:
-            return Appointment.objects.none()
-
-        return Appointment.objects.filter(
-            line__staff_memberships__staff=staff,
-        ).distinct()
-
+        return appointments_for_user(self.request.user)
 
 # ── List ──────────────────────────────────
 
 class AdminAppointmentListAPIView(generics.ListAPIView):
-    """
-    لیست تمام Appointmentها — فقط Admin
-    """
     serializer_class = AppointmentListSerializer
     permission_classes = [IsAdminOrSuperUser]
-
     filter_backends = (SearchFilter, OrderingFilter)
 
     search_fields = (
         "member__user__first_name",
         "member__user__last_name",
         "member__user__phone_number",
+        "requested_by__first_name",
+        "requested_by__last_name",
+        "requested_by__phone_number",
         "staff__user__first_name",
         "staff__user__last_name",
         "status",
     )
 
-    ordering_fields = (
-        "appointment_time",
-        "created_at",
-        "status",
-    )
-
-    ordering = ("appointment_time",)
+    ordering_fields = ("appointment_time", "created_at", "status")
 
     def get_queryset(self):
         queryset = Appointment.objects.select_related(
-            "line",
-            "member__user",
-            "staff__user",
+            "line", "member__user", "requested_by", "staff__user",
         )
 
-        status_filter = self.request.query_params.get("status")
-        line_id = self.request.query_params.get("line_id")
+        params = self.request.query_params
+        if params.get("status"):
+            queryset = queryset.filter(status=params["status"])
+        if params.get("line_id"):
+            queryset = queryset.filter(line_id=params["line_id"])
+        if params.get("user_id"):
+            queryset = queryset.filter(
+                Q(requested_by_id=params["user_id"]) | Q(member__user_id=params["user_id"])
+            )
 
-        if status_filter:
-            queryset = queryset.filter(status=status_filter)
-
-        if line_id:
-            queryset = queryset.filter(line_id=line_id)
-
+        if not params.get("ordering"):
+            queryset = queryset.order_by(
+                F("appointment_time").asc(nulls_first=True), "-created_at"
+            )
         return queryset
 
 
 class StaffAppointmentListAPIView(generics.ListAPIView):
-    """
-    لیست Appointmentهای یک Staff — فقط خود Staff یا Admin
-    """
     serializer_class = AppointmentListSerializer
     permission_classes = [IsStaff | IsAdminOrSuperUser]
-
     filter_backends = (SearchFilter, OrderingFilter)
 
     search_fields = (
         "member__user__first_name",
         "member__user__last_name",
         "member__user__phone_number",
+        "requested_by__first_name",
+        "requested_by__last_name",
+        "requested_by__phone_number",
         "status",
     )
 
-    ordering_fields = (
-        "appointment_time",
-        "created_at",
-        "status",
-    )
-
-    ordering = ("appointment_time",)
+    ordering_fields = ("appointment_time", "created_at", "status")
 
     def get_queryset(self):
         user = self.request.user
         staff = getattr(user, "staff", None)
 
         queryset = Appointment.objects.select_related(
-            "line",
-            "member__user",
-            "staff__user",
+            "line", "member__user", "requested_by", "staff__user",
         )
 
-        if user.is_superuser or user.user_roles.filter(role__name="admin").exists():
-            pass  # همه را می‌بیند
-        elif staff:
-            queryset = queryset.filter(staff=staff)
+        if staff:
+            my_line_ids = StaffLine.objects.filter(staff=staff).values_list("line_id", flat=True)
+            queryset = queryset.filter(
+                Q(staff=staff)                                   # نوبت‌های خودش
+                | Q(staff__isnull=True, line_id__in=my_line_ids)  # درخواست‌های بدون staff در لاین‌های خودش
+            )
         else:
             return Appointment.objects.none()
 
-        status_filter = self.request.query_params.get("status")
-        line_id = self.request.query_params.get("line_id")
+        params = self.request.query_params
+        if params.get("status"):
+            queryset = queryset.filter(status=params["status"])
+        if params.get("line_id"):
+            queryset = queryset.filter(line_id=params["line_id"])
 
-        if status_filter:
-            queryset = queryset.filter(status=status_filter)
-
-        if line_id:
-            queryset = queryset.filter(line_id=line_id)
-
+        if not params.get("ordering"):
+            queryset = queryset.order_by(
+                F("appointment_time").asc(nulls_first=True), "-created_at"
+            )
         return queryset
 
 
 class MemberAppointmentListAPIView(generics.ListAPIView):
-    """
-    لیست Appointmentهای خود Member
-    """
     serializer_class = AppointmentListSerializer
     permission_classes = [IsAuthenticated]
-
-    filter_backends = (SearchFilter, OrderingFilter)
-
-    search_fields = (
-        "staff__user__first_name",
-        "staff__user__last_name",
-        "status",
-    )
-
-    ordering_fields = (
-        "appointment_time",
-        "created_at",
-        "status",
-    )
-
-    ordering = ("appointment_time",)
 
     def get_queryset(self):
         user = self.request.user
 
+        # اصلاح کوئری: نوبت‌هایی که یا memberشان کاربر است یا requested_byشان کاربر است
         queryset = Appointment.objects.filter(
-            member__user=user,
+            models.Q(member__user=user) | models.Q(requested_by=user)
         ).select_related(
             "line",
             "member__user",
             "staff__user",
-        )
+            "requested_by"  # اضافه کردن این برای بهینه‌سازی
+        ).distinct()  # distinct برای جلوگیری از تکرار اگر هر دو شرط برقرار باشد
 
         status_filter = self.request.query_params.get("status")
         if status_filter:
             queryset = queryset.filter(status=status_filter)
 
-        return queryset
-
+        return queryset.order_by("-created_at")  # مرتب‌سازی بر اساس جدیدترین
 
 # ── Detail ────────────────────────────────
+
+
+
+def appointments_for_user(user):
+    """queryset نوبت‌هایی که این کاربر (staff یا admin) اجازه دیدنشان را دارد."""
+    queryset = Appointment.objects.select_related(
+        "line", "member__user", "requested_by", "staff__user",
+    )
+
+    if user.is_superuser or user.user_roles.filter(role__name="admin").exists():
+        return queryset
+
+    staff = getattr(user, "staff", None)
+    if not staff:
+        return Appointment.objects.none()
+
+    my_line_ids = StaffLine.objects.filter(staff=staff).values_list("line_id", flat=True)
+
+    return queryset.filter(
+        Q(staff=staff)
+        | Q(staff__isnull=True, line_id__in=my_line_ids)
+    )
+
 
 class StaffAppointmentDetailAPIView(generics.RetrieveAPIView):
     serializer_class = AppointmentDetailSerializer
@@ -2787,24 +2764,7 @@ class StaffAppointmentDetailAPIView(generics.RetrieveAPIView):
     lookup_field = "pk"
 
     def get_queryset(self):
-        user = self.request.user
-        staff = getattr(user, "staff", None)
-
-        queryset = Appointment.objects.select_related(
-            "line",
-            "member__user",
-            "staff__user",
-        )
-
-        if user.is_superuser or user.user_roles.filter(role__name="admin").exists():
-            return queryset
-
-        if not staff:
-            return Appointment.objects.none()
-
-        return queryset.filter(
-            line__staff_memberships__staff=staff,
-        ).distinct()
+        return appointments_for_user(self.request.user)
 
 
 class MemberAppointmentDetailAPIView(generics.RetrieveAPIView):
@@ -2813,10 +2773,9 @@ class MemberAppointmentDetailAPIView(generics.RetrieveAPIView):
     lookup_field = "pk"
 
     def get_queryset(self):
+        user = self.request.user
         return Appointment.objects.filter(
-            member__user=self.request.user,
+            Q(member__user=user) | Q(requested_by=user)
         ).select_related(
-            "line",
-            "member__user",
-            "staff__user",
-        )
+            "line", "member__user", "staff__user", "requested_by",
+        ).distinct()

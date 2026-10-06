@@ -41,7 +41,7 @@ export default function SubmissionDetailPage() {
           <div className="flex items-center gap-2 text-xs text-cream/40 mb-2">
             <Link href="/line" className="hover:text-gold transition-colors">بخش‌ها</Link>
             <FiChevronLeft size={12} />
-            <Link href={`/staff/consultation/submisions`} className="hover:text-gold transition-colors">پاسخ‌ها</Link>
+            <Link href={`/publicstaff/consultation/submisions`} className="hover:text-gold transition-colors">پاسخ‌ها</Link>
             <FiChevronLeft size={12} />
             <span>جزئیات پاسخ</span>
           </div>

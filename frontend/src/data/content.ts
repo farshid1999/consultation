@@ -20,15 +20,15 @@ import type {
 } from "@/types";
 
 
-
 export const navLinks: NavLink[] = [
-  { id: "why", label: "چرا یوگبال", href: "#why" },
-  { id: "services", label: "خدمات", href: "#services" },
-  { id: "process", label: "فرآیند مشاوره", href: "#process" },
-  { id: "stats", label: "دستاوردها", href: "#stats" },
-  { id: "testimonials", label: "نظرات ورزشکاران", href: "#testimonials" },
-  { id: "faq", label: "پرسش‌های متداول", href: "#faq" },
-  {id: "lines", label: "بخش ها", href: `#` },
+    {id: "why", label: "چرا یوگبال", href: "#why"},
+    {id: "services", label: "خدمات", href: "#services"},
+    {id: "process", label: "فرآیند مشاوره", href: "#process"},
+    {id: "stats", label: "دستاوردها", href: "#stats"},
+    {id: "testimonials", label: "نظرات ورزشکاران", href: "#testimonials"},
+    {id: "faq", label: "پرسش‌های متداول", href: "#faq"},
+    {id: "lines", label: "بخش ها", href: `#`},
+    {id: "staff", label: "کارشناسان", href: "/publicStaff"},
 ];
 
 export const services: ServiceItem[] = [
@@ -99,34 +99,34 @@ export const services: ServiceItem[] = [
 ];
 
 export const processSteps: ProcessStep[] = [
-  {
-    id: "step-1",
-    order: "۰۱",
-    title: "جلسه‌ی آشنایی",
-    description: "گفت‌وگویی بی‌واسطه درباره‌ی چالش‌ها، اهداف و تجربه‌ی ورزشی شما؛ بدون قضاوت، فقط شنیدن دقیق.",
-    icon: FiUser,
-  },
-  {
-    id: "step-2",
-    order: "۰۲",
-    title: "ارزیابی ذهنی",
-    description: "سنجش الگوهای فکری، سطح اضطراب و نقاط قوت روانی برای طراحی مسیری داده‌محور.",
-    icon: PiBrainDuotone,
-  },
-  {
-    id: "step-3",
-    order: "۰۳",
-    title: "طراحی برنامه‌ی اختصاصی",
-    description: "تدوین برنامه‌ای مشخص با تمرین‌های قابل‌اجرا، متناسب با تقویم مسابقات شما.",
-    icon: FiTarget,
-  },
-  {
-    id: "step-4",
-    order: "۰۴",
-    title: "همراهی مستمر",
-    description: "جلسات منظم پیگیری، بازبینی پیشرفت و تنظیم دقیق مسیر بر اساس نتایج میدانی.",
-    icon: FiTrendingUp,
-  },
+    {
+        id: "step-1",
+        order: "۰۱",
+        title: "جلسه‌ی آشنایی",
+        description: "گفت‌وگویی بی‌واسطه درباره‌ی چالش‌ها، اهداف و تجربه‌ی ورزشی شما؛ بدون قضاوت، فقط شنیدن دقیق.",
+        icon: FiUser,
+    },
+    {
+        id: "step-2",
+        order: "۰۲",
+        title: "ارزیابی ذهنی",
+        description: "سنجش الگوهای فکری، سطح اضطراب و نقاط قوت روانی برای طراحی مسیری داده‌محور.",
+        icon: PiBrainDuotone,
+    },
+    {
+        id: "step-3",
+        order: "۰۳",
+        title: "طراحی برنامه‌ی اختصاصی",
+        description: "تدوین برنامه‌ای مشخص با تمرین‌های قابل‌اجرا، متناسب با تقویم مسابقات شما.",
+        icon: FiTarget,
+    },
+    {
+        id: "step-4",
+        order: "۰۴",
+        title: "همراهی مستمر",
+        description: "جلسات منظم پیگیری، بازبینی پیشرفت و تنظیم دقیق مسیر بر اساس نتایج میدانی.",
+        icon: FiTrendingUp,
+    },
 ];
 
 export const benefits: BenefitItem[] = [

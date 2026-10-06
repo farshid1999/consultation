@@ -656,3 +656,53 @@ class RegisterView(GenericAPIView):
         )
 
         return response
+
+
+
+
+
+
+
+def public_staff_queryset():
+    return (
+        Staff.objects.select_related("user")
+        .prefetch_related(
+            "user__informations",
+            "line_memberships__line",
+        )
+        .order_by("user__first_name", "user__last_name")
+    )
+
+
+class PublicStaffListAPIView(GenericAPIView):
+    serializer_class = PublicStaffSerializer
+    permission_classes = (AllowAny,)
+    authentication_classes = ()  # توکن لازم نیست و توکن منقضی هم خطا نمی‌دهد
+    pagination_class = None  # تعداد کارمندان معمولاً کم است؛ اگر زیاد است حذف کن
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("user__first_name", "user__last_name", "position")
+
+    def get_queryset(self):
+        qs = public_staff_queryset().filter(user__is_active=True)
+
+        line_id = self.request.query_params.get("line_id")
+        if line_id:
+            qs = qs.filter(line_memberships__line_id=line_id).distinct()
+        return qs
+
+    def get(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        return Response(self.get_serializer(queryset, many=True).data)
+
+
+class PublicStaffDetailAPIView(GenericAPIView):
+    serializer_class = PublicStaffSerializer
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+    def get(self, request, pk):
+        staff = get_object_or_404(
+            public_staff_queryset().filter(user__is_active=True), pk=pk
+        )
+        return Response(self.get_serializer(staff).data)
