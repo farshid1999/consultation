@@ -9,10 +9,14 @@ import LinesNavDropdown from "@/components/ui/LinesNavDropdown";
 import {cn} from "@/lib/utils";
 import {useCurrentUser} from "@/hooks/useCurrentUser";
 import Link from "next/link";
+import {useUserPath} from "@/hooks/useUserPath";
+import {useLogout} from "@/hooks/useAuth";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+    const {role, basePath} = useUserPath();
 
     // دریافت اطلاعات کاربر
     const {data: user, isLoading} = useCurrentUser();
@@ -134,7 +138,7 @@ export default function Navbar() {
                                     پروفایل من
                                 </Link>
                                 <Link
-                                    href="/dashboard"
+                                    href={`${basePath}/`}
                                     className="block rounded-xl px-4 py-2 text-sm text-cream/80 hover:bg-gold/10 hover:text-gold"
                                 >
                                     داشبورد
@@ -142,7 +146,7 @@ export default function Navbar() {
                                 <button
                                     onClick={() => {
                                         // logic for logout
-                                        console.log("Logout");
+                                        useLogout()
                                     }}
                                     className="w-full rounded-xl px-4 py-2 text-right text-sm text-red-400 hover:bg-red-500/10"
                                 >
