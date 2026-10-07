@@ -38,7 +38,7 @@ export default function AddressFields({ control, name }: AddressFieldsProps) {
         name={`${name}.postal_code`}
         control={control}
         render={({ field, fieldState }) => (
-          <Input label="کد پستی" required {...field} value={field.value ?? ""} error={fieldState.error?.message} />
+          <Input label="کد پستی" {...field} value={field.value ?? ""} error={fieldState.error?.message} />
         )}
       />
       <Controller

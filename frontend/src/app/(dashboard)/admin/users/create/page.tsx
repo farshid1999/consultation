@@ -46,7 +46,7 @@ export default function CreateUserPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit, (errs) => console.log("VALIDATION ERRORS", errs))} noValidate className="space-y-8">
         <section className="space-y-4">
           <h2 className="text-sm font-semibold text-gold border-b border-cream/10 pb-2">
             اطلاعات حساب

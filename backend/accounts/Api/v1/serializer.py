@@ -413,15 +413,8 @@ class StaffCreateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-
         user_data = validated_data.pop("user")
-
-        user_serializer = UserCreateSerializer(data=user_data)
-
-        user_serializer.is_valid(raise_exception=True)
-
-        user = user_serializer.save()
-
+        user = UserCreateSerializer().create(user_data)
         return Staff.objects.create(user=user, **validated_data)
 
 

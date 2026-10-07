@@ -15,6 +15,7 @@ const DEFAULT_VALUES: StaffCreateFormValues = {
   position: "",
   hire_date: null as unknown as Date,
   user: {
+    national_id: "",
     username: "",
     password: "",
     phone_number: "",
@@ -69,6 +70,7 @@ export default function StaffCreateForm() {
         username: values.user.username,
         password: values.user.password,
         phone_number: values.user.phone_number,
+        national_id: values.user.national_id,
         first_name: values.user.first_name || undefined,
         last_name: values.user.last_name || undefined,
         email: values.user.email || undefined,

@@ -55,6 +55,7 @@ export default function StaffFormFields({
                             />
                         )}
                     />
+
                     <Controller
                         name="position"
                         control={control}
@@ -115,6 +116,14 @@ export default function StaffFormFields({
                                 error={fieldState.error?.message}
                                 helperText={mode === "edit" ? "خالی بگذارید تا تغییر نکند" : undefined}
                             />
+                        )}
+                    />
+                    <Controller
+                        name="user.national_id"
+                        control={control}
+                        render={({field, fieldState}) => (
+                            <Input label="کد ملی" required inputMode="numeric" maxLength={10}
+                                   {...field} value={field.value ?? ""} error={fieldState.error?.message}/>
                         )}
                     />
                     <Controller
@@ -298,6 +307,7 @@ export default function StaffFormFields({
                     <AddressFields control={control} name="user.address"/>
                 ) : (
                     <p className="text-xs text-cream/35">آدرس ثبت نشده است.</p>
+
                 )}
             </FormSection>
 

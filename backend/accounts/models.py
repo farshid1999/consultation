@@ -22,14 +22,14 @@ def validate_national_id(value):
         raise ValidationError("کد ملی باید ۱۰ رقم باشد.")
 
     # کدهای تکراری مثل 1111111111 نامعتبرند
-    if len(set(value)) == 1:
-        raise ValidationError("کد ملی نامعتبر است.")
+    # if len(set(value)) == 1:
+    #     raise ValidationError("کد ملی نامعتبر است.")
 
     check = int(value[9])
     total = sum(int(value[i]) * (10 - i) for i in range(9)) % 11
     valid = (total < 2 and check == total) or (total >= 2 and check == 11 - total)
-    if not valid:
-        raise ValidationError("کد ملی نامعتبر است.")
+    # if not valid:
+    #     raise ValidationError("کد ملی نامعتبر است.")
 
 
 def information_upload_path(instance, filename):

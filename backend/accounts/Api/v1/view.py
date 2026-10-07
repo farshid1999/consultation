@@ -301,7 +301,7 @@ class RoleDeleteAPIView(GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserCreateAPIView(GenericAPIView):
+class UserCreateAPIView(NestedFilePayloadMixin,GenericAPIView):
     serializer_class = UserCreateSerializer
 
     permission_classes = (IsAdminOrSuperUser,)

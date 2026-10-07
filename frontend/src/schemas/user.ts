@@ -30,21 +30,13 @@ const avatarField = z
 
 
 export const createUserSchema = z.object({
-    username: z
-        .string()
-        .min(3, "نام کاربری باید حداقل ۳ کاراکتر باشد")
-        .max(50, "نام کاربری نباید بیشتر از ۵۰ کاراکتر باشد"),
-    national_id: z
-        .string()
-        .min(1, "کد ملی الزامی است")
-        .refine(isValidNationalId, "کد ملی معتبر وارد کنید"),
-    password: z.string().min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد"),
-    first_name: z.string().min(1, "نام الزامی است"),
-    last_name: z.string().min(1, "نام خانوادگی الزامی است"),
-    email: z.string().email("ایمیل معتبر وارد کنید"),
-    phone_number: z
-        .string()
-        .regex(/^09\d{9}$/, "شماره موبایل معتبر وارد کنید (مثال: ۰۹۱۲۳۴۵۶۷۸۹)"),
+    username: z.string().min(3).max(50).optional().or(z.literal("")),
+    national_id: z.string().min(1, "کد ملی الزامی است"),
+    password: z.string().min(8, "رمز عبور باید حداقل ۸ کاراکتر باشد").optional().or(z.literal("")),
+    first_name: z.string().optional(),
+    last_name: z.string().optional(),
+    email: z.string().email("ایمیل معتبر وارد کنید").optional().or(z.literal("")),
+    phone_number: z.string().regex(/^09\d{9}$/, "شماره موبایل معتبر وارد کنید"),
     land_line: z.string().optional(),
     is_student: z.boolean().optional(),
     degree: z.string().max(100).optional(),
