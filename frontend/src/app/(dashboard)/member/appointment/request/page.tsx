@@ -9,7 +9,7 @@ import { useMyLines } from "@/hooks/useLines"; // مطمئن شوید این ه�
 import { useCreateAppointmentRequest } from "@/hooks/useAppointment";
 import { Textarea, Select } from "@/components/ui/inputs";
 import GlassCard from "@/components/ui/GlassCard";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
 const requestSchema = z.object({
   line_id: z.string().min(1, "انتخاب بخش الزامی است"),
@@ -18,7 +18,7 @@ const requestSchema = z.object({
 
 type RequestFormValues = z.infer<typeof requestSchema>;
 
-export default function MemberAppointmentRequestPage() {
+function AppointmentRequestContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -62,6 +62,7 @@ export default function MemberAppointmentRequestPage() {
         <span className="spinner-brand h-8 w-8 animate-spin rounded-full border-2 inline-block"></span>
       </main>
     );
+
   }
 
   return (
@@ -124,5 +125,14 @@ export default function MemberAppointmentRequestPage() {
         </form>
       </GlassCard>
     </main>
+  );
+
+}
+
+export default function MemberAppointmentRequestPage() {
+  return (
+    <Suspense fallback={null}>
+      <AppointmentRequestContent />
+    </Suspense>
   );
 }
