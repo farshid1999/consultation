@@ -1,4 +1,3 @@
-cat > /var/www/consultation/deploy.sh << 'EOF'
 #!/bin/bash
 # Usage:
 #   ./deploy.sh           -> full deploy (git, frontend build, backend, restart, status)
@@ -150,4 +149,3 @@ case "${1:-all}" in
     *) echo "Usage: $0 {all|front|back|restart|status}"; exit 1 ;;
 esac
 EOF
-chmod +x /var/www/consultation/deploy.sh
