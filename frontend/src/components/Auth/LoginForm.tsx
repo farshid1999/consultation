@@ -44,11 +44,11 @@ export default function LoginForm({
           } else if (roleData.is_staff) {
             router.push("/staff");
           } else {
-            router.push("/member");
+            router.push("/member/lines");
           }
         } catch (err) {
           console.error("Failed to fetch user role", err);
-          router.push("/member");
+          router.push("/member/lines");
         }
 
         onSuccess?.();

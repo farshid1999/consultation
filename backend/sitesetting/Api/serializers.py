@@ -29,10 +29,6 @@ class ContactRequestSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {'messenger_type': 'انتخاب پیام‌رسان الزامی است'}
             )
-        if data.get('contact_type') == 'email' and not data.get('email'):
-            raise serializers.ValidationError(
-                {'email': 'ایمیل الزامی است'}
-            )
         return data
 
 

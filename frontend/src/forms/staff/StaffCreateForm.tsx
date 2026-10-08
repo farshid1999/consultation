@@ -9,6 +9,7 @@ import { useCreateStaff } from "@/hooks/useStaff";
 import { toApiDateString } from "@/lib/date";
 import type { ApiError, StaffCreateInput } from "@/types";
 import StaffFormFields from "./StaffFormFields";
+import {useUserPath} from "@/hooks/useUserPath";
 
 const DEFAULT_VALUES: StaffCreateFormValues = {
   employee_code: "",
@@ -50,6 +51,7 @@ function cleanInformations(
 export default function StaffCreateForm() {
   const router = useRouter();
   const createStaff = useCreateStaff();
+  const {role,basePath} = useUserPath()
 
   const {
     control,
@@ -93,7 +95,7 @@ export default function StaffCreateForm() {
     try {
       const result = await createStaff.mutateAsync(payload);
       toast.success("کارمند با موفقیت ایجاد شد.");
-      router.push(`/staff/${result.id}`);
+      router.push(`/${basePath}/}`);
     } catch (err) {
       const apiError = err as ApiError;
       toast.error(apiError.message ?? "ایجاد کارمند با خطا مواجه شد.");
