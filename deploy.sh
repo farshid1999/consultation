@@ -148,4 +148,4 @@ case "${1:-all}" in
     status)  status ;;
     *) echo "Usage: $0 {all|front|back|restart|status}"; exit 1 ;;
 esac
-EOF
+
