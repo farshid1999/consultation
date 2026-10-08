@@ -253,6 +253,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
+        print(validated_data)
 
         address_data = validated_data.pop("address", None)
 
@@ -329,6 +330,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
+        print(validated_data)
 
         address_data = validated_data.pop("address", None)
 
@@ -474,6 +476,13 @@ class UserListSerializer(serializers.ModelSerializer):
             "club",
             "address",
             "avatar",
+            "coach_name",
+            "activity_history",
+            "land_line",
+            "bio",
+            "birth_date",
+            "professional_background",
+
         )
 
     def get_address(self, obj):
@@ -493,8 +502,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "password",
             "groups",
             "user_permissions",
-            "coach_name",
-            "activity_history",
         )
 
 

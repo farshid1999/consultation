@@ -40,7 +40,7 @@ export default function Partners({
         </div>
 
         {/* موبایل: ۲ ستون ، تبلت و دسکتاپ: ۴ ستون */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-5 md:gap-6">
           {items.map((item, i) => (
             <motion.div
               key={item.name}

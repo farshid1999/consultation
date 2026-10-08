@@ -64,7 +64,7 @@ export const updateUserSchema = createUserSchema
     .extend({
         // کاربران قدیمی کد ملی ندارند، پس خالی هم مجاز است
         national_id: z
-            .union([z.literal(""), z.string().refine(isValidNationalId, "کد ملی معتبر وارد کنید")])
+            .union([z.literal(""), z.string()])
             .optional(),
         username: z.string().min(3, "نام کاربری باید حداقل ۳ کاراکتر باشد").max(50).optional(),
         password: z

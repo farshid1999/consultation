@@ -17,7 +17,7 @@ export default function Navbar() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     const {role, basePath} = useUserPath();
-
+    const { mutate: logout } = useLogout();
     // دریافت اطلاعات کاربر
     const {data: user, isLoading} = useCurrentUser();
 
@@ -144,10 +144,7 @@ export default function Navbar() {
                                     داشبورد
                                 </Link>
                                 <button
-                                    onClick={() => {
-                                        // logic for logout
-                                        useLogout()
-                                    }}
+                                    onClick={() => logout()}
                                     className="w-full rounded-xl px-4 py-2 text-right text-sm text-red-400 hover:bg-red-500/10"
                                 >
                                     خروج

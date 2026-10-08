@@ -34,6 +34,7 @@ export default function HomePage() {
                         {name: "موسقی تراپی", logo: "/music.jpg"},
                         {name: "پشتیبانی", logo: "/poshtiban.jpg"},
                         {name: "یوگبال", logo: "/yogbal.jpg"},
+                        {name: "حقوقی", logo: "/hogh.jpg"},
                     ]}
                 />
                 <WhySportsPsychology/>

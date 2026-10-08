@@ -61,9 +61,9 @@ function flattenTree(
 ) {
   nodes.forEach((node) => {
     out.push({ node, depth });
-    if (node.children.length > 0 && !collapsed.has(node.id)) {
-      flattenTree(node.children, depth + 1, collapsed, out);
-    }
+    // if (node.children.length > 0 && !collapsed.has(node.id)) {
+    //   flattenTree(node.children, depth + 1, collapsed, out);
+    // }
   });
   return out;
 }
@@ -433,7 +433,7 @@ export default function LineTable() {
                       {isChild ? (
                         <span className="badge-gold">زیرمجموعه</span>
                       ) : (
-                        <span className="badge-green">ریشه</span>
+                        <span className="badge-green">اصلی</span>
                       )}
                     </td>
 
