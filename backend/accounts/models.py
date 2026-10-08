@@ -113,6 +113,10 @@ class User(AbstractUser):
         max_length=20,
     )
 
+    email = models.EmailField(
+        blank=True,null=True
+    )
+
     national_id = models.CharField(
         max_length=10,
         unique=True,
