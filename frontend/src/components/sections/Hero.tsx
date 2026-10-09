@@ -277,7 +277,6 @@ export default function Hero() {
               variants={fadeUp}
               className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/25 bg-gold/[0.08] px-4 py-1.5 text-caption font-medium text-gold"
             >
-              <PiHeartbeatDuotone className="text-base" aria-hidden="true" />
               یوگبال
             </motion.div>
 
