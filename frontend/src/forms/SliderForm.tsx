@@ -7,7 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import FormSection from "@/forms/FormSection";
 import GlassCard from "@/components/ui/GlassCard";
-import { DateTimePicker, Input, Switch } from "@/components/ui/inputs";
+import { DateTimePicker, Input, Select, Switch } from "@/components/ui/inputs";
+import { SLIDER_KEY_OPTIONS } from "@/lib/sliderLimits";
 import { extractApiError } from "@/services/api/errors";
 import type { Slider, SliderCreateInput } from "@/types";
 
@@ -15,7 +16,7 @@ const sliderSchema = z
   .object({
     key: z
       .string()
-      .min(1, "کلید الزامی است.")
+      .min(1, "یک بخش را انتخاب کنید.")
       .max(100, "کلید حداکثر ۱۰۰ کاراکتر باشد.")
       .regex(
         /^[-a-zA-Z0-9_]+$/,
@@ -103,19 +104,16 @@ export default function SliderForm({
       <GlassCard className="space-y-6 p-8">
         <FormSection title="مشخصات اسلایدر">
           <div className="grid gap-5 sm:grid-cols-2">
-            <Input
-              label="کلید (شناسه‌ی بخش در سایت)"
-              dir="ltr"
+            <Select
+              label="بخش مربوط در سایت"
               required
-              readOnly={mode === "edit"}
-              className={
-                mode === "edit" ? "cursor-not-allowed opacity-60" : undefined
-              }
-              placeholder="why-sports-psychology"
+              disabled={mode === "edit"}
+              placeholder="یک بخش را انتخاب کنید"
+              options={SLIDER_KEY_OPTIONS}
               helperText={
                 mode === "edit"
-                  ? "کلید بعد از ساخت قابل تغییر نیست."
-                  : "برای بخش «چرا یوگبال» دقیقاً why-sports-psychology بنویسید."
+                  ? "بخش بعد از ساخت قابل تغییر نیست."
+                  : "اسلایدر در همین بخش از سایت نمایش داده می‌شود."
               }
               error={errors.key?.message}
               {...register("key")}
