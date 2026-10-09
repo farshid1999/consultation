@@ -8,7 +8,7 @@ export const contactCreateSchema = z.object({
     required_error: "نوع ارتباط الزامی است",
   }),
   messenger_type: z.enum(["whatsapp", "telegram", "eitaa", "rubika", "bale"]).optional().nullable(),
-  email: z.string().email("ایمیل معتبر نیست").optional().nullable(),
+  email: z.string().optional().nullable(),
   message: z.string().optional().nullable(),
 }).superRefine((data, ctx) => {
   if (data.contact_type === "messenger" && !data.messenger_type) {
@@ -16,13 +16,6 @@ export const contactCreateSchema = z.object({
       code: z.ZodIssueCode.custom,
       message: "انتخاب پیام‌رسان الزامی است",
       path: ["messenger_type"],
-    });
-  }
-  if (data.contact_type === "email" && !data.email) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "ایمیل الزامی است",
-      path: ["email"],
     });
   }
 });
