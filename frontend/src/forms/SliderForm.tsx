@@ -101,7 +101,7 @@ export default function SliderForm({
 
   return (
     <form onSubmit={submit}>
-      <GlassCard className="space-y-6 p-8">
+      <GlassCard className="space-y-6 p-4 sm:p-8 !overflow-visible">
         <FormSection title="مشخصات اسلایدر">
           <div className="grid gap-5 sm:grid-cols-2">
             <Select
@@ -152,7 +152,7 @@ export default function SliderForm({
               name="start_at"
               control={control}
               render={({ field }) => (
-                <div>
+                <div className="relative z-20">
                   <DateTimePicker
                     label="شروع نمایش"
                     value={field.value}
@@ -176,7 +176,7 @@ export default function SliderForm({
               name="end_at"
               control={control}
               render={({ field }) => (
-                <div>
+                <div className="relative z-10">
                   <DateTimePicker
                     label="پایان نمایش"
                     value={field.value}
