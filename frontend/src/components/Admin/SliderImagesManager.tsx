@@ -12,6 +12,7 @@ import {
   useUpdateSliderImage,
 } from "@/hooks/useSliders";
 import { cn } from "@/lib/utils";
+import { SLIDER_MAX_IMAGES } from "@/lib/sliderLimits";
 import type { Slider, SliderImage, SliderImageUpdateInput } from "@/types";
 
 // ── یک ردیف تصویر ─────────────────────────────────────────────────────
@@ -183,6 +184,22 @@ export default function SliderImagesManager({ slider }: { slider: Slider }) {
   );
   const busy = updateImage.isPending || deleteImage.isPending || uploading;
 
+  const maxImages = SLIDER_MAX_IMAGES[slider.key];
+  const remaining =
+    maxImages === undefined ? Infinity : Math.max(maxImages - sorted.length, 0);
+  const limitReached = remaining === 0;
+
+  const handleFilesChange = (next: File[]) => {
+    if (next.length > remaining) {
+      toast.error(
+        `این اسلایدر حداکثر ${maxImages} تصویر دارد؛ فقط ${remaining} تصویر دیگر می‌توانید اضافه کنید.`,
+      );
+      setFiles(next.slice(0, remaining));
+      return;
+    }
+    setFiles(next);
+  };
+
   const handleUpload = async () => {
     if (files.length === 0) return;
     setUploading(true);
@@ -255,7 +272,11 @@ export default function SliderImagesManager({ slider }: { slider: Slider }) {
     <GlassCard className="space-y-6 p-8">
       <FormSection
         title="افزودن تصویر"
-        description="تصاویر با ترتیب انتخاب‌شده به انتهای اسلایدر اضافه می‌شوند. نسبت پیشنهادی ۴ به ۵ (عمودی)."
+        description={
+          maxImages !== undefined
+            ? `این اسلایدر حداکثر ${maxImages} تصویر می‌پذیرد (${sorted.length} از ${maxImages} استفاده شده). برای افزودن عکس جدید، یکی از عکس‌های فعلی را حذف کنید. نسبت پیشنهادی ۱ به ۱ (مربع).`
+            : "تصاویر با ترتیب انتخاب‌شده به انتهای اسلایدر اضافه می‌شوند. نسبت پیشنهادی ۴ به ۵ (عمودی)."
+        }
       >
         <FileUploader
           label="تصاویر جدید"
@@ -263,8 +284,8 @@ export default function SliderImagesManager({ slider }: { slider: Slider }) {
           multiple
           maxSizeMB={5}
           value={files}
-          onChange={setFiles}
-          disabled={uploading}
+          onChange={handleFilesChange}
+          disabled={uploading || limitReached}
         />
         {files.length > 0 && (
           <div className="mt-4 flex justify-end">

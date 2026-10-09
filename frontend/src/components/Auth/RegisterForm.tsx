@@ -136,7 +136,6 @@ export default function RegisterForm({
           type="email"
           placeholder="example@email.com"
           leftIcon={<FiMail />}
-          required
           error={errors.email?.message}
           {...field("email")}
         />

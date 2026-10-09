@@ -38,20 +38,25 @@ export default function EditSliderPage() {
           </p>
 
           <div className="space-y-6">
-            {/* key باعث می‌شود اگر اسلایدر دیگری باز شد، فرم از نو ساخته شود */}
-            <SliderForm
-              key={slider.id}
-              mode="edit"
-              slider={slider}
-              isPending={updateSlider.isPending}
-              onSubmit={async (values) => {
-                // کلید بعد از ساخت قابل تغییر نیست؛ در PATCH ارسالش نمی‌کنیم
-                const { key: _key, ...payload } = toSliderPayload(values);
-                await updateSlider.mutateAsync(payload);
-              }}
-            />
+            {/* relative z-20: پاپ‌آپ تقویم روی SliderImagesManager بیاید */}
+            <div className="relative z-20">
+              {/* key باعث می‌شود اگر اسلایدر دیگری باز شد، فرم از نو ساخته شود */}
+              <SliderForm
+                key={slider.id}
+                mode="edit"
+                slider={slider}
+                isPending={updateSlider.isPending}
+                onSubmit={async (values) => {
+                  // کلید بعد از ساخت قابل تغییر نیست؛ در PATCH ارسالش نمی‌کنیم
+                  const { key: _key, ...payload } = toSliderPayload(values);
+                  await updateSlider.mutateAsync(payload);
+                }}
+              />
+            </div>
 
-            <SliderImagesManager slider={slider} />
+            <div className="relative z-10">
+              <SliderImagesManager slider={slider} />
+            </div>
           </div>
         </>
       )}

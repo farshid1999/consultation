@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +22,7 @@ export default function LoginForm({
 }: LoginFormProps) {
   const router = useRouter();
   const { mutate: login, isPending, error } = useLogin();
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const {
     register,
@@ -75,6 +78,25 @@ export default function LoginForm({
         {...register("password")}
       />
 
+      <label className="flex cursor-pointer items-center gap-2 text-sm text-cream/80">
+        <input
+          type="checkbox"
+          checked={acceptTerms}
+          onChange={(e) => setAcceptTerms(e.target.checked)}
+          className="h-4 w-4 cursor-pointer accent-gold"
+        />
+        <span>
+          <Link
+            href="/terms"
+            target="_blank"
+            className="font-semibold text-gold transition-opacity hover:opacity-80"
+          >
+            قوانین و مقررات
+          </Link>{" "}
+          را می‌پذیرم
+        </span>
+      </label>
+
       {error && (
         <p className="text-xs text-red-400 text-right">
           {(error as any)?.non_field_errors?.[0] ??
@@ -84,8 +106,8 @@ export default function LoginForm({
 
       <button
         type="submit"
-        disabled={isPending}
-        className="w-full rounded-xl bg-gold py-3 text-sm font-semibold text-deep transition-opacity hover:opacity-90 disabled:opacity-50"
+        disabled={isPending || !acceptTerms}
+        className="w-full rounded-xl bg-gold py-3 text-sm font-semibold text-deep transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? "در حال ورود..." : "ورود"}
       </button>

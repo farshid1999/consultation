@@ -54,8 +54,8 @@ export default function UsersPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-cream/10 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="rounded-2xl border border-cream/10 overflow-x-auto">
+        <table className="w-full min-w-[800px] text-sm">
           <thead>
             <tr className="border-b border-cream/10 bg-cream/[0.03]">
               <th className="text-right px-5 py-3.5 text-cream/50 font-medium">
@@ -126,13 +126,13 @@ export default function UsersPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-cream/60">
+                  <td className="px-5 py-4 text-cream/60 whitespace-nowrap">
                     {user.email || "—"}
                   </td>
                   <td className="px-5 py-4 text-cream/60 font-mono">
                     {user.phone_number || "—"}
                   </td>
-                  <td className="px-5 py-4 text-cream/60">
+                  <td className="px-5 py-4 text-cream/60 whitespace-nowrap">
                     {user.club || "—"}
                   </td>
                   <td className="px-5 py-4">
