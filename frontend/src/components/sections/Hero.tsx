@@ -7,6 +7,7 @@ import { PiBrainDuotone, PiHeartbeatDuotone, PiTargetDuotone } from "react-icons
 import Button from "@/components/ui/Button";
 import GlassCard from "@/components/ui/GlassCard";
 import { toPersianDigits } from "@/lib/utils";
+import {ScrollView} from "react-aria/dist/types/src/virtualizer/ScrollView";
 
 const featureList = [
   "طراحی برنامه عمومی و تخصصی به صورت مستقل و با توجه به نیاز های هر ورزشکار",
@@ -236,7 +237,9 @@ export default function Hero() {
             </motion.p>
 
             <motion.div variants={fadeUp} className="mt-9 flex flex-wrap items-center gap-4">
-              <Button variant="primary" icon={<FiArrowLeft aria-hidden="true" />}>
+              <Button variant="primary" icon={<FiArrowLeft aria-hidden="true" />} onClick={()=>{
+                  document.getElementById('contactForm')?.scrollIntoView({ behavior: "smooth" ,block: "start" });
+              }}>
                 رزرو جلسه‌ی مشاوره
               </Button>
               <Button variant="secondary">آشنایی با فرآیند</Button>

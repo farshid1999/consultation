@@ -38,6 +38,7 @@ export const services: ServiceItem[] = [
     description:
       "مدیریت استرس واضطراب، بازدهی بالای ذهنی و جسمی، بهبود تمرکز و عملکرد",
     icon: FiWind,
+    logo: "/yogbal.jpg",
     layout: "stacked",
   },
   {
@@ -46,6 +47,7 @@ export const services: ServiceItem[] = [
     description:
       "پلی میان موسیقی و ذهن،تنظیم هیجان و بازگرداندن ارامش و تعادل درونی با توجه به فرکانس ذهن در لحظه",
     icon: PiHeartbeatDuotone,
+    logo: "/music.jpg",
     layout: "inline",
   },
   {
@@ -54,14 +56,16 @@ export const services: ServiceItem[] = [
     description:
       "از هویت های ساخته شده عبور کن و به هویت واقعی خودت نزدیک شو",
     icon: FiTarget,
+    logo: "/ravan.jpg",
     layout: "framed",
   },
   {
     id: "confidence-building",
-    title: " مشاوره تخصصی حقوق ورزشی",
+    title: "مشاوره تخصصی حقوق ورزشی",
     description:
       "تنظیم و بررسی قراردادهای ورزشی و تبلیغاتی و حفاظت از حقوق ورزشکاران در تصمیم های مهم حرفه ای و نقل وانتقالات، پیگیری دعاوی ورزشی و مشاوره امور حقوقی مرتبط با باشگاهها فدراسیون ها و نهاد های ورزشی",
     icon: FiTrendingUp,
+    logo: "/hogh.jpg",
     layout: "overlap",
   },
   {
@@ -70,32 +74,9 @@ export const services: ServiceItem[] = [
     description:
       "از پاسخگویی دائمی به سوالات و راهنمایی کاربران تا پیگیری درخواست ها و رفع مشکلات با تیم پشتیبانی بصورت تلفنی و انلاین بنا به درخواست اعضا",
     icon: FiMoon,
+    logo: "/poshtiban.jpg",
     layout: "stacked",
   },
-  // {
-  //   id: "focus-improvement",
-  //   title: "بهبود تمرکز",
-  //   description:
-  //     "تمرین‌های توجه‌محور برای حذف نویزهای ذهنی و ماندن در لحظه‌ی حال، حتی در پرفشارترین ثانیه‌های بازی.",
-  //   icon: FiEye,
-  //   layout: "inline",
-  // },
-  // {
-  //   id: "team-psychology",
-  //   title: "روان‌شناسی تیمی",
-  //   description:
-  //     "تقویت انسجام گروهی، ارتباط مؤثر میان بازیکنان و مربی، و ساخت فرهنگی که عملکرد جمعی را بالا می‌برد.",
-  //   icon: FiUsers,
-  //   layout: "framed",
-  // },
-  // {
-  //   id: "individual-sessions",
-  //   title: "جلسات فردی",
-  //   description:
-  //     "مسیر یک‌به‌یک، متناسب با رشته‌ی ورزشی، اهداف و شخصیت شما؛ بدون الگوهای از پیش‌ساخته.",
-  //   icon: FiUser,
-  //   layout: "overlap",
-  // },
 ];
 
 export const processSteps: ProcessStep[] = [

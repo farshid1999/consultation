@@ -5,6 +5,7 @@ export interface ServiceItem {
   title: string;
   description: string;
   icon: IconType;
+  logo?: string;
   layout: "stacked" | "inline" | "framed" | "overlap";
 }
 

@@ -1,59 +1,89 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useBackgroundMusic } from "@/hooks/useSettings";
+import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 
 export default function BackgroundAudioPlayer() {
   const { data: musicData } = useBackgroundMusic();
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const unlockedRef = useRef(false); // آیا مرورگر پخش خودکار رو آزاد کرده؟
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (musicData?.is_active && musicData.music) {
-      // فقط اگه منبع فرق کرده src رو عوض کن (جلوگیری از قطع و وصل شدن غیرضروری)
-      if (audio.src !== musicData.music) {
+      if (audio.src !== new URL(musicData.music, window.location.href).href) {
         audio.src = musicData.music;
       }
+
       audio.loop = true;
       audio.volume = 0.3;
-
-      const tryPlay = () => {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              unlockedRef.current = true;
-            })
-            .catch((error) => {
-              console.log("Auto-play prevented by browser policy:", error);
-            });
-        }
-      };
-
-      tryPlay();
-
-      // اگه به هر دلیلی (مثلاً ورود مستقیم به لندینگ بدون تعامل قبلی) پخش بلاک شد،
-      // با اولین کلیک/لمس کاربر در هر جای صفحه دوباره تلاش می‌کنیم.
-      const unlockOnInteraction = () => {
-        if (unlockedRef.current) return;
-        tryPlay();
-      };
-
-      document.addEventListener("click", unlockOnInteraction);
-      document.addEventListener("touchstart", unlockOnInteraction);
-
-      return () => {
-        document.removeEventListener("click", unlockOnInteraction);
-        document.removeEventListener("touchstart", unlockOnInteraction);
-      };
     } else {
       audio.pause();
-      audio.src = "";
+      audio.removeAttribute("src");
+      audio.load();
+      setIsPlaying(false);
     }
   }, [musicData]);
 
-  return <audio ref={audioRef} className="hidden" />;
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("ended", handlePause);
+
+    return () => {
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("ended", handlePause);
+    };
+  }, []);
+
+  const togglePlay = async () => {
+    const audio = audioRef.current;
+
+    if (!audio || !musicData?.is_active || !musicData.music) return;
+
+    try {
+      if (audio.paused) {
+        await audio.play();
+      } else {
+        audio.pause();
+      }
+    } catch (error) {
+      console.error("Failed to play background music:", error);
+    }
+  };
+
+  if (!musicData?.is_active || !musicData.music) return null;
+
+  return (
+    <>
+      <audio ref={audioRef} className="hidden" />
+
+      <button
+        type="button"
+        onClick={togglePlay}
+        aria-label={isPlaying ? "Pause background music" : "Play background music"}
+        title={isPlaying ? "توقف موزیک" : "پخش موزیک"}
+        className="fixed bottom-5 right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-black/70 text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-black/90"
+      >
+        {isPlaying ? (
+          <Pause size={21} />
+        ) : (
+          <Play size={21} />
+        )}
+      </button>
+    </>
+  );
 }

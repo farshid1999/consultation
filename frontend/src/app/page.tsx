@@ -26,17 +26,17 @@ export default function HomePage() {
 
             <div className="relative z-10">
                 <Hero/>
-                <Partners
-                    title="همراهان ما"
-                    subtitle="مجموعه‌هایی که در مسیر رشد، کنار ما هستند"
-                    items={[
-                        {name: "روانشناسی", logo: "/ravan.jpg"},
-                        {name: "موسقی تراپی", logo: "/music.jpg"},
-                        {name: "پشتیبانی", logo: "/poshtiban.jpg"},
-                        {name: "یوگبال", logo: "/yogbal.jpg"},
-                        {name: "حقوقی", logo: "/hogh.jpg"},
-                    ]}
-                />
+                {/*<Partners*/}
+                {/*    title="همراهان ما"*/}
+                {/*    subtitle="مجموعه‌هایی که در مسیر رشد، کنار ما هستند"*/}
+                {/*    items={[*/}
+                {/*        {name: "روانشناسی", logo: "/ravan.jpg"},*/}
+                {/*        {name: "موسقی تراپی", logo: "/music.jpg"},*/}
+                {/*        {name: "پشتیبانی", logo: "/poshtiban.jpg"},*/}
+                {/*        {name: "یوگبال", logo: "/yogbal.jpg"},*/}
+                {/*        {name: "حقوقی", logo: "/hogh.jpg"},*/}
+                {/*    ]}*/}
+                {/*/>*/}
                 <WhySportsPsychology/>
 
                 <Services/>

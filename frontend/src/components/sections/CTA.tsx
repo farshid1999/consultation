@@ -12,7 +12,7 @@ export default function CTA() {
       dir="rtl"
       className="relative px-6 py-28 md:px-10 lg:px-16"
     >
-      <div className="mx-auto max-w-4xl overflow-hidden rounded-[2.5rem] border border-gold/20 bg-gradient-to-br from-deep-2 via-deep to-deep-3 p-10 shadow-soft md:p-14">
+      <div id='contactForm' className="mx-auto max-w-4xl overflow-hidden rounded-[2.5rem] border border-gold/20 bg-gradient-to-br from-deep-2 via-deep to-deep-3 p-10 shadow-soft md:p-14">
         <div className="text-center">
           <RevealOnScroll direction="scale">
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/10 text-2xl text-gold">

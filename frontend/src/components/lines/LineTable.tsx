@@ -61,9 +61,9 @@ function flattenTree(
 ) {
   nodes.forEach((node) => {
     out.push({ node, depth });
-    // if (node.children.length > 0 && !collapsed.has(node.id)) {
-    //   flattenTree(node.children, depth + 1, collapsed, out);
-    // }
+    if (node.children.length > 0 && !collapsed.has(node.id)) {
+      flattenTree(node.children, depth + 1, collapsed, out);
+    }
   });
   return out;
 }
