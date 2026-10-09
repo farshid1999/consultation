@@ -16,11 +16,11 @@ const siteUrl = "https://zehnavard.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "سفیران اوج آرامش | یوگبال",
+    default: "سفیران اوج آرامش | متد تخصصی ورزشی یوگبال",
     template: "%s | یوگبال",
   },
   description:
-    "یوگبال متدی جامع و تخصصی روان‌شناسی ورزشی برای ورزشکاران حرفه‌ای و آماتور؛ مدیریت اضطراب رقابتی، تقویت تمرکز و اعتمادبه‌نفس و همراهی ذهنی تا روز مسابقه.",
+   "پلتفرم تخصصی ورزشی با متد یوگبال برای اولین بار در دنیا برای ورزشکاران حرفه‌ای و آماتور؛ مدیریت اضطراب رقابتی، تقویت تمرکز و اعتمادبه‌نفس و همراهی ذهنی تا روز مسابقه.",
   alternates: { canonical: "/" },
   keywords: [
     "یوگبال",
@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     locale: "fa_IR",
     url: siteUrl,
     siteName: "سفیران اوج آرامش",
-    title: "سفیران اوج آرامش | یوگبال",
-    description:
-      "ذهنی که برای قهرمانی آماده می‌شود. مشاوره‌ی تخصصی روان‌شناسی ورزشی، متناسب با رشته و اهداف شما.",
+    title: "سفیران اوج آرامش | متد تخصصی ورزشی یوگبال",
+     description:
+      "ذهنی که برای قهرمانی آماده می‌شود. مشاوره‌ی تخصصی، متناسب با رشته و اهداف شما.",
     images: [
       {
         url: "/og-cover.jpg",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "سفیران اوج آرامش | یوگبال",
+    title: "سفیران اوج آرامش | متد تخصصی ورزشی یوگبال",
     description: "ذهنی که برای قهرمانی آماده می‌شود.",
     images: ["/og-cover.jpg"],
   },
@@ -67,7 +67,7 @@ export default function RootLayout({
     name: "سفیران اوج آرامش",
     alternateName: ["یوگبال", "Yogbal"],
     description:
-      "مشاوره‌ی تخصصی روان‌شناسی ورزشی برای ورزشکاران حرفه‌ای و آماتور",
+      "مشاوره‌ی تخصصی برای ورزشکاران حرفه‌ای و آماتور",
     url: siteUrl,
     medicalSpecialty: "Sports Psychology",
     areaServed: "IR",
