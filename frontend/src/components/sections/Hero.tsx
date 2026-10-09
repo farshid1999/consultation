@@ -3,14 +3,7 @@
 import {useEffect, useRef, useState} from "react";
 import {motion} from "framer-motion";
 import {FiArrowLeft, FiCheck} from "react-icons/fi";
-import {
-    PiBrainDuotone,
-    PiHeartbeatDuotone,
-    PiTargetDuotone,
-} from "react-icons/pi";
 import Button from "@/components/ui/Button";
-import GlassCard from "@/components/ui/GlassCard";
-import {toPersianDigits} from "@/lib/utils";
 import {usePublicSlider} from "@/hooks/useSliders";
 
 const featureList = [
@@ -19,7 +12,6 @@ const featureList = [
     "پشتیبانی دائمی متخصصان در طول دوره",
 ];
 
-// const cubeImages = ["/test2.webp", "/logo.webp", "/test3.webp", "/logo.webp"];
 const SLIDER_KEY = "hero-cube";
 const CUBE_FACES = 4;
 const FALLBACK_IMAGES = [
@@ -55,11 +47,11 @@ const fadeUp = {
     show: {
         opacity: 1,
         y: 0,
-        transition: {duration: 0.9, ease: [0.16, 1, 0.3, 1]},
+        transition: {duration: 0.9, ease: [0.16, 1, 0.3, 1] as const},
     },
 };
 
-const CUBE_SIZE = 380;
+const CUBE_SIZE = 340;
 const CUBE_HALF = CUBE_SIZE / 2;
 
 // ─── Mobile Flat Slider ───────────────────────────────────────────────────────
@@ -84,7 +76,7 @@ function MobileSlider({
 
     return (
         <div
-            className="relative w-full overflow-hidden rounded-2xl"
+            className="relative mx-auto w-full max-w-md overflow-hidden rounded-2xl"
             style={{aspectRatio: "4/3"}}
         >
             {images.map((src, i) => (
@@ -104,7 +96,7 @@ function MobileSlider({
                 />
             ))}
             {images.length > 1 && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
                     {images.map((_, i) => (
                         <button
                             key={i}
@@ -159,7 +151,8 @@ function HeroImageSlider({images}: { images: string[] }) {
             style={{
                 width: CUBE_SIZE,
                 height: CUBE_SIZE,
-                perspective: "700px",
+                // perspective بزرگ‌تر تا وجه جلویی بزرگ نشود و روی متن نیفتد
+                perspective: "1400px",
                 perspectiveOrigin: "50% 50%",
                 display: "flex",
                 alignItems: "center",
@@ -168,6 +161,7 @@ function HeroImageSlider({images}: { images: string[] }) {
         >
             <div
                 ref={cubeRef}
+                className="hero-cube"
                 style={{
                     width: CUBE_SIZE,
                     height: CUBE_SIZE,
@@ -253,7 +247,7 @@ export default function Hero() {
           100% { transform: rotateX(-12deg) rotateY(-360deg); }
         }
         @media (prefers-reduced-motion: reduce) {
-          [style*="heroRotateCube"] {
+          .hero-cube {
             animation: none !important;
             transform: rotateX(-12deg) rotateY(-25deg);
           }
@@ -263,11 +257,10 @@ export default function Hero() {
             <section
                 id="hero"
                 dir="rtl"
-                className="relative isolate flex min-h-screen items-center overflow-hidden px-6 pt-32 pb-20 md:px-10 lg:px-16"
+                className="relative isolate flex min-h-screen items-center overflow-hidden px-6 pt-28 pb-16 md:px-10 lg:px-16 lg:pt-32 lg:pb-20"
             >
-                <div
-                    className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-16 lg:grid-cols-[1fr_1fr] lg:gap-8">
-                    {/* ── RIGHT ZONE ───────────────────────────────────────────────── */}
+                <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-12">
+                    {/* ── متن (سمت راست) ─────────────────────────────────────────── */}
                     <motion.div
                         variants={container}
                         initial="hidden"
@@ -283,7 +276,7 @@ export default function Hero() {
 
                         <motion.h1
                             variants={fadeUp}
-                            className="text-4xl font-extrabold text-cream"
+                            className="text-4xl font-extrabold leading-[1.4] text-cream md:text-5xl"
                         >
                             <span className="sr-only">یوگبال، </span>
                             ذهنی آرام به سوی{" "}
@@ -304,21 +297,17 @@ export default function Hero() {
                       className="text-gold/50"
                   />
                 </svg>
-              </span>{" "}
+              </span>
                         </motion.h1>
-
-                        {/* <motion.p variants={fadeUp} className="mt-4 text-h3 font-medium text-cream/60">
-              پیش از بدن، ذهن باید برنده شود.
-            </motion.p> */}
 
                         <motion.p
                             variants={fadeUp}
-                            className="mt-6 max-w-md text-body text-cream/65"
+                            className="mt-6 max-w-md text-body leading-8 text-cream/65"
                         >
                             یوگبال متدی جامع و تخصصی برای ورزشکاران با رویکردی متفاوت از روز
                             نخست تا آخرین روز فعالیت حرفه ای
                         </motion.p>
-                        }}>
+
                         <motion.div
                             variants={fadeUp}
                             className="mt-9 flex flex-wrap items-center gap-4"
@@ -342,9 +331,9 @@ export default function Hero() {
                             {featureList.map((feature) => (
                                 <li
                                     key={feature}
-                                    className="flex items-center gap-2.5 text-sm text-cream/55"
+                                    className="flex items-start gap-2.5 text-sm leading-7 text-cream/55"
                                 >
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
+                  <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
                     <FiCheck className="text-xs" aria-hidden="true"/>
                   </span>
                                     {feature}
@@ -353,54 +342,21 @@ export default function Hero() {
                         </motion.ul>
                     </motion.div>
 
-                    {/* ── CENTER ZONE ──────────────────────────────────────────────── */}
-                    {/* <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="order-2 relative mx-auto hidden h-[440px] w-full max-w-sm items-center justify-center md:flex"
-          >
-            <div className="absolute h-56 w-56 rounded-full border border-gold/30" />
-            <div className="absolute h-56 w-56 animate-pulse-ring rounded-full border border-gold/40" />
-            <div className="absolute h-56 w-56 animate-pulse-ring rounded-full border border-gold/40" style={{ animationDelay: "1.1s" }} />
-            <div className="absolute h-56 w-56 animate-pulse-ring rounded-full border border-gold/40" style={{ animationDelay: "2.2s" }} />
-
-            <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-gradient-to-br from-deep-2 to-deep-3 shadow-soft">
-              <PiBrainDuotone className="text-6xl text-gold" aria-hidden="true" />
-            </div>
-
-            <GlassCard className="absolute -right-4 top-4 animate-float-slow px-5 py-4 md:-right-10">
-              <p className="text-xs text-cream/50">اضطراب پیش‌مسابقه</p>
-              <p className="mt-1 text-h3 font-bold text-cream">−{toPersianDigits(64)}٪</p>
-            </GlassCard>
-
-            <GlassCard className="absolute -left-6 bottom-8 animate-float-slower px-5 py-4 md:-left-14">
-              <div className="flex items-center gap-2">
-                <PiTargetDuotone className="text-lg text-gold" aria-hidden="true" />
-                <p className="text-xs text-cream/50">تمرکز پایدار</p>
-              </div>
-              <p className="mt-1 text-h3 font-bold text-cream">{toPersianDigits(420)}+ ورزشکار</p>
-            </GlassCard>
-          </motion.div> */}
-
-                    {/* ── LEFT ZONE — mobile: flat slider / desktop: 3D cube ───────── */}
+                    {/* ── موبایل: اسلایدر ساده ───────────────────────────────────── */}
                     <motion.div
                         initial={{opacity: 0, y: 24}}
                         animate={{opacity: 1, y: 0}}
                         transition={{duration: 1.0, delay: 0.2, ease: [0.16, 1, 0.3, 1]}}
-                        className="order-3 w-full px-2 lg:hidden"
+                        className="order-2 w-full lg:hidden"
                     >
                         <MobileSlider images={images} intervalSeconds={intervalSeconds}/>
                     </motion.div>
 
+                    {/* ── دسکتاپ: مکعب سه‌بعدی (سمت چپ) ──────────────────────────── */}
                     <motion.div
                         initial={{opacity: 0, scale: 0.9}}
                         animate={{opacity: 1, scale: 1}}
-                        transition={{
-                            duration: 1.1,
-                            delay: 0.2,
-                            ease: [0.16, 1, 0.3, 1],
-                        }}
+                        transition={{duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1]}}
                         className="order-2 hidden lg:flex lg:items-center lg:justify-center"
                     >
                         <HeroImageSlider images={images}/>
