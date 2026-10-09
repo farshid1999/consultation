@@ -284,6 +284,7 @@ export default function Hero() {
               variants={fadeUp}
               className="text-4xl font-extrabold text-cream"
             >
+              <span className="sr-only">یوگبال، </span>
               ذهنی آرام به سوی{" "}
               <span className="relative inline-block text-gold">
                 قهرمانی
