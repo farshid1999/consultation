@@ -45,8 +45,6 @@ export default function HomePage() {
 
                 <Testimonials/>
                 <Benefits/>
-                <Stats/>
-                <Testimonials/>
                 <FAQ/>
                 <CTA/>
                 {/*<SectionDivider />*/}
