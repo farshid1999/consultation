@@ -27,6 +27,7 @@ function mapDetailToFormValues(staff: StaffDetail): StaffUpdateFormValues {
         employee_code: staff.employee_code,
         position: staff.position,
         hire_date: fromApiDateString(staff.hire_date),
+        is_show_public:staff.is_show_public,
         user: {
             username: user.username,
             password: "",
@@ -107,6 +108,7 @@ export default function StaffEditForm({staff}: { staff: StaffDetail }) {
             employee_code: values.employee_code,
             position: values.position,
             hire_date: toApiDateString(values.hire_date ?? undefined),
+            is_show_public:values.is_show_public,
 
 
             user: {

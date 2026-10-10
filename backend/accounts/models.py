@@ -170,12 +170,14 @@ class User(AbstractUser):
 
 
 class Staff(BaseModel):
-    user = models.OneToOneField("User", on_delete=models.CASCADE)
+    user = models.OneToOneField("User", on_delete=models.CASCADE,related_name="staff")
     employee_code = models.CharField(max_length=50, unique=True)
 
     hire_date = models.DateField()
 
     position = models.CharField(max_length=100)
+
+    is_show_public = models.BooleanField(default=True)
 
 
 class UserRole(BaseModel):

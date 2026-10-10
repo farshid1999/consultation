@@ -411,12 +411,13 @@ class StaffCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Staff
 
-        fields = ["id", "user", "employee_code", "hire_date", "position"]
+        fields = ["id", "user", "employee_code", "hire_date", "position","is_show_public"]
 
     @transaction.atomic
     def create(self, validated_data):
         user_data = validated_data.pop("user")
         user = UserCreateSerializer().create(user_data)
+        user.is_staff = True
         return Staff.objects.create(user=user, **validated_data)
 
 

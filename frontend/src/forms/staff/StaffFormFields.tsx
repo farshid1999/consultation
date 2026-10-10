@@ -2,7 +2,7 @@
 
 import {useState} from "react";
 import {Controller, type Control, type FieldErrors} from "react-hook-form";
-import {Input, Textarea, DatePicker, FileUploader, Switch, AvatarUpload} from "@/components/ui/inputs";
+import {Input, Textarea, DatePicker, FileUploader, Switch, AvatarUpload, Checkbox} from "@/components/ui/inputs";
 import FormSection from "../FormSection";
 import AddressFields from "./AddressFields";
 import ClubFields from "./ClubFields";
@@ -75,6 +75,22 @@ export default function StaffFormFields({
                         render={({field, fieldState}) => (
                             <DatePicker
                                 label="تاریخ استخدام"
+                                required={mode === "create"}
+                                value={field.value ?? null}
+                                onChange={field.onChange}
+                                onBlur={field.onBlur}
+                                ref={field.ref}
+                                error={fieldState.error?.message}
+                            />
+                        )}
+                    />
+
+                    <Controller
+                        name="is_show_public"
+                        control={control}
+                        render={({field, fieldState}) => (
+                            <Checkbox
+                                label="اطلاعات در صفحه اصلی نمایش داده شود"
                                 required={mode === "create"}
                                 value={field.value ?? null}
                                 onChange={field.onChange}
