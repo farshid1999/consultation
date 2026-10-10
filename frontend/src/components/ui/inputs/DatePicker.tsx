@@ -37,6 +37,10 @@ export interface DatePickerProps {
   showTodayButton?: boolean;
 }
 
+type ViewMode = "days" | "months" | "years";
+
+const YEARS_PER_PAGE = 12;
+
 function isBeforeDay(a: Date, b: Date) {
   return (
     a.getFullYear() < b.getFullYear() ||
@@ -45,12 +49,19 @@ function isBeforeDay(a: Date, b: Date) {
   );
 }
 
+function yearPageStartFor(year: number) {
+  return Math.floor(year / YEARS_PER_PAGE) * YEARS_PER_PAGE;
+}
+
 /**
  * A fully Persian (Jalali/Shamsi) date picker. Internally stores and emits a
- * plain `Date` object (so it stays trivial to send to a backend or compare),
- * while every visible label — month names, weekday headers, the grid of
- * days — is Jalali. Built as a controlled component so it plugs into
- * react-hook-form via `Controller`, exactly like MultiSelect / RadioGroup.
+ * plain `Date` object, while every visible label is Jalali.
+ *
+ * The popover has three views:
+ *  - days   : grid of days; arrows move month by month
+ *  - months : grid of 12 months; arrows move year by year
+ *  - years  : grid of 12 years; arrows move page by page
+ * Click the "month year" title to go days → months → years.
  */
 const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(function DatePicker(
   {
@@ -77,45 +88,81 @@ const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(function DateP
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const initialView = useMemo(() => toJalali(value ?? new Date()), [value]);
-  const [viewYear, setViewYear] = useState(initialView.jy);
-  const [viewMonth, setViewMonth] = useState(initialView.jm);
+  const [viewYear, setViewYear] = useState(() => toJalali(value ?? new Date()).jy);
+  const [viewMonth, setViewMonth] = useState(() => toJalali(value ?? new Date()).jm);
+  const [mode, setMode] = useState<ViewMode>("days");
+  const [yearPageStart, setYearPageStart] = useState(() => yearPageStartFor(toJalali(value ?? new Date()).jy));
+
+  // Keep the latest value/onBlur in refs so the effects below only react to
+  // `open` changing — otherwise a parent re-render with a fresh Date object
+  // would snap the calendar back to the selected month while navigating.
+  const valueRef = useRef(value);
+  valueRef.current = value;
+  const onBlurRef = useRef(onBlur);
+  onBlurRef.current = onBlur;
 
   useEffect(() => {
-    if (open) {
-      const v = toJalali(value ?? new Date());
-      setViewYear(v.jy);
-      setViewMonth(v.jm);
-    }
-  }, [open, value]);
+    if (!open) return;
+    const v = toJalali(valueRef.current ?? new Date());
+    setViewYear(v.jy);
+    setViewMonth(v.jm);
+    setYearPageStart(yearPageStartFor(v.jy));
+    setMode("days");
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpen(false);
-        onBlur?.();
+        onBlurRef.current?.();
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open, onBlur]);
+  }, [open]);
 
-  const goToPrevMonth = () => {
-    if (viewMonth === 1) {
-      setViewMonth(12);
+  const minYear = minDate ? toJalali(minDate).jy : undefined;
+  const maxYear = maxDate ? toJalali(maxDate).jy : undefined;
+
+  const goPrev = () => {
+    if (mode === "days") {
+      if (viewMonth === 1) {
+        setViewMonth(12);
+        setViewYear((y) => y - 1);
+      } else {
+        setViewMonth((m) => m - 1);
+      }
+    } else if (mode === "months") {
       setViewYear((y) => y - 1);
     } else {
-      setViewMonth((m) => m - 1);
+      setYearPageStart((s) => s - YEARS_PER_PAGE);
     }
   };
 
-  const goToNextMonth = () => {
-    if (viewMonth === 12) {
-      setViewMonth(1);
+  const goNext = () => {
+    if (mode === "days") {
+      if (viewMonth === 12) {
+        setViewMonth(1);
+        setViewYear((y) => y + 1);
+      } else {
+        setViewMonth((m) => m + 1);
+      }
+    } else if (mode === "months") {
       setViewYear((y) => y + 1);
     } else {
-      setViewMonth((m) => m + 1);
+      setYearPageStart((s) => s + YEARS_PER_PAGE);
+    }
+  };
+
+  const handleTitleClick = () => {
+    if (mode === "days") {
+      setMode("months");
+    } else if (mode === "months") {
+      setYearPageStart(yearPageStartFor(viewYear));
+      setMode("years");
+    } else {
+      setMode("days");
     }
   };
 
@@ -132,12 +179,13 @@ const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(function DateP
   }, [viewYear, viewMonth]);
 
   const today = new Date();
+  const selectedJalali = value ? toJalali(value) : null;
+  const todayJalali = toJalali(today);
 
   const handleSelectDay = (date: Date) => {
     if (disabled) return;
     if (minDate && isBeforeDay(date, minDate)) return;
     if (maxDate && isBeforeDay(maxDate, date)) return;
-    // Preserve any existing time-of-day if the value already had one (useful when DateTimePicker composes this).
     const next = new Date(date);
     if (value) {
       next.setHours(value.getHours(), value.getMinutes(), 0, 0);
@@ -145,6 +193,42 @@ const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(function DateP
     onChange(next);
     setOpen(false);
   };
+
+  const isMonthDisabled = (month: number) => {
+    if (minDate) {
+      const m = toJalali(minDate);
+      if (viewYear < m.jy || (viewYear === m.jy && month < m.jm)) return true;
+    }
+    if (maxDate) {
+      const m = toJalali(maxDate);
+      if (viewYear > m.jy || (viewYear === m.jy && month > m.jm)) return true;
+    }
+    return false;
+  };
+
+  const isYearDisabled = (year: number) =>
+    (minYear !== undefined && year < minYear) || (maxYear !== undefined && year > maxYear);
+
+  const title =
+    mode === "days"
+      ? `${JALALI_MONTH_NAMES[viewMonth - 1]} ${toPersianDigits(viewYear)}`
+      : mode === "months"
+      ? toPersianDigits(viewYear)
+      : `${toPersianDigits(yearPageStart)} - ${toPersianDigits(yearPageStart + YEARS_PER_PAGE - 1)}`;
+
+  const navBtn =
+    "flex h-8 w-8 items-center justify-center rounded-full text-cream/60 transition-colors hover:bg-cream/[0.08] hover:text-gold";
+
+  const gridBtn = (active: boolean, current: boolean, isDisabled: boolean) =>
+    cn(
+      "flex h-9 items-center justify-center rounded-xl text-xs transition-colors duration-150",
+      active
+        ? "bg-gold text-deep font-bold"
+        : current
+        ? "border border-gold/50 text-gold"
+        : "text-cream/70 hover:bg-cream/[0.08]",
+      isDisabled && "cursor-not-allowed opacity-30 hover:bg-transparent"
+    );
 
   return (
     <FieldWrapper
@@ -194,69 +278,125 @@ const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(function DateP
               aria-label="انتخاب تاریخ"
               className="absolute z-30 mt-2 w-72 overflow-hidden rounded-2xl border border-cream/10 bg-deep-2/95 p-4 shadow-soft backdrop-blur-xl"
             >
-              {/* header: month/year nav */}
+              {/* header: nav + clickable title */}
               <div className="flex items-center justify-between">
                 <button
                   type="button"
-                  onClick={goToNextMonth}
-                  aria-label="ماه بعد"
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-cream/60 transition-colors hover:bg-cream/[0.08] hover:text-gold"
+                  onClick={goNext}
+                  aria-label={mode === "days" ? "ماه بعد" : mode === "months" ? "سال بعد" : "صفحه بعد"}
+                  className={navBtn}
                 >
                   <FiChevronRight aria-hidden="true" />
                 </button>
-                <p className="text-sm font-bold text-cream">
-                  {JALALI_MONTH_NAMES[viewMonth - 1]} {toPersianDigits(viewYear)}
-                </p>
                 <button
                   type="button"
-                  onClick={goToPrevMonth}
-                  aria-label="ماه قبل"
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-cream/60 transition-colors hover:bg-cream/[0.08] hover:text-gold"
+                  onClick={handleTitleClick}
+                  aria-label="تغییر ماه و سال"
+                  className="rounded-lg px-3 py-1 text-sm font-bold text-cream transition-colors hover:bg-cream/[0.08] hover:text-gold"
+                >
+                  {title}
+                </button>
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  aria-label={mode === "days" ? "ماه قبل" : mode === "months" ? "سال قبل" : "صفحه قبل"}
+                  className={navBtn}
                 >
                   <FiChevronLeft aria-hidden="true" />
                 </button>
               </div>
 
-              {/* weekday header */}
-              <div className="mt-3 grid grid-cols-7 gap-1 text-center">
-                {JALALI_WEEKDAY_LABELS.map((label) => (
-                  <span key={label} className="text-[0.65rem] text-cream/35">
-                    {label}
-                  </span>
-                ))}
-              </div>
+              {mode === "days" && (
+                <>
+                  <div className="mt-3 grid grid-cols-7 gap-1 text-center">
+                    {JALALI_WEEKDAY_LABELS.map((l) => (
+                      <span key={l} className="text-[0.65rem] text-cream/35">
+                        {l}
+                      </span>
+                    ))}
+                  </div>
 
-              {/* day grid */}
-              <div className="mt-1.5 grid grid-cols-7 gap-1">
-                {days.map((cell, index) => {
-                  if (!cell) return <span key={`blank-${index}`} />;
-                  const isSelected = isSameJalaliDay(value, cell.date);
-                  const isToday = isSameJalaliDay(today, cell.date);
-                  const isDisabled =
-                    (minDate && isBeforeDay(cell.date, minDate)) ||
-                    (maxDate && isBeforeDay(maxDate, cell.date));
+                  <div className="mt-1.5 grid grid-cols-7 gap-1">
+                    {days.map((cell, index) => {
+                      if (!cell) return <span key={`blank-${index}`} />;
+                      const isSelected = isSameJalaliDay(value, cell.date);
+                      const isToday = isSameJalaliDay(today, cell.date);
+                      const isDisabled =
+                        (minDate && isBeforeDay(cell.date, minDate)) ||
+                        (maxDate && isBeforeDay(maxDate, cell.date));
 
-                  return (
-                    <button
-                      key={cell.jd}
-                      type="button"
-                      disabled={Boolean(isDisabled)}
-                      onClick={() => handleSelectDay(cell.date)}
-                      className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-full text-xs transition-colors duration-150",
-                        isSelected
-                          ? "bg-gold text-deep font-bold"
-                          : isToday
-                          ? "border border-gold/50 text-gold"
-                          : "text-cream/70 hover:bg-cream/[0.08]",
-                        isDisabled && "cursor-not-allowed opacity-30 hover:bg-transparent"
-                      )}
-                    >
-                      {toPersianDigits(cell.jd)}
-                    </button>
-                  );
-                })}
-              </div>
+                      return (
+                        <button
+                          key={cell.jd}
+                          type="button"
+                          disabled={Boolean(isDisabled)}
+                          onClick={() => handleSelectDay(cell.date)}
+                          className={cn(
+                            "flex h-8 w-8 items-center justify-center rounded-full text-xs transition-colors duration-150",
+                            isSelected
+                              ? "bg-gold text-deep font-bold"
+                              : isToday
+                              ? "border border-gold/50 text-gold"
+                              : "text-cream/70 hover:bg-cream/[0.08]",
+                            isDisabled && "cursor-not-allowed opacity-30 hover:bg-transparent"
+                          )}
+                        >
+                          {toPersianDigits(cell.jd)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {mode === "months" && (
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {JALALI_MONTH_NAMES.map((name, i) => {
+                    const m = i + 1;
+                    const isDisabled = isMonthDisabled(m);
+                    return (
+                      <button
+                        key={name}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => {
+                          setViewMonth(m);
+                          setMode("days");
+                        }}
+                        className={gridBtn(
+                          selectedJalali?.jy === viewYear && selectedJalali?.jm === m,
+                          todayJalali.jy === viewYear && todayJalali.jm === m,
+                          isDisabled
+                        )}
+                      >
+                        {name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {mode === "years" && (
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {Array.from({ length: YEARS_PER_PAGE }, (_, i) => yearPageStart + i).map((y) => {
+                    const isDisabled = isYearDisabled(y);
+                    return (
+                      <button
+                        key={y}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => {
+                          setViewYear(y);
+                          setMode("months");
+                        }}
+                        className={gridBtn(selectedJalali?.jy === y, todayJalali.jy === y, isDisabled)}
+                      >
+                        {toPersianDigits(y)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {showTodayButton && (
                 <div className="mt-3 flex justify-center border-t border-cream/10 pt-3">

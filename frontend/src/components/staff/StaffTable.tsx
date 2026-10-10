@@ -7,7 +7,7 @@ import { FiEdit2, FiEye, FiPlus, FiSearch, FiTrash2, FiX } from "react-icons/fi"
 import { useDeleteStaff, useStaffList } from "@/hooks/useStaff";
 import RoleBadges from "./RoleBadges";
 import PaginationControls from "./PaginationControls";
-import { toPersianDigits } from "@/lib/jalaali";
+import {toJalali, toPersianDigits } from "@/lib/jalaali";
 import { fromApiDateString } from "@/lib/date";
 import type { ApiError } from "@/types";
 
@@ -22,8 +22,8 @@ const ORDERING_OPTIONS = [
 function formatShortJalali(iso: string): string {
   const date = fromApiDateString(iso);
   if (!date) return "—";
-  const jy = date.getFullYear();
-  return toPersianDigits(`${date.getDate()}/${date.getMonth() + 1}/${jy}`);
+  const { jy, jm, jd } = toJalali(date);
+  return toPersianDigits(`${jy}/${jm}/${jd}`);
 }
 
 export default function StaffTable() {
@@ -103,7 +103,7 @@ export default function StaffTable() {
                 <th className="px-5 py-4">کد پرسنلی</th>
                 <th className="px-5 py-4">سمت</th>
                 <th className="px-5 py-4">تاریخ استخدام</th>
-                <th className="px-5 py-4">نقش‌ها</th>
+                {/*<th className="px-5 py-4">نقش‌ها</th>*/}
                 <th className="px-5 py-4 text-center">عملیات</th>
               </tr>
             </thead>
@@ -167,9 +167,9 @@ export default function StaffTable() {
                   </td>
                   <td className="px-5 py-4 text-cream/60">{staff.position || "—"}</td>
                   <td className="px-5 py-4 text-cream/60">{formatShortJalali(staff.hire_date)}</td>
-                  <td className="px-5 py-4">
-                    <RoleBadges roles={staff.roles} />
-                  </td>
+                  {/*<td className="px-5 py-4">*/}
+                  {/*  <RoleBadges roles={staff.roles} />*/}
+                  {/*</td>*/}
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-center gap-1">
                       {confirmingId === staff.id ? (

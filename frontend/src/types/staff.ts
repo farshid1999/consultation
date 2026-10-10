@@ -21,7 +21,6 @@ export interface StaffDetail {
   hire_date: string;
   user: UserDetail;
   roles: UserRole[];
-  is_show_public:boolean;
 }
 
 /** Mirrors StaffCreateSerializer. */
@@ -30,7 +29,6 @@ export interface StaffCreateInput {
   employee_code: string;
   hire_date: string;
   position: string;
-  is_show_public:boolean;
 }
 
 /** Mirrors StaffUpdateSerializer — everything optional (partial update). */
@@ -39,7 +37,6 @@ export interface StaffUpdateInput {
   employee_code?: string;
   hire_date?: string;
   position?: string;
-  is_show_public:boolean;
 }
 
 /** What StaffCreateAPIView / StaffUpdateAPIView actually return (StaffUpdateSerializer shape in both cases). */
@@ -49,7 +46,6 @@ export interface StaffMutationResult {
   employee_code: string;
   hire_date: string;
   position: string;
-  is_show_public:boolean;
 }
 
 

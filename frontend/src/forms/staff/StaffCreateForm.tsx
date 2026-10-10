@@ -15,7 +15,6 @@ const DEFAULT_VALUES: StaffCreateFormValues = {
   employee_code: "",
   position: "",
   hire_date: null as unknown as Date,
-  is_show_public:undefined,
   user: {
     national_id: "",
     username: "",
@@ -68,7 +67,6 @@ export default function StaffCreateForm() {
     const payload: StaffCreateInput = {
       employee_code: values.employee_code,
       position: values.position,
-      is_show_public:values.is_show_public,
       hire_date: toApiDateString(values.hire_date) as string,
       user: {
         username: values.user.username,
