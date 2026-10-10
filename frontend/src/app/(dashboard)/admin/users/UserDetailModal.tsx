@@ -110,15 +110,15 @@ export default function UserDetailModal({
               <Section title="اطلاعات شخصی">
                 <Row label="شماره موبایل" value={u.phone_number} />
                 <Row label="تلفن ثابت" value={u.land_line} />
-                <Row label="تاریخ تولد" value={u.birth_date} />
+                {/* <Row label="تاریخ تولد" value={u.birth_date} /> */}
                 <Row label="شغل" value={u.job} />
                 <Row label="مدرک تحصیلی" value={u.degree} />
                 <Row label="رشته ورزشی" value={u.sport_discipline} />
                 <Row label="نام مربی" value={u.coach_name} />
                 <Row label="سابقه فعالیت" value={u.activity_history} />
                 <Row label="دانشجو" value={u.is_student ? "بله" : "خیر"} />
-                <Row label="سوابق حرفه‌ای" value={u.professional_background} />
-                <Row label="بیوگرافی" value={u.bio} />
+                {/* <Row label="سوابق حرفه‌ای" value={u.professional_background} />
+                <Row label="بیوگرافی" value={u.bio} /> */}
               </Section>
 
               {u.club && (
