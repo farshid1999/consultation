@@ -318,7 +318,6 @@ export default function Hero() {
                             یوگبال متدی جامع و تخصصی برای ورزشکاران با رویکردی متفاوت از روز
                             نخست تا آخرین روز فعالیت حرفه ای
                         </motion.p>
-                        }}>
                         <motion.div
                             variants={fadeUp}
                             className="mt-9 flex flex-wrap items-center gap-4"
