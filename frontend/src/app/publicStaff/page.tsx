@@ -7,6 +7,7 @@ import NeuralBackground from "@/components/background/NeuralBackground";
 import StaffCard from "@/components/staff/StaffCard";
 import FeaturedSlider from "@/components/staff/FeaturedSlider";
 import { usePublicStaffList } from "@/hooks/usePublicStaff";
+import { usePublicLines } from "@/hooks/useLines";
 
 const FEATURED_COUNT = 6;
 
@@ -15,20 +16,9 @@ export default function ExpertsPage() {
   const [lineId, setLineId] = useState<string>("");
 
   const { data, isLoading, isError } = usePublicStaffList({ search, line_id: lineId });
-  const { data: all } = usePublicStaffList(); // برای ساخت فیلتر بخش‌ها
+  const { data: allLines } = usePublicLines();
 
-  // فقط لاین‌های اصلی در فیلتر نمایش داده می‌شوند.
-  // اگر ساختار داده‌ی شما فرق دارد، شرط داخل if را عوض کنید
-  // (مثلاً l.is_main یا l.type === "main").
-  const lines = useMemo(() => {
-    const map = new Map<string, string>();
-    (all ?? []).forEach((s) =>
-      s.lines.forEach((l) => {
-        if (!l.parent_id) map.set(l.id, l.title);
-      })
-    );
-    return Array.from(map, ([id, title]) => ({ id, title }));
-  }, [all]);
+  const lines = (allLines ?? []).filter((l) => !l.parent);
 
   const staff = data ?? [];
   const isFiltering = Boolean(search || lineId);
