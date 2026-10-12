@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { tokenService } from "@/lib/auth/tokenService";
+import { useUserRole } from "@/hooks/useUsers"; // مسیر واقعی هوک خودتان
 import AdminSidebar from "@/components/Admin/adminSidebar";
 import "@/styles/light.css";
 
@@ -12,12 +13,28 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const isAuthenticated = tokenService.isAuthenticated();
 
+  const { data: role, isLoading, isError } = useUserRole();
+
+  // لاگین نبودن، یا خطای دریافت نقش (مثلاً توکن نامعتبر): به صفحه‌ی ورود
   useEffect(() => {
-    if (!tokenService.isAuthenticated()) {
+    if (!isAuthenticated || isError) {
       router.replace("/login");
     }
-  }, [router]);
+  }, [isAuthenticated, isError, router]);
+
+  // تا وقتی نقش مشخص نشده چیزی از پنل نشان نده
+  if (!isAuthenticated || isLoading || isError || !role) {
+    return <div className="min-h-screen" />;
+  }
+
+  const hasAccess =
+    role.roles.includes("admin") || role.is_staff || role.is_super;
+
+  if (!hasAccess) {
+    notFound(); // صفحه‌ی 404
+  }
 
   return (
     <div className="min-h-screen flex" dir="rtl">

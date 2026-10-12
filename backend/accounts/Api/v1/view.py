@@ -15,7 +15,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.Api.v1.serializer import *
 from accounts.models import Role, Staff, User
 from core.permissions import IsAdminOrSuperUser
-
+from operations.models import Line
 
 
 class NestedFilePayloadMixin:
@@ -662,7 +662,6 @@ class RegisterView(GenericAPIView):
 
 
 
-
 def public_staff_queryset():
     return (
         Staff.objects.select_related("user")
@@ -677,8 +676,8 @@ def public_staff_queryset():
 class PublicStaffListAPIView(GenericAPIView):
     serializer_class = PublicStaffSerializer
     permission_classes = (AllowAny,)
-    authentication_classes = ()  # توکن لازم نیست و توکن منقضی هم خطا نمی‌دهد
-    pagination_class = None  # تعداد کارمندان معمولاً کم است؛ اگر زیاد است حذف کن
+    authentication_classes = ()
+    pagination_class = None
 
     filter_backends = (filters.SearchFilter,)
     search_fields = ("user__first_name", "user__last_name", "position")

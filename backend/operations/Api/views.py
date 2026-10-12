@@ -25,7 +25,7 @@ class LineListAPIView(generics.ListAPIView):
     serializer_class = LineListSerializer
     pagination_class = None
     permission_classes = [AllowAny]
-
+    authentication_classes = ()
     filter_backends = (
         SearchFilter,
     )
