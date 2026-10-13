@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
           value={stats.appointments.upcoming}
           icon={FiCalendar}
           color="purple"
-          href="/admin/appointments"
+          href="/admin/appointment"
         />
       </div>
 

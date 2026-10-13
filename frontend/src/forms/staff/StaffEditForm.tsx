@@ -29,6 +29,7 @@ function mapDetailToFormValues(staff: StaffDetail): StaffUpdateFormValues {
         hire_date: fromApiDateString(staff.hire_date),
         user: {
             username: user.username,
+            national_id: user.national_id,
             password: "",
             phone_number: user.phone_number,
             first_name: user.first_name ?? "",
@@ -111,6 +112,7 @@ export default function StaffEditForm({staff}: { staff: StaffDetail }) {
 
             user: {
                 username: u?.username !== orig.username ? u?.username : undefined,
+                national_id: u?.national_id !== orig.national_id ? u?.national_id : undefined,
                 phone_number: u?.phone_number !== orig.phone_number ? u?.phone_number : undefined,
                 password: u?.password ? u.password : undefined,
                 avatar: u?.avatar instanceof File ? u.avatar : undefined,

@@ -42,7 +42,7 @@ export default function ExpertDetailPage() {
 
       <div className="relative z-10 mx-auto max-w-5xl px-6 py-10">
         <button
-          onClick={() => router.push("/experts")}
+          onClick={() => router.push("/publicStaff")}
           className="group mb-8 flex items-center gap-2 text-sm text-cream/50 transition-colors hover:text-gold"
         >
           <FiArrowRight size={16} className="transition-transform group-hover:translate-x-1" />

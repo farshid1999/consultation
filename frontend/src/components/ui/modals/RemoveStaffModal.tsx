@@ -84,11 +84,11 @@ export default function RemoveStaffModal({
             </div>
           ) : (
             filteredStaff.map((staff) => {
-              const isSelected = selectedIds.includes(staff.id); // استفاده از ID مدل StaffLine
+              const isSelected = selectedIds.includes(staff.staff_id);
               return (
                 <div
                   key={staff.id}
-                  onClick={() => toggleStaff(staff.id)}
+                  onClick={() => toggleStaff(staff.staff_id)}
                   className={cn(
                     "flex items-center gap-3 rounded-xl p-3 cursor-pointer transition-all border",
                     isSelected
