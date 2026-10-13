@@ -1680,7 +1680,7 @@ class SubmitConsultationFormListSerializer(serializers.ModelSerializer):
 class AppointmentListSerializer(serializers.ModelSerializer):
     line = serializers.StringRelatedField()
     member = serializers.StringRelatedField(allow_null=True)
-    staff = serializers.StringRelatedField(allow_null=True)
+    staff = serializers.SerializerMethodField()
     requested_by = serializers.StringRelatedField(allow_null=True)
 
     class Meta:
@@ -1696,6 +1696,12 @@ class AppointmentListSerializer(serializers.ModelSerializer):
             "appointment_time",
             "created_at",
         )
+
+    def get_staff(self, obj):
+        if not obj.staff:
+            return None
+
+        return f"{obj.staff.user.first_name} {obj.staff.user.last_name} - {obj.staff.employee_code}".strip()
 
 
 class AppointmentDetailSerializer(serializers.ModelSerializer):

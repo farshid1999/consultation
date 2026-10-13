@@ -65,7 +65,7 @@ export default function AdminAppointmentsPage() {
           <thead className="bg-deep-2/50 text-xs font-medium text-cream/40 border-b border-cream/10">
             <tr>
               <th className="px-5 py-4">درخواست دهنده / ممبر</th>
-              <th className="px-5 py-4">بخش (لاین)</th>
+              <th className="px-5 py-4">بخش</th>
               <th className="px-5 py-4">کارشناس</th>
               <th className="px-5 py-4">زمان نوبت</th>
               <th className="px-5 py-4">وضعیت</th>
