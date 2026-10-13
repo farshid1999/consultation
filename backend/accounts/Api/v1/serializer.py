@@ -726,9 +726,7 @@ class PublicStaffSerializer(serializers.ModelSerializer):
     bio = serializers.CharField(source="user.bio", read_only=True)
     degree = serializers.CharField(source="user.degree", read_only=True)
     informations = serializers.SerializerMethodField()
-    lines = PublicStaffLineSerializer(
-        source="line_memberships", many=True, read_only=True
-    )
+    lines = serializers.SerializerMethodField()
 
     class Meta:
         model = Staff
@@ -752,7 +750,7 @@ class PublicStaffSerializer(serializers.ModelSerializer):
     def get_lines(self, obj):
         memberships = obj.line_memberships.filter(
             line__parent__isnull=True
-        )
+        ).select_related("line")
 
         return PublicStaffLineSerializer(
             memberships,
