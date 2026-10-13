@@ -744,6 +744,11 @@ class PublicStaffSerializer(serializers.ModelSerializer):
             "informations",
         )
 
+    def get_informations(self, obj):
+        # فقط ریشه‌ها؛ فرزندان داخل خود سریالایزر می‌آیند
+        roots = [i for i in obj.user.informations.all() if i.parent_id is None]
+        return PublicInformationSerializer(roots, many=True, context=self.context).data
+
     def get_lines(self, obj):
         memberships = obj.line_memberships.filter(
             line__parent__isnull=True
@@ -754,8 +759,3 @@ class PublicStaffSerializer(serializers.ModelSerializer):
             many=True,
             context=self.context,
         ).data
-
-    def get_informations(self, obj):
-        # فقط ریشه‌ها؛ فرزندان داخل خود سریالایزر می‌آیند
-        roots = [i for i in obj.user.informations.all() if i.parent_id is None]
-        return PublicInformationSerializer(roots, many=True, context=self.context).data
