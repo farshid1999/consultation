@@ -1579,10 +1579,12 @@ class StaffContentListAPIView(generics.ListAPIView):
             None,
         )
 
-        if not staff:
-            return Response({
-                "results": [],
-            })
+        if not request.user.is_superuser:
+            if not staff:
+                return Response({
+                    "results": [],
+                })
+
 
         # -----------------------------
         # Query Params
