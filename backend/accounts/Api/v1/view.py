@@ -683,7 +683,7 @@ class PublicStaffListAPIView(GenericAPIView):
     search_fields = ("user__first_name", "user__last_name", "position")
 
     def get_queryset(self):
-        qs = public_staff_queryset().filter(user__is_active=True)
+        qs = public_staff_queryset().filter(user__is_active=True,is_show_public=True)
 
         line_id = self.request.query_params.get("line_id")
         if line_id:

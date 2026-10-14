@@ -63,6 +63,7 @@ class StaffInline(admin.StackedInline):
 
     fields = (
         "employee_code",
+        "is_show_public",
         "hire_date",
         "position",
         "created_at",
