@@ -30,7 +30,7 @@ export default function AdminLayout({
   }
 
   const hasAccess =
-    role.roles.includes("admin") || role.is_staff || role.is_super;
+    role.roles.includes("admin") || role.is_super;
 
   if (!hasAccess) {
     notFound(); // صفحه‌ی 404
