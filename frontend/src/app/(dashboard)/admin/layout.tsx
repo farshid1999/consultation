@@ -35,7 +35,7 @@ export default function AdminLayout({
   if (!hasAccess) {
     notFound(); // صفحه‌ی 404
   }
-// صصص
+
   return (
     <div className="min-h-screen flex" dir="rtl">
       <AdminSidebar />

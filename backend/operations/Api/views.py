@@ -1531,17 +1531,30 @@ class StaffContentListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         staff = getattr(self.request.user, "staff", None)
+        user = self.request.user
+
         if not staff:
             return Content.objects.none()
 
-        queryset = Content.objects.filter(
-            line__staff_memberships__staff=staff,
-        ).select_related(
-            "line",
-            "parent",
-        ).prefetch_related(
-            "line__children",
-        )
+        if user.user_roles.filter(role__name="admin").exists():
+            queryset = Content.objects.all().select_related(
+                "line",
+                "parent",
+            ).prefetch_related(
+                "line__children",
+            )
+        else:
+            queryset = Content.objects.filter(
+                line__staff_memberships__staff=staff,
+            ).select_related(
+                "line",
+                "parent",
+            ).prefetch_related(
+                "line__children",
+            )
+
+
+
         print(queryset)
 
         line_id = self.request.query_params.get("line_id")
