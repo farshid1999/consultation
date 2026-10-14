@@ -1536,7 +1536,7 @@ class StaffContentListAPIView(generics.ListAPIView):
         if not staff:
             return Content.objects.none()
 
-        if user.user_roles.filter(role__name="admin").exists():
+        if user.user_roles.filter(role__name="admin").exists() or user.is_superuser:
             queryset = Content.objects.all().select_related(
                 "line",
                 "parent",
