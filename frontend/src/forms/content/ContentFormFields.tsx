@@ -70,10 +70,8 @@ export default function ContentFormFields({
             <FileUploader
               label="آپلود فایل (تصویر، سند و...)"
               wrapperClassName="mb-6"
-              accept="image/*,.pdf,.doc,.docx"
               multiple
-              maxFiles={10}
-              maxSizeMB={10}
+              maxSizeMB={200}
               value={field.value || []}
               onChange={field.onChange}
             />
