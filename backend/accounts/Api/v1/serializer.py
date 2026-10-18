@@ -467,6 +467,7 @@ class UserListSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             "id",
+            "is_active",
             "username",
             "first_name",
             "last_name",
@@ -504,6 +505,13 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "groups",
             "user_permissions",
         )
+
+
+
+class UserStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["is_active"]
 
 
 class StaffListSerializer(serializers.ModelSerializer):
@@ -584,25 +592,38 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
+
+
 
 
 class PasswordLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
-
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
+        User = get_user_model()
 
-        user = authenticate(username=attrs["username"], password=attrs["password"])
+        user = User._default_manager.filter(
+            username=attrs["username"]
+        ).first()
 
-        if not user:
-            raise serializers.ValidationError("نام کاربری یا رمز عبور اشتباه است")
+        # بررسی نام کاربری و رمز عبور
+        if user is None or not user.check_password(attrs["password"]):
+            raise serializers.ValidationError(
+                "نام کاربری یا رمز عبور اشتباه است"
+            )
+
+        # بررسی فعال بودن حساب بعد از تأیید رمز
+        if not user.is_active:
+            raise serializers.ValidationError(
+                "حساب شما غیرفعال است با پشتیبانی تماس بگیرید."
+            )
 
         attrs["user"] = user
-
         return attrs
+
 
 
 class SendOTPSerializer(serializers.Serializer):

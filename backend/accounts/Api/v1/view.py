@@ -1,7 +1,7 @@
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status
+from rest_framework import filters, status, generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.generics import GenericAPIView, RetrieveAPIView
@@ -342,6 +342,14 @@ class UserUpdateAPIView(GenericAPIView):
         return Response(
             UserDetailSerializer(user, context=self.get_serializer_context()).data
         )
+
+
+
+class UserStatusUpdateAPIView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserStatusSerializer
+    permission_classes = [IsAdminOrSuperUser]
+    http_method_names = ["patch"]
 
 
 class CurrentUserAPIView(RetrieveAPIView):

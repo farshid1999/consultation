@@ -1,5 +1,5 @@
 import {apiClient} from "@/lib/axios";
-import type {UserListItem, UserDetail, UserCreateInput, UserUpdateInput, UserGuard, UserRoleResponse} from "@/types";
+import type {UserListItem, UserDetail, UserCreateInput, UserUpdateInput, UserGuard, UserRoleResponse, UserStatusUpdateInput} from "@/types";
 import type {Paginated, ListQueryParams} from "@/types";
 
 const BASE = "v1/users";
@@ -37,5 +37,10 @@ export const users = {
     async getUserRole(): Promise<UserRoleResponse> {
         const {data} = await apiClient.get<UserRoleResponse>("accounts/roles/get-user-role/");
         return data;
+    },
+
+    async updateStatus(id: number, data: UserStatusUpdateInput): Promise<UserDetail> {
+        const {data: response} = await apiClient.patch(`accounts/users/${id}/status/`, data);
+        return response;
     },
 };

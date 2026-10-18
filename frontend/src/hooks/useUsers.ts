@@ -5,6 +5,7 @@ import type {
     UserDetail,
     UserCreateInput,
     UserUpdateInput,
+    UserStatusUpdateInput,
 } from "@/types";
 import type {Paginated, ListQueryParams} from "@/types";
 
@@ -75,4 +76,20 @@ export const useUserRole = () => {
         staleTime: 1000 * 60 * 5, // کش ۵ دقیقه‌ای
         retry: 1,
     });
+};
+
+
+export const useUpdateUserStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UserStatusUpdateInput }) =>
+      users.updateStatus(id, data),
+
+    onSuccess: (_, variables) => {
+      // اینوالید کردن لیست و جزئیات کاربر مربوطه
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", "detail", variables.id] });
+    },
+  });
 };

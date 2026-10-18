@@ -56,6 +56,10 @@ export interface UserDetail {
   last_login: string | null;
 }
 
+export interface UserStatusUpdateInput {
+  is_active: boolean;
+}
+
 /** Mirrors UserCreateSerializer exactly. */
 
 /**

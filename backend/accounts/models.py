@@ -113,6 +113,8 @@ class User(AbstractUser):
         max_length=20,
     )
 
+    is_active= models.BooleanField(default=True)
+
     email = models.EmailField(
         blank=True,null=True
     )
