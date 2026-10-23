@@ -13,6 +13,7 @@ import {
     FiMessageSquare,
     FiMenu,
     FiX,
+    FiClipboard
 } from "react-icons/fi";
 import {cn} from "@/lib/utils";
 import {useLogout} from "@/hooks/useAuth";

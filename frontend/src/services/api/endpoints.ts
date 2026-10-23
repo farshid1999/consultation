@@ -45,17 +45,18 @@ export const CONTENT_ENDPOINTS = {
   memberDetailContent: (id: number | string) =>
     `operations/member/contents/${id}/`,
   memberDetail: (id: string) => `operations/member/contents/${id}/`,
-
 };
 
 export const ASSIGNMENT_ENDPOINTS = {
   // Admin
   adminList: "operations/assignments/admin/",
   create: "operations/assignments/create/",
-  update: (id: number) => `operations/assignments/${id}/update/`,
+  update: (id: string | number) => `operations/assignments/${id}/update/`,
+  delete: (id: string | number) => `operations/assignments/${id}/delete/`,
   adminDetail: (id: string | number) => `operations/assignments/admin/${id}/`,
 
   // Staff
+  staffAllList: "operations/staff/assignments/",
   staffList: (lineId: string | number) =>
     `operations/staff/assignments/lines/${lineId}/`, // ✅ اصلاح شد: staff قبل از assignments
 
@@ -184,11 +185,8 @@ export const SLIDER_ENDPOINTS = {
 };
 
 export const USER_ENDPOINTS = {
-  me: "accounts/users/me/", 
- 
+  me: "accounts/users/me/",
 };
-
-
 
 export const PUBLIC_STAFF_ENDPOINTS = {
   list: "accounts/public/staff/",

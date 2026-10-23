@@ -66,9 +66,14 @@ assignment_urls = [
         name="assignment-create",
     ),
     path(
-        "<int:pk>/update/",
+        "<str:pk>/update/",
         AssignmentUpdateAPIView.as_view(),
         name="assignment-update",
+    ),
+    path(
+        "<str:pk>/delete/",
+        AssignmentDestroyAPIView.as_view(),
+        name="assignment-delete",
     ),
     # Admin - All Assignments
     path(
@@ -93,6 +98,7 @@ assignment_urls = [
 # Staff Assignment URLs
 # =========================
 staff_assignment_urls = [
+    path("", StaffAllAssignmentListAPIView.as_view(), name="staff-all-assignment-list"),
     path("lines/<str:line_id>/", StaffAssignmentListAPIView.as_view(), name="staff-assignment-list"),
     path("lines/<str:line_id>/<str:assignment_id>/", StaffAssignmentDetailAPIView.as_view(),
          name="staff-assignment-detail"),  # ✅ تغییر به str

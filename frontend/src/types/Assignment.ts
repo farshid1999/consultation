@@ -54,11 +54,16 @@ export interface AssignmentDetail {
 export interface AllAssignmentListItem {
   id: number;
   line: string;
+  line_id: string;
   title: string;
   description: string;
   parent: number | null;
 }
 
+export interface StaffAllAssignmentListItem extends AllAssignmentListItem {
+  line_id: string;
+  created_at: string;
+}
 export interface AssignmentCreateInput {
   line: string;
   title: string;
@@ -74,6 +79,7 @@ export interface AssignmentUpdateInput {
   description?: string;
   parent?: number | null;
   member_ids?: string[];
+  existing_media_ids?: (number | string)[];
   media_items?: { media: MediaInput }[];
 }
 

@@ -10,6 +10,7 @@ import type {
   AssignmentSubmissionDetail,
   AssignmentSubmissionCreateInput,
   AssignmentSubmissionUpdateInput,
+  StaffAllAssignmentListItem,
 } from "@/types/Assignment";
 import type { Paginated, ListQueryParams } from "@/types";
 
@@ -41,14 +42,20 @@ export const assignmentService = {
   },
 
   update: async (
-    id: number,
-    data: AssignmentUpdateInput,
+    id: string | number,
+    data: AssignmentUpdateInput | FormData,
   ): Promise<AssignmentDetail> => {
+    const isFormData = data instanceof FormData;
     const res = await apiClient.patch<AssignmentDetail>(
       ASSIGNMENT_ENDPOINTS.update(id),
       data,
+      { headers: isFormData ? { "Content-Type": "multipart/form-data" } : {} },
     );
     return res.data;
+  },
+
+  delete: async (id: string | number): Promise<void> => {
+    await apiClient.delete(ASSIGNMENT_ENDPOINTS.delete(id));
   },
 
   adminDetail: async (id: string | number): Promise<AssignmentDetail> => {
@@ -59,6 +66,16 @@ export const assignmentService = {
   },
 
   // ── Staff ──────────────────────────────────────────────────────────────────
+
+  staffAllList: async (
+    params?: ListQueryParams,
+  ): Promise<Paginated<StaffAllAssignmentListItem>> => {
+    const res = await apiClient.get<Paginated<StaffAllAssignmentListItem>>(
+      ASSIGNMENT_ENDPOINTS.staffAllList,
+      { params },
+    );
+    return res.data;
+  },
 
   staffList: async (
     lineId: string | number,
@@ -73,7 +90,7 @@ export const assignmentService = {
 
   staffDetail: async (
     lineId: string | number,
-    assignmentId: string | number, 
+    assignmentId: string | number,
   ): Promise<AssignmentDetail> => {
     const res = await apiClient.get<AssignmentDetail>(
       ASSIGNMENT_ENDPOINTS.staffDetail(lineId, assignmentId),
@@ -95,8 +112,8 @@ export const assignmentService = {
 
   staffSubmissionDetail: async (
     lineId: string | number,
-    assignmentId: string | number, 
-    submissionId: string | number, 
+    assignmentId: string | number,
+    submissionId: string | number,
   ): Promise<AssignmentSubmissionDetail> => {
     const res = await apiClient.get<AssignmentSubmissionDetail>(
       ASSIGNMENT_ENDPOINTS.staffSubmissionDetail(

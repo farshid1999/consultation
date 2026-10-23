@@ -398,20 +398,21 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         user = request.user
 
-        staff = getattr(user, "staff", None)
+        is_admin = (
+            user.is_superuser
+            or user.user_roles.filter(role__name="admin").exists()
+        )
 
-        if staff is None:
-            raise serializers.ValidationError({"lines": "شما Staff نیستید."})
+        if not is_admin:
+            staff = getattr(user, "staff", None)
 
-        has_access = StaffLine.objects.filter(
-            staff=staff,
-            line=line,
-        ).exists()
+            if staff is None:
+                raise serializers.ValidationError({"line": "شما Staff نیستید."})
 
-        if not has_access:
-            raise serializers.ValidationError(
-                {"lines": "شما به این Line دسترسی ندارید."}
-            )
+            if not StaffLine.objects.filter(staff=staff, line=line).exists():
+                raise serializers.ValidationError(
+                    {"line": "شما به این Line دسترسی ندارید."}
+                )
 
         invalid_members = [member.id for member in members if member.line_id != line.id]
 
@@ -427,7 +428,10 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         media_items_data = validated_data.pop("media_items", [])
         members = validated_data.pop("members", [])
 
-        assignment = Assignment.objects.create(**validated_data)
+        assignment = Assignment.objects.create(
+            created_by=self.context["request"].user,
+            **validated_data,
+        )
 
         for item in media_items_data:
             media_data = item.get("media", {})
@@ -445,17 +449,23 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
 class AssignmentUpdateSerializer(serializers.ModelSerializer):
     member_ids = serializers.PrimaryKeyRelatedField(
         source="members",
-        queryset=LineMember.objects.select_related(
-            "line",
-            "user",
-        ),
+        queryset=LineMember.objects.select_related("line", "user"),
         many=True,
         write_only=True,
         required=False,
     )
 
-    media_items = AssignmentMediaSerializer(
+    media_items = MediaItemInputSerializer(
         many=True,
+        required=False,
+        write_only=True,
+    )
+
+    # Mediaهایی که باید بمانند؛ بقیه‌ی Mediaهای قدیمی حذف می‌شوند
+    existing_media_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Media.objects.all(),
+        many=True,
+        write_only=True,
         required=False,
     )
 
@@ -469,143 +479,125 @@ class AssignmentUpdateSerializer(serializers.ModelSerializer):
             "parent",
             "member_ids",
             "media_items",
+            "existing_media_ids",
         )
         read_only_fields = ("id",)
 
     def validate(self, attrs):
-        request = self.context["request"]
-        user = request.user
+        user = self.context["request"].user
+        line = self.instance.line
 
-        staff = getattr(user, "staff", None)
-
-        if staff is None:
-            raise serializers.ValidationError({"detail": "شما Staff نیستید."})
-
-        # اگر lines در request آمده باشد،
-        # همان Line جدید را بررسی می‌کنیم.
-        # در غیر این صورت Line فعلی Assignment ملاک است.
-        line = attrs.get(
-            "lines",
-            self.instance.line,
-        )
-
-        # Staff باید به Line دسترسی داشته باشد.
-        if not StaffLine.objects.filter(
-                staff=staff,
-                line=line,
-        ).exists():
+        # تغییر line مجاز نیست (گیرنده‌ها و submissionها به line وابسته‌اند)
+        new_line = attrs.get("line")
+        if new_line is not None and new_line.id != line.id:
             raise serializers.ValidationError(
-                {"lines": "شما به این Line دسترسی ندارید."}
+                {"line": "تغییر Line یک تکلیف مجاز نیست."}
             )
 
-        # اگر member_ids ارسال شده باشد،
-        # همه باید عضو Line انتخاب‌شده باشند.
-        members = attrs.get("members")
-
-        if members is not None:
-            invalid_members = [
-                member.id for member in members if member.line_id != line.id
-            ]
-
-            if invalid_members:
+        is_admin = user.is_superuser or user.user_roles.filter(role__name="admin").exists()
+        if not is_admin:
+            staff = getattr(user, "staff", None)
+            if staff is None or not StaffLine.objects.filter(staff=staff, line=line).exists():
                 raise serializers.ValidationError(
-                    {"member_ids": ("تمام اعضای انتخاب‌شده باید عضو همین Line باشند.")}
+                    {"line": "شما به این Line دسترسی ندارید."}
+                )
+
+        members = attrs.get("members")
+        if members is not None:
+            if any(m.line_id != line.id for m in members):
+                raise serializers.ValidationError(
+                    {"member_ids": "تمام اعضای انتخاب‌شده باید عضو همین Line باشند."}
+                )
+
+        kept = attrs.get("existing_media_ids")
+        if kept is not None:
+            own = set(
+                AssignmentMedia.objects.filter(assignment=self.instance)
+                .values_list("media_id", flat=True)
+            )
+            if any(m.id not in own for m in kept):
+                raise serializers.ValidationError(
+                    {"existing_media_ids": "برخی فایل‌ها متعلق به این تکلیف نیستند."}
                 )
 
         return attrs
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        media_items_data = validated_data.pop(
-            "media_items",
-            None,
-        )
-
-        members = validated_data.pop(
-            "members",
-            None,
-        )
-
-        # ---------------------------------
-        # Assignment fields
-        # ---------------------------------
+        members = validated_data.pop("members", None)
+        media_items_data = validated_data.pop("media_items", None)
+        kept_media = validated_data.pop("existing_media_ids", None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
         instance.save()
 
-        # ---------------------------------
-        # Recipients
-        # ---------------------------------
-
+        # ── Recipients: فقط تفاوت‌ها ──
         if members is not None:
-            AssignmentRecipient.objects.filter(
-                assignment=instance,
-            ).delete()
+            new_ids = {m.id for m in members}
+            existing = {
+                r.member_id: r
+                for r in AssignmentRecipient.objects.filter(assignment=instance)
+            }
 
-            AssignmentRecipient.objects.bulk_create(
-                [
-                    AssignmentRecipient(
-                        assignment=instance,
-                        member=member,
-                    )
-                    for member in members
-                ]
+            removed = [r.id for mid, r in existing.items() if mid not in new_ids]
+            if removed:
+                AssignmentRecipient.objects.filter(id__in=removed).delete()
+
+            AssignmentRecipient.objects.bulk_create([
+                AssignmentRecipient(assignment=instance, member=m)
+                for m in members
+                if m.id not in existing
+            ])
+
+        # ── Media قدیمی که نباید بماند ──
+        if kept_media is not None:
+            kept_ids = {m.id for m in kept_media}
+            stale = AssignmentMedia.objects.filter(assignment=instance).exclude(
+                media_id__in=kept_ids
             )
+            stale_media_ids = list(stale.values_list("media_id", flat=True))
+            stale.delete()
+            Media.objects.filter(id__in=stale_media_ids).delete()
 
-        # ---------------------------------
-        # Media
-        # ---------------------------------
-
-        if media_items_data is not None:
-            # فقط Mediaهای متعلق به همین Assignment
-            old_media_ids = list(
-                AssignmentMedia.objects.filter(assignment=instance).values_list(
-                    "media_id",
-                    flat=True,
-                )
-            )
-
-            # اول relation را حذف کن
-            AssignmentMedia.objects.filter(assignment=instance).delete()
-
-            # بعد خود Mediaهای متعلق به Assignment را حذف کن
-            Media.objects.filter(id__in=old_media_ids).delete()
-
-            # ساخت Mediaهای جدید
-            assignment_media_objects = []
-
-            for item_data in media_items_data:
-                media_data = item_data["media"]
-
-                media = Media.objects.create(**media_data)
-
-                assignment_media_objects.append(
-                    AssignmentMedia(
-                        assignment=instance,
-                        media=media,
-                    )
-                )
-
-            AssignmentMedia.objects.bulk_create(assignment_media_objects)
+        # ── Media جدید ──
+        for item in media_items_data or []:
+            media = Media.objects.create(**item.get("media", {}))
+            AssignmentMedia.objects.create(assignment=instance, media=media)
 
         return instance
 
-
 class AllAssignmentListSerializer(serializers.ModelSerializer):
     line = serializers.StringRelatedField()
+    line_id = serializers.PrimaryKeyRelatedField(source="line", read_only=True)
 
     class Meta:
         model = Assignment
         fields = (
             "id",
             "line",
+            "line_id",
             "title",
             "description",
             "parent",
         )
 
+
+class StaffAllAssignmentListSerializer(serializers.ModelSerializer):
+    line = serializers.StringRelatedField()
+    line_id = serializers.PrimaryKeyRelatedField(source="line", read_only=True)
+
+    class Meta:
+        model = Assignment
+        fields = (
+            "id",
+            "line",
+            "line_id",
+            "title",
+            "description",
+            "parent",
+            "created_at",
+        )
 
 class AssignmentListSerializer(serializers.ModelSerializer):
     class Meta:

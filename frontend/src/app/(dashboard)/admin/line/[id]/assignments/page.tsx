@@ -10,6 +10,8 @@ import {
   FiEye,
   FiMessageSquare,
   FiPlus,
+  FiEdit2,
+  FiTrash2
 } from "react-icons/fi";
 import { useDebounce } from "use-debounce";
 
@@ -48,7 +50,7 @@ export default function StaffAssignmentsPage() {
         </div>
 
         <Link
-          href="/admin/assignments/create"
+          href={`/admin/line/${lineId}/assignments/create`}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold text-deep text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <FiPlus size={15} />
@@ -75,7 +77,8 @@ export default function StaffAssignmentsPage() {
 
       {/* جدول تکالیف */}
       <div className="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-sm overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-white/5 bg-white/[0.01]">
               <th className="text-right px-5 py-3.5 text-cream/50 font-medium">
@@ -139,6 +142,30 @@ export default function StaffAssignmentsPage() {
                       >
                         <FiMessageSquare size={16} />
                       </Link>
+
+                      {/* ویرایش */}
+                      <Link
+                        href={`/admin/line/${lineId}/assignments/${assignment.id}/edit`}
+                        className="p-2 rounded-lg text-cream/40 hover:text-gold hover:bg-gold/10 transition-colors"
+                        title="ویرایش تکلیف"
+                      >
+                        <FiEdit2 size={16} />
+                      </Link>
+
+                      {/* حذف */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDeleteTarget({
+                            id: assignment.id,
+                            title: assignment.title,
+                          })
+                        }
+                        className="p-2 rounded-lg text-cream/40 hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                        title="حذف تکلیف"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -146,6 +173,7 @@ export default function StaffAssignmentsPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Pagination */}
