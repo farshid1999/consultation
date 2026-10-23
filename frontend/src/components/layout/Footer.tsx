@@ -16,7 +16,7 @@ export default function Footer() {
                             <span className="text-h3 font-extrabold text-cream">سفیران اوج آرامش</span>
                         </div>
                         <p className="mt-4 max-w-xs text-sm leading-relaxed text-cream/50">
-                            مشاوره‌ی تخصصی روان‌شناسی ورزشی؛ همراه ورزشکاران حرفه‌ای و آماتور در مسیر رسیدن به
+                            متد جامع تخصصی ورزشی با رویکردی متفاوت؛ همراه ورزشکاران حرفه‌ای و آماتور در مسیر رسیدن به
                             بهترین نسخه‌ی ذهنی خودشان.
                         </p>
                         <div className="mt-6 flex items-center gap-3">
@@ -84,11 +84,11 @@ export default function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="mailto:info@serenityambassadors.com"
+                                    href="mailto:Serenityambassadors@gmail.com"
                                     className="flex items-center gap-2.5 transition-colors duration-300 hover:text-gold"
                                 >
                                     <FiMail className="text-gold" aria-hidden="true"/>
-                                    <span dir="ltr">info@serenityambassadors.com</span>
+                                    <span dir="ltr">Serenityambassadors@gmail.com</span>
                                 </a>
                             </li>
                         </ul>
