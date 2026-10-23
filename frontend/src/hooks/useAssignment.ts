@@ -10,6 +10,7 @@ import type {
   AssignmentSubmissionDetail,
   AssignmentSubmissionCreateInput,
   AssignmentSubmissionUpdateInput,
+  StaffAllAssignmentListItem,
 } from "@/types/Assignment";
 import type { Paginated, ListQueryParams } from "@/types";
 
@@ -89,10 +90,20 @@ export const useCreateAssignment = () => {
   });
 };
 
-export const useUpdateAssignment = (id: number) => {
+export const useUpdateAssignment = (id: string | number) => {
   const queryClient = useQueryClient();
-  return useMutation<AssignmentDetail, Error, AssignmentUpdateInput>({
+  return useMutation<AssignmentDetail, Error, AssignmentUpdateInput | FormData>({
     mutationFn: (data) => assignmentService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] });
+    },
+  });
+};
+
+export const useDeleteAssignment = () => {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, string | number>({
+    mutationFn: (id) => assignmentService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
     },
@@ -107,6 +118,13 @@ export const useAdminAssignmentDetail = (id: string | number) =>
   });
 
 // ── Staff ─────────────────────────────────────────────────────────────────────
+
+export const useStaffAllAssignments = (params?: ListQueryParams) =>
+  useQuery<Paginated<StaffAllAssignmentListItem>>({
+    queryKey: ["assignments", "staff", "all", params],
+    queryFn: () => assignmentService.staffAllList(params),
+    staleTime: 0,
+  });
 
 export const useStaffAssignments = (
   lineId: string | number,

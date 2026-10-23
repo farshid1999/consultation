@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.core.cache import cache
 from rest_framework.views import APIView
+from django.db import transaction
 
 from core.permissions import IsAdminOrSuperUser, IsStaff
 from core.utils import *
@@ -433,16 +434,90 @@ class AssignmentCreateAPIView(NestedMultipartCreateMixin, generics.CreateAPIView
         return super().create(request, *args, **kwargs)
 
 
-class AssignmentUpdateAPIView(generics.UpdateAPIView):
-    queryset = Assignment.objects.all()
+def assignments_for_staff(user):
+    """تکلیف‌هایی که این کاربر اجازه‌ی ویرایش/حذفشان را دارد."""
+    qs = Assignment.objects.select_related("line", "parent")
+
+    if user.is_superuser or user.user_roles.filter(role__name="admin").exists():
+        return qs
+
+    staff = getattr(user, "staff", None)
+    if not staff:
+        return qs.none()
+
+    return qs.filter(line__staff_memberships__staff=staff).distinct()
+
+
+class AssignmentUpdateAPIView(NestedMultipartCreateMixin, generics.UpdateAPIView):
     serializer_class = AssignmentUpdateSerializer
-
-    permission_classes = [
-        IsStaff |
-        IsAdminOrSuperUser
-    ]
-
+    permission_classes = [IsStaff | IsAdminOrSuperUser]
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
     lookup_field = "pk"
+
+    def get_queryset(self):
+        return assignments_for_staff(self.request.user)
+
+class StaffAllAssignmentListAPIView(generics.ListAPIView):
+    serializer_class = StaffAllAssignmentListSerializer
+    permission_classes = [IsStaff | IsAdminOrSuperUser]
+
+    filter_backends = (
+        SearchFilter,
+        OrderingFilter,
+    )
+
+    search_fields = (
+        "title",
+        "description",
+        "line__title",
+    )
+
+    ordering_fields = (
+        "id",
+        "title",
+        "line__title",
+        "created_at",
+    )
+
+    ordering = ("-created_at",)
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = assignments_for_staff(user)
+
+        # ادمین همه را می‌بیند؛ staff فقط تکالیف ساخته‌ی خودش را
+        if user.is_superuser or user.user_roles.filter(role__name="admin").exists():
+            return queryset
+
+        return queryset.filter(created_by=user)
+
+class AssignmentDestroyAPIView(generics.DestroyAPIView):
+    permission_classes = [IsStaff | IsAdminOrSuperUser]
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        return assignments_for_staff(self.request.user)
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        submissions = AssignmentSubmission.objects.filter(
+            assignment_recipient__assignment=instance
+        )
+
+        media_ids = list(instance.media_items.values_list("media_id", flat=True))
+        media_ids += list(
+            SubmissionMedia.objects.filter(submission__in=submissions)
+            .values_list("media_id", flat=True)
+        )
+        conversation_ids = list(
+            submissions.exclude(conversation__isnull=True)
+            .values_list("conversation_id", flat=True)
+        )
+
+        instance.delete()
+
+        Media.objects.filter(id__in=media_ids).delete()
+        Conversation.objects.filter(id__in=conversation_ids).delete()
 
 
 class AllAssignmentListAPIView(generics.ListAPIView):

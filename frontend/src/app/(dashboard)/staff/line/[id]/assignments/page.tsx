@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useStaffAssignments } from "@/hooks/useAssignment";
+import {
+  useStaffAssignments,
+  useDeleteAssignment,
+} from "@/hooks/useAssignment";
+import Modal from "@/components/ui/modals/Modal";
 import Link from "next/link";
 import {
   FiArrowRight,
@@ -10,6 +14,8 @@ import {
   FiEye,
   FiMessageSquare,
   FiPlus,
+  FiEdit2,
+  FiTrash2,
 } from "react-icons/fi";
 import { useDebounce } from "use-debounce";
 
@@ -27,6 +33,35 @@ export default function StaffAssignmentsPage() {
     search: debouncedSearch,
     page,
   });
+
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string | number;
+    title: string;
+  } | null>(null);
+
+  const {
+    mutate: deleteAssignment,
+    isPending: isDeleting,
+    error: deleteError,
+    reset: resetDelete,
+  } = useDeleteAssignment();
+
+  const closeDeleteModal = () => {
+    if (isDeleting) return;
+    setDeleteTarget(null);
+    resetDelete();
+  };
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    deleteAssignment(deleteTarget.id, {
+      onSuccess: () => {
+        setDeleteTarget(null);
+        // اگر آخرین آیتم صفحه حذف شد، یک صفحه برگرد عقب
+        if (data?.results.length === 1 && page > 1) setPage((p) => p - 1);
+      },
+    });
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -75,7 +110,8 @@ export default function StaffAssignmentsPage() {
 
       {/* جدول تکالیف */}
       <div className="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-sm overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-white/5 bg-white/[0.01]">
               <th className="text-right px-5 py-3.5 text-cream/50 font-medium">
@@ -117,8 +153,10 @@ export default function StaffAssignmentsPage() {
                   <td className="px-5 py-4 text-cream font-medium">
                     {assignment.title}
                   </td>
-                  <td className="px-5 py-4 text-cream/50 max-w-xs truncate">
-                    {assignment.description || "—"}
+                  <td className="px-5 py-4 text-cream/50">
+                    <div className="max-w-xs truncate">
+                      {assignment.description || "—"}
+                    </div>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-center gap-2">
@@ -139,6 +177,30 @@ export default function StaffAssignmentsPage() {
                       >
                         <FiMessageSquare size={16} />
                       </Link>
+
+                      {/* ویرایش */}
+                      <Link
+                        href={`/staff/line/${lineId}/assignments/${assignment.id}/edit`}
+                        className="p-2 rounded-lg text-cream/40 hover:text-gold hover:bg-gold/10 transition-colors"
+                        title="ویرایش تکلیف"
+                      >
+                        <FiEdit2 size={16} />
+                      </Link>
+
+                      {/* حذف */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDeleteTarget({
+                            id: assignment.id,
+                            title: assignment.title,
+                          })
+                        }
+                        className="p-2 rounded-lg text-cream/40 hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                        title="حذف تکلیف"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -146,6 +208,7 @@ export default function StaffAssignmentsPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Pagination */}
@@ -172,6 +235,44 @@ export default function StaffAssignmentsPage() {
           </div>
         </div>
       )}
+
+      {/* مودال تأیید حذف */}
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={closeDeleteModal}
+        title="حذف تکلیف"
+      >
+        <p className="text-sm text-cream/70 leading-relaxed">
+          آیا از حذف تکلیف «{deleteTarget?.title}» مطمئن هستید؟ تمام پاسخ‌های
+          ارسال‌شده‌ی اعضا برای این تکلیف هم حذف می‌شود و این کار قابل بازگشت
+          نیست.
+        </p>
+
+        {deleteError && (
+          <p className="mt-3 text-xs text-red-400">
+            {(deleteError as any)?.detail ?? "حذف انجام نشد."}
+          </p>
+        )}
+
+        <div className="mt-6 flex gap-3">
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="px-5 py-2.5 rounded-xl bg-red-500/90 text-white text-sm font-semibold hover:bg-red-500 disabled:opacity-50 transition-colors"
+          >
+            {isDeleting ? "در حال حذف..." : "بله، حذف شود"}
+          </button>
+          <button
+            type="button"
+            onClick={closeDeleteModal}
+            disabled={isDeleting}
+            className="px-5 py-2.5 rounded-xl border border-cream/20 text-cream/60 text-sm hover:text-cream hover:border-cream/40 transition-colors"
+          >
+            انصراف
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

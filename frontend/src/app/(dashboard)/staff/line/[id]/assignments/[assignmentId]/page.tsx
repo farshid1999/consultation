@@ -10,6 +10,7 @@ import {
   FiGitBranch,
   FiClock,
   FiMessageSquare,
+  FiEdit2,
 } from "react-icons/fi";
 import { useStaffAssignmentDetail } from "@/hooks/useAssignment";
 import { formatJalaliDateTime } from "@/lib/jalaali";
@@ -69,13 +70,22 @@ export default function StaffAssignmentDetailPage() {
           </h1>
         </div>
 
-        <Link
-          href={`/staff/line/${lineId}/assignments/${assignmentId}/submissions`}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/15 text-cream/70 text-sm hover:text-blue-400 hover:border-blue-400/40 transition-colors"
-        >
-          <FiMessageSquare size={14} />
-          پاسخ‌ها
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/staff/line/${lineId}/assignments/${assignmentId}/edit`}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/15 text-cream/70 text-sm hover:text-gold hover:border-gold/40 transition-colors"
+          >
+            <FiEdit2 size={14} />
+            ویرایش
+          </Link>
+          <Link
+            href={`/staff/line/${lineId}/assignments/${assignmentId}/submissions`}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-cream/15 text-cream/70 text-sm hover:text-blue-400 hover:border-blue-400/40 transition-colors"
+          >
+            <FiMessageSquare size={14} />
+            پاسخ‌ها
+          </Link>
+        </div>
       </div>
 
       {/* Info */}

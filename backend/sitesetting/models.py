@@ -44,7 +44,7 @@ class ContactRequest(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.contact_type}"
 
-
+#perrmision contact
 
 class BackgroundMusic(BaseModel):
     music = models.FileField()

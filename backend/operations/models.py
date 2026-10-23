@@ -131,6 +131,14 @@ class Assignment(BaseModel):
         blank=True,
         related_name="children",
     )
+    
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_assignments",
+    )
 
     def __str__(self):
         return self.title
