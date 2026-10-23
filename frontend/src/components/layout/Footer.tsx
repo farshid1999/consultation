@@ -1,4 +1,4 @@
-import {FiInstagram, FiLinkedin, FiMail, FiPhone} from "react-icons/fi";
+import {FiInstagram, FiLinkedin, FiMail, FiPhone, FiSmartphone} from "react-icons/fi";
 import {navLinks} from "@/data/content";
 
 export default function Footer() {
@@ -21,18 +21,13 @@ export default function Footer() {
                         </p>
                         <div className="mt-6 flex items-center gap-3">
                             <a
-                                href="#"
+                                href="https://instagram.com/Serenity.Ambassadors"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 aria-label="اینستاگرام"
                                 className="flex h-10 w-10 items-center justify-center rounded-full border border-cream/15 text-cream/60 transition-colors duration-300 hover:border-gold/50 hover:text-gold"
                             >
                                 <FiInstagram aria-hidden="true"/>
-                            </a>
-                            <a
-                                href="#"
-                                aria-label="لینکدین"
-                                className="flex h-10 w-10 items-center justify-center rounded-full border border-cream/15 text-cream/60 transition-colors duration-300 hover:border-gold/50 hover:text-gold"
-                            >
-                                <FiLinkedin aria-hidden="true"/>
                             </a>
                         </div>
                     </div>
@@ -56,17 +51,45 @@ export default function Footer() {
                     <div>
                         <p className="text-caption font-semibold text-gold">ارتباط با ما</p>
                         <ul className="mt-5 flex flex-col gap-3 text-sm text-cream/55">
-                            <li className="flex items-center gap-2.5">
-                                <FiPhone className="text-gold" aria-hidden="true"/>
-                                ۰۲۱-۹۱۰۰۰۰۰۰
+                            <li>
+                                <a
+                                    href="tel:01142206332"
+                                    className="flex items-center gap-2.5 transition-colors duration-300 hover:text-gold"
+                                >
+                                    <FiPhone className="text-gold" aria-hidden="true"/>
+                                    <span>تلفن مؤسسه:</span>
+                                    <span dir="ltr">۰۱۱-۴۲۲۰۶۳۳۲</span>
+                                </a>
                             </li>
-                            <li className="flex items-center gap-2.5">
-                                <FiMail className="text-gold" aria-hidden="true"/>
-                                info@serenityambassadors.com
+                            <li>
+                                <a
+                                    href="tel:09360086228"
+                                    className="flex items-center gap-2.5 transition-colors duration-300 hover:text-gold"
+                                >
+                                    <FiSmartphone className="text-gold" aria-hidden="true"/>
+                                    <span>پشتیبانی:</span>
+                                    <span dir="ltr">۰۹۳۶۰۰۸۶۲۲۸</span>
+                                </a>
                             </li>
-                            <li className="flex items-center gap-2.5">
-                                <FiMail className="text-gold" aria-hidden="true"/>
-                                پشتیبانی:
+                            <li>
+                                <a
+                                    href="https://instagram.com/Serenity.Ambassadors"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2.5 transition-colors duration-300 hover:text-gold"
+                                >
+                                    <FiInstagram className="text-gold" aria-hidden="true"/>
+                                    <span dir="ltr">Serenity.Ambassadors</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="mailto:info@serenityambassadors.com"
+                                    className="flex items-center gap-2.5 transition-colors duration-300 hover:text-gold"
+                                >
+                                    <FiMail className="text-gold" aria-hidden="true"/>
+                                    <span dir="ltr">info@serenityambassadors.com</span>
+                                </a>
                             </li>
                         </ul>
                     </div>
