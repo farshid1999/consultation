@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Vazirmatn } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import QueryProvider from "@/components/providers/QueryProvider";
 import "./globals.css";
 import BackgroundAudioPlayer from "@/components/background/BackgroundAudioPlayer";
 
-const vazirmatn = Vazirmatn({
-  subsets: ["arabic"],
+const vazirmatn = localFont({
+  src: "../fonts/Vazirmatn-Variable.woff2",
   variable: "--font-vazir",
   display: "swap",
 });
