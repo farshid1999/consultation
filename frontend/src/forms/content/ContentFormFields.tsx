@@ -71,7 +71,6 @@ export default function ContentFormFields({
               label="آپلود فایل (تصویر، سند و...)"
               wrapperClassName="mb-6"
               multiple
-              maxSizeMB={200}
               value={field.value || []}
               onChange={field.onChange}
             />
