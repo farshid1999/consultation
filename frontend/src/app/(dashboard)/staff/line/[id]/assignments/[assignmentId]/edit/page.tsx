@@ -420,7 +420,6 @@ export default function StaffEditAssignmentPage() {
                     onChange={(files) => onChange(files[0] ?? null)}
                     onBlur={onBlur}
                     multiple={false}
-                    maxSizeMB={10}
                     dropzoneText="فایل را بکشید یا کلیک کنید"
                   />
                 )}
