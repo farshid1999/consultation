@@ -44,16 +44,19 @@ export default function RegisterForm({
   });
 
   const onSubmit = (data: RegisterFormValues) => {
-    submitRegister(data, {
-      onSuccess: () => {
-        setRegisteredUser({
-          username: data.national_id,
-          password: data.phone_number,
-        });
-        onSuccess?.();
-      },
-    });
-  };
+  console.log("FORM DATA:", data);
+  console.log("NATIONAL ID:", data.national_id);
+
+  submitRegister(data, {
+    onSuccess: () => {
+      setRegisteredUser({
+        username: data.national_id,
+        password: data.phone_number,
+      });
+      onSuccess?.();
+    },
+  });
+};
 
   const handleCopy = () => {
     if (!registeredUser) return;

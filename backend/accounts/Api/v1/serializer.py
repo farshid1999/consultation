@@ -569,7 +569,11 @@ class StaffDetailSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     club = ClubSerializer()
-    referrer_code = serializers.CharField()
+    referrer_code = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        write_only=True
+    )
 
     class Meta:
         model = User
@@ -594,40 +598,60 @@ class RegisterSerializer(serializers.ModelSerializer):
             "activity_history",
             "professional_background",
             "club",
-            "referrer_code"
+            "referrer_code",
         )
 
     def validate_national_id(self, value):
-        # چون username برابر کد ملی می‌شود، نباید با username موجود تداخل کند
+        if User.objects.filter(national_id=value).exists():
+            raise serializers.ValidationError(
+                "این کد ملی قبلاً ثبت شده است."
+            )
+
         if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("این کد ملی قبلاً ثبت شده است.")
+            raise serializers.ValidationError(
+                "این کد ملی قبلاً ثبت شده است."
+            )
+
+        return value
+
+    def validate_referrer_code(self, value):
+        if value and not User.objects.filter(
+            referral_code=value
+        ).exists():
+            raise serializers.ValidationError(
+                "کد معرف معتبر نیست."
+            )
+
         return value
 
     @transaction.atomic
     def create(self, validated_data):
         club_data = validated_data.pop("club")
+        referrer_code = validated_data.pop("referrer_code", None)
+
         address_data = club_data.pop("address")
-        referrer_code = club_data.pop("referrer_code")
-        referrer= None
-
-        if referrer_code:
-            referrer = User.objects.filter(referral_code=referrer_code)
-
         address = Address.objects.create(**address_data)
-        club = Club.objects.create(address=address, **club_data)
+
+        club = Club.objects.create(
+            address=address,
+            **club_data
+        )
 
         user = User(**validated_data)
-        user.username = validated_data["national_id"]
+        user.username = user.national_id
         user.club = club
-        user.set_password(validated_data["phone_number"])
+        user.set_password(user.phone_number)
         user.save()
 
-        if referrer is not None:
+        if referrer_code:
+            referrer = User.objects.get(
+                referral_code=referrer_code
+            )
+
             Referral.objects.create(
                 referrer=referrer,
                 referred=user
             )
-
 
         return user
 
