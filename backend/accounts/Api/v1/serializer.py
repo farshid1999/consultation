@@ -13,7 +13,7 @@ from accounts.models import (
     Role,
     Staff,
     User,
-    UserRole,
+    UserRole, Referral,
 )
 from message.tasks import *
 
@@ -459,9 +459,22 @@ class StaffUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
+
+class ReferredUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "first_name",
+            "last_name",
+            "username",
+            "national_id",
+            "phone_number",
+        )
+
 class UserListSerializer(serializers.ModelSerializer):
     club = serializers.CharField(source="club.name", read_only=True)
     address = serializers.SerializerMethodField()
+    invited_users = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -485,6 +498,7 @@ class UserListSerializer(serializers.ModelSerializer):
             "birth_date",
             "professional_background",
             "referral_code",
+            "invited_users",
 
         )
 
@@ -493,11 +507,17 @@ class UserListSerializer(serializers.ModelSerializer):
             return f"{obj.address.country} - {obj.address.city}"
         return None
 
+    def get_invited_users(self, obj):
+        referrals = obj.referrals.select_related("referred").all()
+        users = [referral.referred for referral in referrals]
+        return ReferredUserSerializer(users, many=True).data
+
 
 class UserDetailSerializer(serializers.ModelSerializer):
     address = AddressSerializer(read_only=True)
     club = ClubSerializer(read_only=True)
     informations = InformationSerializer(many=True, read_only=True)
+    invited_users = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -506,6 +526,11 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "groups",
             "user_permissions",
         )
+
+    def get_invited_users(self, obj):
+        referrals = obj.referrals.select_related("referred").all()
+        users = [referral.referred for referral in referrals]
+        return ReferredUserSerializer(users, many=True).data
 
 
 
@@ -544,6 +569,7 @@ class StaffDetailSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     club = ClubSerializer()
+    referrer_code = serializers.CharField()
 
     class Meta:
         model = User
@@ -568,6 +594,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "activity_history",
             "professional_background",
             "club",
+            "referrer_code"
         )
 
     def validate_national_id(self, value):
@@ -580,6 +607,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         club_data = validated_data.pop("club")
         address_data = club_data.pop("address")
+        referrer_code = club_data.pop("referrer_code")
+        referrer= None
+
+        if referrer_code:
+            referrer = User.objects.filter(referral_code=referrer_code)
 
         address = Address.objects.create(**address_data)
         club = Club.objects.create(address=address, **club_data)
@@ -589,6 +621,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.club = club
         user.set_password(validated_data["phone_number"])
         user.save()
+
+        if referrer is not None:
+            Referral.objects.create(
+                referrer=referrer,
+                referred=user
+            )
+
 
         return user
 

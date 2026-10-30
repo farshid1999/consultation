@@ -189,6 +189,27 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
 
+class Referral(BaseModel):
+    referrer = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="referrals",
+        verbose_name="معرف"
+    )
+
+    referred = models.OneToOneField(
+        User,
+        on_delete=models.PROTECT,
+        related_name="referral",
+        verbose_name="معرفی‌شده"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.referrer} -> {self.referred}"
+
+
 class Staff(BaseModel):
     user = models.OneToOneField("User", on_delete=models.CASCADE,related_name="staff")
     employee_code = models.CharField(max_length=50, unique=True)

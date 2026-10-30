@@ -6,6 +6,15 @@ import type {
   UpdateUserFormValues,
 } from "@/schemas/user";
 
+
+export interface ReferredUser {
+  first_name: string;
+  last_name: string;
+  username: string;
+  national_id: string | null;
+  phone_number: string;
+}
+
 /** Mirrors UserListSerializer — used inside StaffListSerializer. */
 export interface UserListItem {
   id: number;
@@ -20,6 +29,7 @@ export interface UserListItem {
   /** Flattened to "country - city" by the backend, or null if no address. */
   address: string | null;
   avatar: string | null;
+  invited_users: ReferredUser[];
 }
 
 /**
@@ -54,6 +64,7 @@ export interface UserDetail {
   is_superuser: boolean;
   date_joined: string;
   last_login: string | null;
+  invited_users: ReferredUser[];
 }
 
 export interface UserStatusUpdateInput {

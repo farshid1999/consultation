@@ -23,6 +23,15 @@ export interface Information {
   children: Information[];
 }
 
+
+export interface ReferredUser {
+  first_name: string;
+  last_name: string;
+  username: string;
+  national_id: string | null;
+  phone_number: string;
+}
+
 export interface UserDetail {
   id: number;
   username: string;
@@ -46,4 +55,5 @@ export interface UserDetail {
   address: Address | null;
   club: Club | null;
   informations: Information[];
+  invited_users: ReferredUser[];
 }

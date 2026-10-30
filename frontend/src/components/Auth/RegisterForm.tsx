@@ -160,6 +160,13 @@ export default function RegisterForm({
             error={errors.last_name?.message}
             {...field("last_name")}
           />
+          <Input
+            label="کد معرف"
+            placeholder="کد معرف"
+            required
+            error={errors.referrer_code?.message}
+            {...field("referrer_code")}
+          />
         </div>
         <Input
           label="شماره موبایل"
