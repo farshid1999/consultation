@@ -1,4 +1,6 @@
 import os
+import random
+import string
 import uuid
 
 from django.contrib.auth.models import AbstractUser
@@ -36,6 +38,8 @@ def information_upload_path(instance, filename):
     ext = os.path.splitext(filename)[1].lower()
     return f"informations/{uuid.uuid4().hex}{ext}"
 
+def generate_code():
+    return "".join(random.choices(string.digits,k=5))
 
 from datetime import timedelta
 
@@ -145,7 +149,7 @@ class User(AbstractUser):
 
     professional_background = models.TextField(blank=True, null=True)
 
-    referral_code = models.CharField(max_length=100, blank=True, null=True)
+    referral_code = models.CharField(max_length=100, blank=True, null=True,unique=True)
 
     address = models.ForeignKey(
         Address, null=True, blank=True, on_delete=models.SET_NULL, related_name="users"
@@ -167,8 +171,22 @@ class User(AbstractUser):
 
     birth_date = models.DateField(blank=True, null=True)
 
+
     def __str__(self):
         return self.get_full_name() or self.username
+
+    def save(self, *args, **kwargs):
+        if not self.referral_code:
+            while True:
+                code = generate_code()
+
+                if not self.__class__.objects.filter(
+                        referral_code=code
+                ).exists():
+                    self.referral_code = code
+                    break
+
+        super().save(*args, **kwargs)
 
 
 class Staff(BaseModel):

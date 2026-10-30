@@ -89,6 +89,12 @@ export default function CreateUserPage() {
               error={errors.last_name?.message}
               {...field("last_name")}
             />
+            <Input
+              label="کد معرف"
+              placeholder="کد معرف"
+              error={errors.referral_code?.message}
+              {...field("referral_code")}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Input

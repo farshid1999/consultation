@@ -484,6 +484,7 @@ class UserListSerializer(serializers.ModelSerializer):
             "bio",
             "birth_date",
             "professional_background",
+            "referral_code",
 
         )
 

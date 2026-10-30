@@ -117,6 +117,7 @@ export default function UserDetailModal({
                 <Row label="نام مربی" value={u.coach_name} />
                 <Row label="سابقه فعالیت" value={u.activity_history} />
                 <Row label="دانشجو" value={u.is_student ? "بله" : "خیر"} />
+                <Row label="کد معرف" value={u.referral_code} />
                 {/* <Row label="سوابق حرفه‌ای" value={u.professional_background} />
                 <Row label="بیوگرافی" value={u.bio} /> */}
               </Section>
