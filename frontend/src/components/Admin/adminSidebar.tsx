@@ -21,6 +21,7 @@ import {IoSettingsOutline} from "react-icons/io5";
 
 const navItems = [
     {href: "/admin", label: "داشبورد", icon: FiGrid},
+    {href: "/admin/profile", label: "داشبورد", icon: FiGrid},
     {href: "/admin/users", label: "کاربران", icon: FiUsers},
     {href: "/admin/staff", label: "کارمندان", icon: FiUserCheck},
     {href: "/admin/content", label: "محتواها", icon: FiFileText},

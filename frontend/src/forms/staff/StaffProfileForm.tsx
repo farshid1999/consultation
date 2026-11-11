@@ -1,14 +1,92 @@
 "use client";
 
 import {useState} from "react";
-import {useForm, Controller, useFieldArray} from "react-hook-form";
+import {useForm, Controller, useFieldArray, type Control, type UseFormSetValue} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {z} from "zod";
 import {FiSave, FiPlus, FiTrash2, FiUpload} from "react-icons/fi";
 import {Input, Textarea, FileUploader} from "@/components/ui/inputs";
 import FormSection from "@/forms/FormSection";
 import {useUpdateStaffProfile} from "@/hooks/useStaff";
-import type {StaffProfile} from "@/types";
+import type {Information, StaffProfile} from "@/types";
+
+
+const fileNameFromUrl = (url: string) => {
+    try {
+        return decodeURIComponent(url.split("?")[0].split("/").pop() || "file");
+    } catch {
+        return "file";
+    }
+};
+
+async function downloadFile(url: string) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error();
+        const blob = await res.blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = fileNameFromUrl(url);
+        a.click();
+        URL.revokeObjectURL(a.href);
+    } catch {
+        window.open(url, "_blank"); // اگر CORS مانع شد
+    }
+}
+
+const isImage = (url: string) => /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(url.split("?")[0]);
+const isPdf = (url: string) => /\.pdf$/i.test(url.split("?")[0]);
+
+function FilePreview({url, onRemove}: { url: string; onRemove: () => void }) {
+    const [showPdf, setShowPdf] = useState(false);
+
+    return (
+        <div className="rounded-xl border border-cream/10 bg-deep-2/40 p-3 space-y-3">
+            {isImage(url) ? (
+                <a href={url} target="_blank" rel="noreferrer">
+                    <img src={url} alt="" className="max-h-48 w-full rounded-lg object-contain bg-black/20"/>
+                </a>
+            ) : isPdf(url) ? (
+                showPdf ? (
+                    <iframe src={url} title="پیش‌نمایش فایل" className="h-64 w-full rounded-lg bg-white"/>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={() => setShowPdf(true)}
+                        className="w-full rounded-lg bg-black/20 py-8 text-center text-xs text-gold hover:bg-black/30"
+                    >
+                        نمایش پیش‌نمایش PDF
+                    </button>
+                )
+            ) : (
+                <div className="py-6 text-center text-xs text-cream/60">پیش‌نمایش برای این نوع فایل ممکن نیست</div>
+            )}
+
+            <div className="flex items-center justify-between gap-2">
+                <span className="truncate text-xs text-cream/80" dir="ltr">{fileNameFromUrl(url)}</span>
+                <div className="flex shrink-0 items-center gap-3 text-xs">
+                    <a href={url} target="_blank" rel="noreferrer" className="text-gold">باز کردن</a>
+                    <button type="button" onClick={() => downloadFile(url)} className="text-gold">دانلود</button>
+                    <button type="button" onClick={onRemove} className="text-red-400 hover:text-red-500">حذف</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+type InfoValue = {
+    id?: string; title: string; text?: string; file?: any; children?: InfoValue[];
+};
+
+const infoSchema: z.ZodType<InfoValue> = z.lazy(() =>
+    z.object({
+        id: z.string().optional(),
+        title: z.string().min(1, "عنوان الزامی است"),
+        text: z.string().optional(),
+        file: z.any().optional(),
+        children: z.array(infoSchema).optional(),
+    })
+);
 
 // اسکیمای اعتبارسنجی
 const profileSchema = z.object({
@@ -31,12 +109,8 @@ const profileSchema = z.object({
         postal_code: z.string().optional(),
         description: z.string().optional(),
     }).optional(),
-    informations: z.array(z.object({
-        id: z.number().optional(),
-        title: z.string().min(1, "عنوان الزامی است"),
-        text: z.string().optional(),
-        file: z.any().optional(), // File | string(url) | null
-    })).optional(),
+    informations: z.array(infoSchema).optional(),
+
 });
 
 
@@ -46,11 +120,103 @@ interface StaffProfileFormProps {
     initialData: StaffProfile;
 }
 
+function InfoItem({control, setValue, name, onRemove, depth = 0}: {
+    control: Control<ProfileFormValues>;
+    setValue: UseFormSetValue<ProfileFormValues>;
+    name: string;
+    onRemove: () => void;
+    depth?: number;
+}) {
+    const {fields, append, remove} = useFieldArray({
+        control,
+        name: `${name}.children` as any,
+    });
+
+    return (
+        <div className="p-4 rounded-xl border border-cream/10 bg-deep-2/30 relative group">
+            <button
+                type="button"
+                onClick={onRemove}
+                className="absolute left-4 top-4 text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+                <FiTrash2 size={18}/>
+            </button>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Controller
+                    name={`${name}.title` as any}
+                    control={control}
+                    render={({field}) => <Input label="عنوان مدرک/سابقه" {...field} />}
+                />
+                <Controller
+                    name={`${name}.file` as any}
+                    control={control}
+                    render={({field}) => (
+                        <div className="space-y-2">
+                            {typeof field.value === "string" && field.value && (
+                                <FilePreview
+                                    url={field.value}
+                                    onRemove={() => {
+                                        field.onChange(null);
+                                        setValue(`${name}.remove_file` as any, true, {shouldDirty: true});
+                                    }}
+                                />
+                            )}
+                            <FileUploader
+                                label={typeof field.value === "string" && field.value ? "جایگزینی فایل" : "فایل ضمیمه"}
+                                maxFiles={1}
+                                value={field.value instanceof File ? [field.value] : []}
+                                onChange={(files) => {
+                                    field.onChange(files[0] ?? null);
+                                    if (files[0]) setValue(`${name}.remove_file` as any, false);
+                                }}
+                            />
+                        </div>
+                    )}
+                />
+            </div>
+
+            <Controller
+                name={`${name}.text` as any}
+                control={control}
+                render={({field}) => (
+                    <Textarea label="توضیحات" wrapperClassName="mt-3" rows={2} {...field} />
+                )}
+            />
+
+            {/* زیرمجموعه‌ها */}
+            <div className="mt-4 space-y-3 border-r-2 border-gold/20 pr-4">
+                {fields.map((child, idx) => (
+                    <InfoItem
+                        key={child.id}
+                        control={control}
+                        setValue={setValue}
+                        name={`${name}.children.${idx}`}
+                        onRemove={() => remove(idx)}
+                        depth={depth + 1}
+                    />
+                ))}
+                <button
+                    type="button"
+                    onClick={() => append({title: "", text: "", file: null, children: []} as any)}
+                    className="flex items-center gap-2 text-xs text-gold hover:text-gold-soft"
+                >
+                    <FiPlus size={14}/> افزودن زیرمجموعه
+                </button>
+            </div>
+        </div>
+    );
+}
+
 export default function StaffProfileForm({initialData}: StaffProfileFormProps) {
     const updateProfile = useUpdateStaffProfile();
     const [previewAvatar, setPreviewAvatar] = useState<string | null>(initialData.avatar || null);
+    const mapInfo = (i: Information): InfoValue => ({
+        id: i.id, title: i.title, text: i.text ?? "", file: i.file ?? null,
+        children: (i.children ?? []).map(mapInfo),
+    });
 
-    const {control, handleSubmit, formState: {errors, isSubmitting}} = useForm<ProfileFormValues>({
+    const {control, handleSubmit, setValue, formState: {errors, isSubmitting}} = useForm<ProfileFormValues>({
         resolver: zodResolver(profileSchema),
         defaultValues: {
             phone_number: initialData.phone_number,
@@ -69,11 +235,21 @@ export default function StaffProfileForm({initialData}: StaffProfileFormProps) {
                 postal_code: initialData.address?.postal_code ?? "",
                 description: initialData.address?.description ?? "",
             },
-            informations: (initialData.informations ?? []).map((i) => ({
-                id: i.id, title: i.title, text: i.text ?? "", file: i.file ?? null,
-            })),
+            informations: (initialData.informations ?? []).map(mapInfo),
         },
     });
+
+    const stripFiles = (items: InfoValue[], prefix: string, fd: FormData): any[] =>
+        items.map((it, i) => {
+            const path = `${prefix}_${i}`;
+            if (it.file instanceof File) fd.append(path, it.file);
+            return {
+                id: it.id,
+                title: it.title,
+                text: it.text ?? "",
+                children: stripFiles(it.children ?? [], path, fd),
+            };
+        });
 
     // مدیریت آرایه اطلاعات تکمیلی (مدارک)
     const {fields, append, remove} = useFieldArray({
@@ -102,11 +278,8 @@ export default function StaffProfileForm({initialData}: StaffProfileFormProps) {
         const infos = values.informations ?? [];
         fd.append(
             "informations",
-            JSON.stringify(infos.map(({id, title, text}) => ({id, title, text: text ?? ""}))),
+            JSON.stringify(stripFiles(values.informations ?? [], "info_file", fd)),
         );
-        infos.forEach((info, i) => {
-            if (info.file instanceof File) fd.append(`info_file_${i}`, info.file);
-        });
 
         await updateProfile.mutateAsync(fd);
     };
@@ -198,62 +371,17 @@ export default function StaffProfileForm({initialData}: StaffProfileFormProps) {
             <FormSection title="مدارک و سوابق" description="افزودن مدارک معتبر یا سوابق کاری">
                 <div className="space-y-4">
                     {fields.map((item, index) => (
-                        <div key={item.id}
-                             className="p-4 rounded-xl border border-cream/10 bg-deep-2/30 relative group">
-                            <button
-                                type="button"
-                                onClick={() => remove(index)}
-                                className="absolute left-4 top-4 text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                <FiTrash2 size={18}/>
-                            </button>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Controller
-                                    name={`informations.${index}.title`}
-                                    control={control}
-                                    render={({field}) => <Input label="عنوان مدرک/سابقه" {...field} />}
-                                />
-                                <Controller
-                                    name={`informations.${index}.file`}
-                                    control={control}
-                                    render={({field}) => (
-                                        <div>
-                                            <FileUploader
-                                                label="فایل ضمیمه"
-                                                maxFiles={1}
-                                                value={field.value instanceof File ? [field.value] : []}
-                                                onChange={(files) => field.onChange(files[0] ?? null)}
-                                            />
-                                            {typeof field.value === "string" && field.value && (
-                                                <a
-                                                    href={field.value}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="mt-1 inline-block text-xs text-gold"
-                                                >
-                                                    مشاهده فایل فعلی
-                                                </a>
-                                            )}
-                                        </div>
-                                    )}
-                                />
-
-
-                            </div>
-                            <Controller
-                                name={`informations.${index}.text`}
-                                control={control}
-                                render={({field}) => <Textarea label="توضیحات" wrapperClassName="mt-3"
-                                                               rows={2} {...field} />}
-                            />
-                        </div>
+                        <InfoItem
+                            key={item.id}
+                            control={control}
+                            name={`informations.${index}`}
+                            onRemove={() => remove(index)}
+                        />
                     ))}
-
 
                     <button
                         type="button"
-                        onClick={() => append({title: "", text: "", file: null})}
+                        onClick={() => append({title: "", text: "", file: null, children: []})}
                         className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-dashed border-gold/30 text-gold hover:bg-gold/5 transition-colors"
                     >
                         <FiPlus size={16}/> افزودن مورد جدید

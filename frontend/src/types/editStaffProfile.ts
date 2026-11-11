@@ -11,10 +11,11 @@ export interface Address {
 }
 
 export interface Information {
-  id?: number;
+  id?: string;
   title: string;
   text?: string | null;
-  file?: string | File | null; // URL هنگام خواندن، File هنگام آپلود
+  file?: string | File | null;
+  children?: Information[];
 }
 
 

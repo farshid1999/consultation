@@ -580,14 +580,29 @@ class AddressStaffProfileSerializer(serializers.ModelSerializer):
 
 
 class InformationStaffProfileSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(required=False)  # تا در validated_data بیاید
+    id = serializers.UUIDField(required=False)
     file = serializers.FileField(required=False, allow_null=True)
+    children = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Information
-        fields = ["id", "title", "text", "file"]
+        fields = ["id", "title", "text", "file", "children"]
         extra_kwargs = {"text": {"required": False, "allow_blank": True}}
 
+    def get_children(self, obj):
+        return InformationStaffProfileSerializer(
+            obj.children.all(), many=True, context=self.context
+        ).data
+
+    def to_internal_value(self, data):
+        children = data.get("children") if hasattr(data, "get") else None
+        ret = super().to_internal_value(data)
+        if children is not None:
+            ret["children"] = [
+                InformationStaffProfileSerializer(context=self.context).to_internal_value(c)
+                for c in children
+            ]
+        return ret
 
 class StaffProfileSerializer(serializers.ModelSerializer):
     SCALAR_FIELDS = ["phone_number", "email", "national_id", "land_line",
@@ -605,18 +620,37 @@ class StaffProfileSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(source="user.avatar", required=False, allow_null=True)
 
     address = AddressStaffProfileSerializer(source="user.address", required=False, allow_null=True)
-    informations = InformationStaffProfileSerializer(source="user.informations", many=True, required=False)
+    informations = serializers.SerializerMethodField()
 
     class Meta:
         model = Staff
         fields = ["phone_number", "email", "national_id", "land_line", "degree", "job",
                   "address", "informations", "avatar", "bio", "birth_date"]
 
+    def get_informations(self, obj):
+        roots = obj.user.informations.filter(parent__isnull=True)
+        return InformationStaffProfileSerializer(roots, many=True, context=self.context).data
+
     # ---------- ورودی: پشتیبانی از multipart ----------
     def to_internal_value(self, data):
-        if hasattr(data, "getlist"):  # QueryDict => multipart / form
+        if hasattr(data, "getlist"):
             data = self._parse_multipart(data)
-        return super().to_internal_value(data)
+        infos_raw = data.get("informations", serializers.empty) if hasattr(data, "get") else serializers.empty
+        ret = super().to_internal_value(data)  # informations (SerializerMethodField) نادیده گرفته می‌شود
+        if infos_raw is not serializers.empty:
+            s = InformationStaffProfileSerializer(data=infos_raw, many=True, context=self.context)
+            s.is_valid(raise_exception=True)
+            ret["informations_data"] = s.validated_data
+        return ret
+
+    def _attach_files(self, items, data, prefix="info_file"):
+        for i, item in enumerate(items):
+            path = f"{prefix}_{i}"
+            f = data.get(path)
+            if f is not None and hasattr(f, "read"):
+                item["file"] = f
+            if item.get("children"):
+                self._attach_files(item["children"], data, path)
 
     def _parse_multipart(self, data):
         out = {}
@@ -634,10 +668,7 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                 out["address"] = json.loads(data.get("address") or "null")
             if "informations" in data:
                 items = json.loads(data.get("informations") or "[]")
-                for i, item in enumerate(items):
-                    f = data.get(f"info_file_{i}")
-                    if f is not None and hasattr(f, "read"):
-                        item["file"] = f
+                self._attach_files(items, data)
                 out["informations"] = items
         except (ValueError, TypeError):
             raise serializers.ValidationError({"detail": "فرمت JSON نامعتبر است."})
@@ -646,11 +677,11 @@ class StaffProfileSerializer(serializers.ModelSerializer):
     # ---------- نوشتن ----------
     @transaction.atomic
     def update(self, instance, validated_data):
+        informations_data = validated_data.pop("informations_data", None)
         user_data = validated_data.pop("user", {})
         user = instance.user
-
         address_data = user_data.pop("address", serializers.empty)
-        informations_data = user_data.pop("informations", None)
+        user_data.pop("informations", None)
 
         for attr, value in user_data.items():
             setattr(user, attr, value)
@@ -664,29 +695,31 @@ class StaffProfileSerializer(serializers.ModelSerializer):
                 user.address.save()
             else:
                 user.address = Address.objects.create(**address_data)
-
         user.save()
 
         if informations_data is not None:
-            self._sync_informations(user, informations_data)
+            self._sync_tree(user, user.informations.filter(parent__isnull=True), informations_data, parent=None)
         return instance
 
-    @staticmethod
-    def _sync_informations(user, items):
-        existing = {i.id: i for i in user.informations.all()}
+    def _sync_tree(self, user, existing_qs, items, parent):
+        existing = {o.id: o for o in existing_qs}
         keep = set()
         for item in items:
             item = dict(item)
+            children = item.pop("children", [])
             pk = item.pop("id", None)
             obj = existing.get(pk)
             if obj:
-                for k, v in item.items():   # file فقط اگر ارسال شده باشد تغییر می‌کند
+                for k, v in item.items():
                     setattr(obj, k, v)
+                obj.parent = parent
                 obj.save()
             else:
-                obj = Information.objects.create(**item)
-                user.informations.add(obj)
+                obj = Information.objects.create(parent=parent, **item)
+                if parent is None:
+                    user.informations.add(obj)
             keep.add(obj.id)
+            self._sync_tree(user, obj.children.all(), children, obj)
         for pk, obj in existing.items():
             if pk not in keep:
                 obj.delete()
