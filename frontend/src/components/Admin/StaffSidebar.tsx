@@ -11,14 +11,14 @@ import {
   FiMessageSquare,
   FiMenu,
   FiX,
-  FiClipboard,
+  FiClipboard, FiUsers,
 } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 import { useLogout } from "@/hooks/useAuth";
 
 const navItems = [
   { href: "/staff", label: "داشبورد", icon: FiGrid },
-  { href: "/staff/profile", label: "پروفایل", icon: FiGrid },
+  { href: "/staff/profile", label: "پروفایل", icon: FiUsers },
   { href: "/staff/content", label: "محتواها", icon: FiFileText },
   { href: "/staff/line", label: "بخش‌ها", icon: FiLayers },
   { href: "/staff/assignments", label: "تکالیف", icon: FiClipboard },
