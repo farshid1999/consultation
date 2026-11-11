@@ -20,8 +20,8 @@ import {useLogout} from "@/hooks/useAuth";
 import {IoSettingsOutline} from "react-icons/io5";
 
 const navItems = [
-    {href: "/admin", label: "داشبورد", icon: FiUsers},
-    {href: "/admin/profile", label: "پروفایل", icon: FiGrid},
+    {href: "/admin", label: "داشبورد", icon: FiGrid},
+    {href: "/admin/profile", label: "پروفایل", icon: FiUsers},
     {href: "/admin/users", label: "کاربران", icon: FiUsers},
     {href: "/admin/staff", label: "کارمندان", icon: FiUserCheck},
     {href: "/admin/content", label: "محتواها", icon: FiFileText},
