@@ -135,6 +135,8 @@ class SliderAdminSerializer(serializers.ModelSerializer):
         return attrs
 
 
+
+
 class SiteViewSerializer(serializers.ModelSerializer):
 
     class Meta:
