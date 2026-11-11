@@ -3,7 +3,7 @@ from sitesetting.models import (
     BackgroundMusic,
     ContactRequest,
     Slider,
-    SliderImage,
+    SliderImage, SiteView,
 )
 
 
@@ -133,3 +133,33 @@ class SliderAdminSerializer(serializers.ModelSerializer):
             )
 
         return attrs
+
+
+class SiteViewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SiteView
+        fields = ['ip', 'language']
+        read_only_fields = ['ip']
+
+    def create(self, validated_data):
+        request = self.context['request']
+        ip = self.get_client_ip(request)
+
+        instance, created = SiteView.objects.update_or_create(
+            ip=ip,
+            defaults=validated_data
+        )
+
+        return instance
+
+    @staticmethod
+    def get_client_ip(request):
+        forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+        if forwarded_for:
+            return forwarded_for.split(',')[0].strip()
+
+        return request.META.get('REMOTE_ADDR')
+
+

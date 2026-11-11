@@ -55,6 +55,11 @@ staff_urls = [
     path("<str:pk>/", StaffDetailAPIView.as_view(), name="staff-detail"),
     path("<str:pk>/update/", StaffUpdateAPIView.as_view(), name="staff-update"),
     path("<str:pk>/delete/", StaffDeleteAPIView.as_view(), name="staff-delete"),
+    path(
+        "profile/",
+        StaffProfileView.as_view(),
+        name="staff-profile"
+    ),
 ]
 
 public_staff_urls = [

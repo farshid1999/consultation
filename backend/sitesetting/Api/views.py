@@ -9,14 +9,14 @@ from sitesetting.models import (
     BackgroundMusic,
     ContactRequest,
     Slider,
-    SliderImage,
+    SliderImage, SiteView,
 )
 from .serializers import (
     BackgroundMusicSerializer,
     ContactRequestSerializer,
     SliderAdminSerializer,
     SliderImageAdminSerializer,
-    SliderPublicSerializer,
+    SliderPublicSerializer, SiteViewSerializer,
 )
 
 
@@ -134,3 +134,32 @@ class SliderImageDetailView(generics.RetrieveUpdateDestroyAPIView):
         if instance.image:
             instance.image.delete(save=False)
         instance.delete()
+
+
+class SiteViewAPIView(APIView):
+
+    def post(self, request):
+        serializer = SiteViewSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+
+        return Response(
+            SiteViewSerializer(instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    def get(self, request):
+        ip = SiteViewSerializer.get_client_ip(request)
+
+        instance = SiteView.objects.filter(ip=ip).first()
+
+        if not instance:
+            return Response(
+                {'language': SiteView.LanguageType.PERSIAN},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(SiteViewSerializer(instance).data)

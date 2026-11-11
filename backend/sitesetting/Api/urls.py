@@ -8,7 +8,7 @@ from .views import (
     SliderImageCreateView,
     SliderImageDetailView,
     SliderListCreateView,
-    SliderPublicView,
+    SliderPublicView, SiteViewAPIView,
 )
 
 urlpatterns = [
@@ -37,4 +37,5 @@ urlpatterns = [
         SliderImageDetailView.as_view(),
         name="slider-image-detail",
     ),
+    path('site-view/', SiteViewAPIView.as_view()),
 ]

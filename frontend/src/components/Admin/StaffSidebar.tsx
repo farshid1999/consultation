@@ -18,6 +18,7 @@ import { useLogout } from "@/hooks/useAuth";
 
 const navItems = [
   { href: "/staff", label: "داشبورد", icon: FiGrid },
+  { href: "/staff/profile", label: "پروفایل", icon: FiGrid },
   { href: "/staff/content", label: "محتواها", icon: FiFileText },
   { href: "/staff/line", label: "بخش‌ها", icon: FiLayers },
   { href: "/staff/assignments", label: "تکالیف", icon: FiClipboard },

@@ -1,11 +1,13 @@
 import os
 import uuid
 
+from click import Choice
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
+from accounts.models import User
 from core.models import BaseModel
 
 
@@ -118,3 +120,13 @@ class SliderImage(BaseModel):
 
     def __str__(self):
         return f"{self.slider} #{self.order}"
+
+
+
+class SiteView(BaseModel):
+    class LanguageType(models.TextChoices):
+        PERSIAN = 'fa', 'فارسی'
+        ENGLISH = 'en', 'انگلیسی'
+
+    ip = models.CharField(max_length=15)
+    language = models.CharField(max_length=10, choices=LanguageType.choices, default=LanguageType.PERSIAN)

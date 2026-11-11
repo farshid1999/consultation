@@ -567,6 +567,131 @@ class StaffDetailSerializer(serializers.ModelSerializer):
         fields = ("id", "employee_code", "position", "hire_date", "user", "roles")
 
 
+
+class AddressStaffProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ["id", "country", "province", "city", "street", "postal_code", "description"]
+        read_only_fields = ["id"]
+        extra_kwargs = {
+            "postal_code": {"required": False, "allow_null": True, "allow_blank": True},
+            "description": {"required": False, "allow_null": True, "allow_blank": True},
+        }
+
+
+class InformationStaffProfileSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)  # تا در validated_data بیاید
+    file = serializers.FileField(required=False, allow_null=True)
+
+    class Meta:
+        model = Information
+        fields = ["id", "title", "text", "file"]
+        extra_kwargs = {"text": {"required": False, "allow_blank": True}}
+
+
+class StaffProfileSerializer(serializers.ModelSerializer):
+    SCALAR_FIELDS = ["phone_number", "email", "national_id", "land_line",
+                     "degree", "job", "bio", "birth_date"]
+    EMPTY_TO_NULL = {"national_id", "birth_date"}  # unique / DateField
+
+    phone_number = serializers.CharField(source="user.phone_number")
+    email = serializers.EmailField(source="user.email", required=False, allow_null=True, allow_blank=True)
+    national_id = serializers.CharField(source="user.national_id", required=False, allow_null=True, allow_blank=True)
+    land_line = serializers.CharField(source="user.land_line", required=False, allow_null=True, allow_blank=True)
+    degree = serializers.CharField(source="user.degree", required=False, allow_null=True, allow_blank=True)
+    job = serializers.CharField(source="user.job", required=False, allow_null=True, allow_blank=True)
+    bio = serializers.CharField(source="user.bio", required=False, allow_null=True, allow_blank=True)
+    birth_date = serializers.DateField(source="user.birth_date", required=False, allow_null=True)
+    avatar = serializers.ImageField(source="user.avatar", required=False, allow_null=True)
+
+    address = AddressStaffProfileSerializer(source="user.address", required=False, allow_null=True)
+    informations = InformationStaffProfileSerializer(source="user.informations", many=True, required=False)
+
+    class Meta:
+        model = Staff
+        fields = ["phone_number", "email", "national_id", "land_line", "degree", "job",
+                  "address", "informations", "avatar", "bio", "birth_date"]
+
+    # ---------- ورودی: پشتیبانی از multipart ----------
+    def to_internal_value(self, data):
+        if hasattr(data, "getlist"):  # QueryDict => multipart / form
+            data = self._parse_multipart(data)
+        return super().to_internal_value(data)
+
+    def _parse_multipart(self, data):
+        out = {}
+        for key in self.SCALAR_FIELDS:
+            if key in data:
+                value = data.get(key)
+                out[key] = None if (value == "" and key in self.EMPTY_TO_NULL) else value
+
+        avatar = data.get("avatar")
+        if avatar is not None and hasattr(avatar, "read"):  # فقط اگر فایل واقعی بود
+            out["avatar"] = avatar
+
+        try:
+            if "address" in data:
+                out["address"] = json.loads(data.get("address") or "null")
+            if "informations" in data:
+                items = json.loads(data.get("informations") or "[]")
+                for i, item in enumerate(items):
+                    f = data.get(f"info_file_{i}")
+                    if f is not None and hasattr(f, "read"):
+                        item["file"] = f
+                out["informations"] = items
+        except (ValueError, TypeError):
+            raise serializers.ValidationError({"detail": "فرمت JSON نامعتبر است."})
+        return out
+
+    # ---------- نوشتن ----------
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", {})
+        user = instance.user
+
+        address_data = user_data.pop("address", serializers.empty)
+        informations_data = user_data.pop("informations", None)
+
+        for attr, value in user_data.items():
+            setattr(user, attr, value)
+
+        if address_data is not serializers.empty:
+            if address_data is None:
+                user.address = None
+            elif user.address_id:
+                for k, v in address_data.items():
+                    setattr(user.address, k, v)
+                user.address.save()
+            else:
+                user.address = Address.objects.create(**address_data)
+
+        user.save()
+
+        if informations_data is not None:
+            self._sync_informations(user, informations_data)
+        return instance
+
+    @staticmethod
+    def _sync_informations(user, items):
+        existing = {i.id: i for i in user.informations.all()}
+        keep = set()
+        for item in items:
+            item = dict(item)
+            pk = item.pop("id", None)
+            obj = existing.get(pk)
+            if obj:
+                for k, v in item.items():   # file فقط اگر ارسال شده باشد تغییر می‌کند
+                    setattr(obj, k, v)
+                obj.save()
+            else:
+                obj = Information.objects.create(**item)
+                user.informations.add(obj)
+            keep.add(obj.id)
+        for pk, obj in existing.items():
+            if pk not in keep:
+                obj.delete()
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     club = ClubSerializer()
     referrer_code = serializers.CharField(

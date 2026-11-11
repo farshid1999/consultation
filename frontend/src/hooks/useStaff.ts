@@ -1,6 +1,7 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {staffService} from "@/services/staffService";
 import type {ListQueryParams, StaffCreateInput, StaffUpdateInput} from "@/types";
+import {toast} from "sonner";
 
 export const staffKeys = {
     all: ["staff"] as const,
@@ -8,7 +9,30 @@ export const staffKeys = {
     list: (params: ListQueryParams) => [...staffKeys.lists(), params] as const,
     details: () => [...staffKeys.all, "detail"] as const,
     detail: (id: string) => [...staffKeys.details(), id] as const,
+    profile: ["staff-profile"] as const,
 };
+
+export function useStaffProfile() {
+  return useQuery({
+    queryKey: staffKeys.profile,
+    queryFn: () => staffService.getProfile(),
+  });
+}
+
+export function useUpdateStaffProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: FormData) => staffService.updateProfile(payload),
+    onSuccess: () => {
+      toast.success("پروفایل با موفقیت بروزرسانی شد.");
+      queryClient.invalidateQueries({ queryKey: staffKeys.profile });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.detail || "خطا در بروزرسانی پروفایل");
+    },
+  });
+}
+
 
 export function useStaffList(params: ListQueryParams = {}) {
     return useQuery({

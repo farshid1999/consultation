@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.generics import GenericAPIView, RetrieveAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -14,7 +14,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.Api.v1.serializer import *
 from accounts.models import Role, Staff, User
-from core.permissions import IsAdminOrSuperUser
+from core.permissions import IsAdminOrSuperUser, IsStaff
 from operations.models import Line
 
 
@@ -617,6 +617,16 @@ class StaffDetailAPIView(GenericAPIView):
 
         return Response(serializer.data)
 
+class StaffProfileView(RetrieveUpdateAPIView):
+    serializer_class = StaffProfileSerializer
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated & (IsStaff | IsAdminOrSuperUser)]
+    http_method_names = ["get", "put", "patch", "head", "options"]
+
+    def get_object(self):
+        # بدون prefetch_related تا بعد از آپدیت، پاسخ دادهٔ کهنه برنگرداند
+        return get_object_or_404(Staff.objects.select_related("user", "user__address"),
+                                 user=self.request.user)
 
 class StaffDeleteAPIView(GenericAPIView):
     permission_classes = (IsAdminOrSuperUser,)
