@@ -22,3 +22,10 @@ export function toPersianDigits(input: string | number): string {
   const persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
   return String(input).replace(/[0-9]/g, (digit) => persianDigits[Number(digit)] ?? digit);
 }
+
+/**
+ * ارقام را بر اساس زبان نمایش می‌دهد: فارسی => ارقام فارسی، انگلیسی => لاتین.
+ */
+export function localizeDigits(input: string | number, lang: "fa" | "en"): string {
+  return lang === "fa" ? toPersianDigits(input) : String(input);
+}

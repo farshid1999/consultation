@@ -1,13 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { FiArrowLeft } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import {
-  contactCreateSchema,
+  createContactSchema,
   type ContactCreateFormValues,
 } from "@/schemas/contact";
+import { useLang } from "@/components/providers/LanguageProvider";
 import { useCreateContact } from "@/hooks/useContact";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -24,7 +26,13 @@ const radioClass = (selected: boolean) =>
   );
 
 export default function ContactForm() {
+  const { t, dir, isRtl } = useLang();
+  const c = t.contact;
+  const ArrowIcon = isRtl ? FiArrowLeft : FiArrowRight;
   const { mutate: createContact, isPending } = useCreateContact();
+  const schema = useMemo(() => createContactSchema(c.validation), [c.validation]);
+  // toast در بیرون از محدوده‌ی dir لندینگ رندر می‌شود؛ جهت را دستی می‌دهیم
+  const toastStyle = { direction: dir } as const;
 
   const {
     register,
@@ -33,39 +41,35 @@ export default function ContactForm() {
     reset,
     formState: { errors },
   } = useForm<ContactCreateFormValues>({
-    resolver: zodResolver(contactCreateSchema),
+    resolver: zodResolver(schema),
   });
 
   const contactType = watch("contact_type");
   const messengerType = watch("messenger_type");
 
   const onSubmit = (data: ContactCreateFormValues) => {
-    console.log("submitted:", data);
     createContact(data, {
       onSuccess: () => {
-        toast.success("درخواست شما ثبت شد. به‌زودی با شما تماس می‌گیریم.");
+        toast.success(c.success, { style: toastStyle });
         reset();
       },
       onError: () => {
-        toast.error("ثبت درخواست با خطا مواجه شد. لطفاً دوباره تلاش کنید.");
+        toast.error(c.error, { style: toastStyle });
       },
     });
   };
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit, (errors) =>
-        console.log("validation errors:", errors),
-      )}
-      dir="rtl"
+      onSubmit={handleSubmit(onSubmit)}
       className="grid gap-4 sm:grid-cols-2"
       noValidate
     >
       <div className="sm:col-span-1">
-        <label className="mb-1.5 block text-xs text-cream/50">نام</label>
+        <label className="mb-1.5 block text-xs text-cream/50">{c.firstName}</label>
         <input
           className={inputClass}
-          placeholder="نام"
+          placeholder={c.firstName}
           {...register("first_name")}
         />
         {errors.first_name && (
@@ -77,11 +81,11 @@ export default function ContactForm() {
 
       <div className="sm:col-span-1">
         <label className="mb-1.5 block text-xs text-cream/50">
-          نام خانوادگی
+          {c.lastName}
         </label>
         <input
           className={inputClass}
-          placeholder="نام خانوادگی"
+          placeholder={c.lastName}
           {...register("last_name")}
         />
         {errors.last_name && (
@@ -92,10 +96,10 @@ export default function ContactForm() {
       </div>
 
       <div className="sm:col-span-1">
-        <label className="mb-1.5 block text-xs text-cream/50">شماره تماس</label>
+        <label className="mb-1.5 block text-xs text-cream/50">{c.phone}</label>
         <input
           className={inputClass}
-          placeholder="09xxxxxxxxx"
+          placeholder={c.phonePlaceholder}
           dir="ltr"
           {...register("phone")}
         />
@@ -105,12 +109,12 @@ export default function ContactForm() {
       </div>
 
       <div className="sm:col-span-2">
-        <label className="mb-1.5 block text-xs text-cream/50">نوع ارتباط</label>
+        <label className="mb-1.5 block text-xs text-cream/50">{c.contactType}</label>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { value: "phone", label: "تماس تلفنی" },
-            { value: "messenger", label: "پیام‌رسان" },
-            { value: "email", label: "ایمیل" },
+            { value: "phone", label: c.contactTypes.phone },
+            { value: "messenger", label: c.contactTypes.messenger },
+            { value: "email", label: c.contactTypes.email },
           ].map((option) => (
             <label
               key={option.value}
@@ -136,15 +140,15 @@ export default function ContactForm() {
       {contactType === "messenger" && (
         <div className="sm:col-span-2">
           <label className="mb-1.5 block text-xs text-cream/50">
-            پیام‌رسان
+            {c.messenger}
           </label>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
             {[
-              { value: "whatsapp", label: "واتساپ" },
-              { value: "telegram", label: "تلگرام" },
-              { value: "eitaa", label: "ایتا" },
-              { value: "rubika", label: "روبیکا" },
-              { value: "bale", label: "بله" },
+              { value: "whatsapp", label: c.messengers.whatsapp },
+              { value: "telegram", label: c.messengers.telegram },
+              { value: "eitaa", label: c.messengers.eitaa },
+              { value: "rubika", label: c.messengers.rubika },
+              { value: "bale", label: c.messengers.bale },
             ].map((option) => (
               <label
                 key={option.value}
@@ -170,7 +174,7 @@ export default function ContactForm() {
 
       {contactType === "email" && (
         <div className="sm:col-span-2">
-          <label className="mb-1.5 block text-xs text-cream/50">ایمیل</label>
+          <label className="mb-1.5 block text-xs text-cream/50">{c.email}</label>
           <input
             className={inputClass}
             placeholder="example@email.com"
@@ -187,11 +191,11 @@ export default function ContactForm() {
 
       <div className="sm:col-span-2">
         <label className="mb-1.5 block text-xs text-cream/50">
-          پیام (اختیاری)
+          {c.message}
         </label>
         <input
           className={inputClass}
-          placeholder="توضیحات یا سوالات خود را بنویسید..."
+          placeholder={c.messagePlaceholder}
           {...register("message")}
         />
       </div>
@@ -201,13 +205,13 @@ export default function ContactForm() {
           type="submit"
           variant="primary"
           disabled={isPending}
-          icon={<FiArrowLeft aria-hidden="true" />}
+          icon={<ArrowIcon aria-hidden="true" />}
           className={cn(
             "w-full justify-center sm:w-auto",
             isPending && "opacity-70",
           )}
         >
-          {isPending ? "در حال ارسال..." : "ارسال درخواست"}
+          {isPending ? c.submitting : c.submit}
         </Button>
       </div>
     </form>

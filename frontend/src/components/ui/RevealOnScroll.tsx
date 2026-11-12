@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+import { useLang } from "@/components/providers/LanguageProvider";
 
 type Direction = "up" | "down" | "left" | "right" | "fade" | "scale" | "blur";
 
@@ -37,10 +38,20 @@ export default function RevealOnScroll({
   className,
   once = true,
 }: RevealOnScrollProps) {
+  const { isRtl } = useLang();
+  // طراحی با RTL نوشته شده؛ در LTR جهت‌های چپ/راست برعکس می‌شوند
+  const resolved: Direction = isRtl
+    ? direction
+    : direction === "left"
+      ? "right"
+      : direction === "right"
+        ? "left"
+        : direction;
+
   const initial = {
     opacity: 0,
-    filter: direction === "blur" ? "blur(10px)" : "blur(0px)",
-    ...offsets[direction],
+    filter: resolved === "blur" ? "blur(10px)" : "blur(0px)",
+    ...offsets[resolved],
   };
 
   return (

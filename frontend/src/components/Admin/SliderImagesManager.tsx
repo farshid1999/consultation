@@ -37,9 +37,15 @@ function ImageRow({
 }: ImageRowProps) {
   const [title, setTitle] = useState(image.caption_title);
   const [text, setText] = useState(image.caption_text);
+  const [titleEn, setTitleEn] = useState(image.caption_title_en ?? "");
+  const [textEn, setTextEn] = useState(image.caption_text_en ?? "");
   const replaceRef = useRef<HTMLInputElement>(null);
 
-  const dirty = title !== image.caption_title || text !== image.caption_text;
+  const dirty =
+    title !== image.caption_title ||
+    text !== image.caption_text ||
+    titleEn !== (image.caption_title_en ?? "") ||
+    textEn !== (image.caption_text_en ?? "");
 
   return (
     <li
@@ -75,6 +81,21 @@ function ImageRow({
           rows={3}
           value={text}
           onChange={(e) => setText(e.target.value)}
+        />
+        <Input
+          label="عنوان کپشن (انگلیسی)"
+          dir="ltr"
+          maxLength={100}
+          placeholder="Clinical Statistics"
+          value={titleEn}
+          onChange={(e) => setTitleEn(e.target.value)}
+        />
+        <Textarea
+          label="متن کپشن (انگلیسی)"
+          dir="ltr"
+          rows={3}
+          value={textEn}
+          onChange={(e) => setTextEn(e.target.value)}
         />
 
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -145,6 +166,8 @@ function ImageRow({
               onClick={() => {
                 setTitle(image.caption_title);
                 setText(image.caption_text);
+                setTitleEn(image.caption_title_en ?? "");
+                setTextEn(image.caption_text_en ?? "");
               }}
               className="rounded-lg px-4 py-2 text-xs text-cream/60 transition-colors hover:text-cream"
             >
@@ -155,7 +178,12 @@ function ImageRow({
               disabled={busy}
               onClick={() =>
                 onSave(
-                  { caption_title: title, caption_text: text },
+                  {
+                    caption_title: title,
+                    caption_text: text,
+                    caption_title_en: titleEn,
+                    caption_text_en: textEn,
+                  },
                   "کپشن ذخیره شد.",
                 )
               }

@@ -1,0 +1,291 @@
+{
+  "brand": "Serenity Ambassadors",
+  "meta": {
+    "title": "Serenity Ambassadors | Yogball, a Specialized Sports Methodology",
+    "description": "Yogball is a comprehensive, specialized methodology designed to support professional and amateur athletes: managing competitive anxiety, strengthening focus and confidence, and providing mental support all the way to competition day.",
+    "ogDescription": "A mind prepared for championship. Specialized consultation tailored to your sport and goals.",
+    "twitterDescription": "A mind prepared for championship.",
+    "ogLocale": "en_US"
+  },
+  "common": {
+    "logoAlt": "Serenity Ambassadors logo",
+    "switchLanguageLabel": "Switch language to Persian",
+    "switchLanguageShort": "فا"
+  },
+  "nav": {
+    "ariaMain": "Main navigation",
+    "ariaMobile": "Mobile navigation",
+    "links": {
+      "why": "Why Yogball",
+      "services": "Services",
+      "process": "Process",
+      "stats": "Achievements",
+      "testimonials": "Testimonials",
+      "faq": "FAQ",
+      "lines": "Departments",
+      "staff": "Specialists"
+    },
+    "login": "Log in / Sign up",
+    "profile": "My Profile",
+    "dashboard": "Dashboard",
+    "logout": "Log out",
+    "linesMenuTitle": "Specialized Departments"
+  },
+  "hero": {
+    "badge": "YOGBALL",
+    "srPrefix": "Yogball, ",
+    "titleBefore": "A Calm Mind on the Path to",
+    "titleHighlight": "Championship",
+    "subtitle": "Yogball is a comprehensive, specialized methodology designed to support athletes throughout their professional sporting journeys, from the very beginning to the final stage of their careers.",
+    "ctaPrimary": "Book a Consultation",
+    "ctaSecondary": "Discover Our Approach",
+    "features": [
+      "Individually designed general and specialized programs tailored to each athlete's specific needs.",
+      "Continuous guidance and support throughout the athlete's sporting career.",
+      "Ongoing professional support at every stage of the journey."
+    ],
+    "imageAlt": "Sports psychology",
+    "slideLabel": "Image {n}"
+  },
+  "why": {
+    "eyebrow": "WHY YOGBALL?",
+    "title": "Your Technical Skills Get You into the Game, but Your Mind Determines What Happens on the Field.",
+    "points": [
+      {
+        "title": "A Prepared Body, an Unprepared Mind",
+        "text": "Many athletes spend years developing their physical abilities but never train their minds — even though mental readiness is often what makes the difference in the final outcome."
+      },
+      {
+        "title": "The Moment of Decision Is the Moment of Truth",
+        "text": "In the critical moments of competition, mental readiness determines whether well-practiced skills can be effectively executed or become compromised under pressure."
+      },
+      {
+        "title": "Science-Based. Individually Designed. Pioneering.",
+        "text": "Yogball is an innovative, original methodology developed by Serenity Ambassadors. As a pioneering approach, it introduces a distinctive, integrated framework designed specifically for each athlete to optimize and harmonize their mental, physical, and technical capabilities."
+      }
+    ],
+    "fallbackStatTitle": "Clinical Statistics",
+    "fallbackStatText": "87% of athletes reported a noticeable improvement in competitive focus after three months of support."
+  },
+  "services": {
+    "eyebrow": "SPECIALIZED SERVICES",
+    "title": "A Personalized Approach Tailored to Your Sport, Goals, and Athletic Profile",
+    "logoAlt": "{title} logo",
+    "items": [
+      {
+        "id": "performance-anxiety",
+        "title": "Yogball",
+        "description": "Stress and anxiety management, enhanced mental and physical performance, improved concentration, and optimized athletic performance."
+      },
+      {
+        "id": "stress-management",
+        "title": "Yogball Music Therapy",
+        "description": "A specialized approach that bridges music and the mind, supporting emotional regulation and restoring inner calm and balance through an approach responsive to the individual's mental state at each moment."
+      },
+      {
+        "id": "competition-prep",
+        "title": "Psychological Counseling",
+        "description": "Move beyond constructed identities and reconnect with your authentic self."
+      },
+      {
+        "id": "confidence-building",
+        "title": "Specialized Sports Law Consultation",
+        "description": "Drafting and reviewing sports and endorsement contracts, safeguarding athletes' legal rights in critical professional decisions and transfers, handling sports-related legal claims, and providing legal counsel on matters involving sports clubs, federations, and other sports organizations."
+      },
+      {
+        "id": "mental-recovery",
+        "title": "Dedicated Support Services",
+        "description": "From answering questions and providing guidance to following up on requests and resolving issues, our support team is available to assist members through phone and online communication, according to their needs and preferences."
+      }
+    ]
+  },
+  "process": {
+    "eyebrow": "THE CONSULTATION PROCESS",
+    "title": "A Clear Four-Step Journey, from the First Consultation to Competition",
+    "steps": [
+      {
+        "id": "step-1",
+        "order": "01",
+        "title": "Initial Consultation",
+        "description": "An open conversation about your challenges, goals, and sporting experiences. No judgment, just attentive listening and understanding."
+      },
+      {
+        "id": "step-2",
+        "order": "02",
+        "title": "Mental Performance Assessment",
+        "description": "Evaluating thought patterns, anxiety levels, and psychological strengths to develop an individualized, evidence-informed approach."
+      },
+      {
+        "id": "step-3",
+        "order": "03",
+        "title": "Personalized Program Development",
+        "description": "Creating a structured program with practical exercises tailored to your individual needs and competition schedule."
+      },
+      {
+        "id": "step-4",
+        "order": "04",
+        "title": "Ongoing Support",
+        "description": "Regular follow-up sessions, progress evaluations, and continuous adjustments based on real-world performance and competitive results."
+      }
+    ]
+  },
+  "stats": {
+    "eyebrow": "ATHLETE STATISTICS & ACHIEVEMENTS",
+    "title": "Numbers Backed by Real Training and Experience",
+    "items": [
+      { "id": "athletes", "suffix": "+", "label": "Athletes Supported" },
+      { "id": "years", "suffix": "", "label": "Years of Clinical Experience" },
+      { "id": "satisfaction", "suffix": "%", "label": "Client Satisfaction Rate" },
+      { "id": "federations", "suffix": "", "label": "Partnerships with Coaches and Sports Academies" }
+    ]
+  },
+  "testimonials": {
+    "eyebrow": "ATHLETES' VOICES",
+    "title": "Stories of Transformation That Made a Difference on the Field",
+    "quoteOpen": "“",
+    "quoteClose": "”",
+    "items": [
+      {
+        "id": "t1",
+        "name": "Arman Kiani",
+        "role": "Sprinter",
+        "sport": "National Athletics Team",
+        "quote": "Before starting this journey, pre-race anxiety had complete control over me. Now I understand my anxiety and know how to channel it into energy rather than letting it take over."
+      },
+      {
+        "id": "t2",
+        "name": "Niloofar Sadr",
+        "role": "Volleyball Team Captain",
+        "sport": "",
+        "quote": "Team psychology sessions changed something in us that technical training alone could never achieve. Our communication on the court became clearer, and that made a significant difference in our performance."
+      },
+      {
+        "id": "t3",
+        "name": "Behrad Amini",
+        "role": "Professional Swimmer",
+        "sport": "",
+        "quote": "After a prolonged injury, mental recovery proved more challenging than physical recovery. This support helped me return to the pool with confidence and without fear."
+      }
+    ]
+  },
+  "benefits": {
+    "eyebrow": "REAL RESULTS",
+    "title": "What You Gain Along the Way",
+    "intro": "The outcome of this journey goes beyond temporary peace of mind. It is about creating lasting changes in the way you approach challenges and navigate your path to success.",
+    "items": [
+      {
+        "id": "clarity",
+        "title": "Mental Clarity at Critical Moments",
+        "description": "The ability to make quick, precise decisions, even under the highest levels of competitive pressure."
+      },
+      {
+        "id": "resilience",
+        "title": "Lasting Mental Resilience",
+        "description": "Developing inner calm, recognizing and overcoming destructive thought patterns, and replacing them with emotional balance and motivation for personal growth."
+      },
+      {
+        "id": "consistency",
+        "title": "Consistent Performance",
+        "description": "Reducing the performance gap between training and competition, allowing you to deliver reliable results when it matters most."
+      },
+      {
+        "id": "growth",
+        "title": "Building a Healthy and Sustainable Self-Image Grounded in Reality",
+        "description": "Developing a healthy and stable sense of self-worth that goes beyond the outcome of a single game or sporting season."
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "FREQUENTLY ASKED QUESTIONS",
+    "title": "Answers to the Questions You May Have Before Getting Started",
+    "items": [
+      {
+        "id": "f1",
+        "question": "Who Is Yogball Designed For?",
+        "answer": "From professional and semi-professional athletes to young people developing their skills in a particular sport, Yogball is designed for anyone whose athletic performance is influenced by their mental state."
+      },
+      {
+        "id": "f2",
+        "question": "How Are the Sessions Conducted, and How Frequently Do They Take Place?",
+        "answer": "Sessions are held online, usually on a weekly basis. The exact schedule is tailored to your goals and your competition calendar."
+      },
+      {
+        "id": "f3",
+        "question": "Are the Results of This Program Measurable?",
+        "answer": "Yes. A baseline assessment is carried out at the start, and at defined intervals your progress in concentration, anxiety, and self-confidence is reviewed and documented."
+      },
+      {
+        "id": "f4",
+        "question": "How Soon Can Results Be Expected?",
+        "answer": "Many athletes notice a change in mental clarity within the first few sessions, but lasting results typically develop over several months of continuous support."
+      },
+      {
+        "id": "f5",
+        "question": "Is Session Confidentiality Guaranteed?",
+        "answer": "Absolutely. All conversations and session information are kept confidential in accordance with professional ethical standards, unless you give explicit consent."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Take the First Step Toward a Championship-Ready Mind Today",
+    "text": "Complete the form below, and our team will contact you as soon as possible to arrange your initial consultation."
+  },
+  "contact": {
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone Number",
+    "phonePlaceholder": "+98 9xx xxx xxxx",
+    "contactType": "Preferred Contact Method",
+    "contactTypes": {
+      "phone": "Phone Call",
+      "messenger": "Messaging App",
+      "email": "Email"
+    },
+    "messenger": "Messaging App",
+    "messengers": {
+      "whatsapp": "WhatsApp",
+      "telegram": "Telegram",
+      "eitaa": "Eitaa",
+      "rubika": "Rubika",
+      "bale": "Bale"
+    },
+    "email": "Email",
+    "message": "Message (Optional)",
+    "messagePlaceholder": "Write your questions or comments here...",
+    "submit": "Submit Request",
+    "submitting": "Submitting...",
+    "success": "Your request has been submitted. We will contact you shortly.",
+    "error": "Something went wrong while submitting your request. Please try again.",
+    "validation": {
+      "firstName": "First name is required",
+      "lastName": "Last name is required",
+      "phone": "Phone number is not valid",
+      "contactType": "Please choose a contact method",
+      "messenger": "Please choose a messaging app"
+    }
+  },
+  "footer": {
+    "about": "A comprehensive sports development methodology with a distinctive approach, supporting both professional and amateur athletes on their journey toward achieving their full mental potential.",
+    "instagramLabel": "Instagram",
+    "quickLinksTitle": "QUICK LINKS",
+    "quickLinks": {
+      "why": "Why Yogball",
+      "services": "Our Services",
+      "process": "Consultation Process",
+      "stats": "Achievements",
+      "testimonials": "Athletes' Testimonials",
+      "faq": "Frequently Asked Questions",
+      "lines": "Departments",
+      "staff": "Our Specialists"
+    },
+    "contactTitle": "CONTACT US",
+    "institutePhoneLabel": "Institute Phone:",
+    "institutePhoneDisplay": "+98 11 4220 6332",
+    "supportLabel": "Support:",
+    "supportDisplay": "+98 936 008 6228",
+    "rights": "All Rights Reserved."
+  },
+  "slider": {
+    "slideLabel": "Slide {n}"
+  }
+}

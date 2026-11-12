@@ -4,6 +4,8 @@ export interface PublicSliderImage {
   image: string; // URL تصویر
   caption_title: string;
   caption_text: string;
+  caption_title_en?: string;
+  caption_text_en?: string;
   order: number;
 }
 
@@ -20,6 +22,8 @@ export interface Slider {
   image: string;
   caption_title: string;
   caption_text: string;
+  caption_title_en: string;
+  caption_text_en: string;
   order: number;
   is_active: boolean;
 }
@@ -51,6 +55,8 @@ export interface SliderImageCreateInput {
   image: File;
   caption_title?: string;
   caption_text?: string;
+  caption_title_en?: string;
+  caption_text_en?: string;
   order?: number;
   is_active?: boolean;
 }
@@ -59,4 +65,4 @@ export type SliderImageUpdateInput = Partial<
   Omit<SliderImageCreateInput, "image">
 > & {
   image?: File; // اگر ارسال نشود، عکس قبلی می‌ماند
-};
+};

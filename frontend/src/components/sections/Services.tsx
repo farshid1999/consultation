@@ -1,14 +1,23 @@
 "use client";
 
 import {motion} from "framer-motion";
-import {services} from "@/data/content";
+import {serviceMeta} from "@/data/content";
+import {useLang} from "@/components/providers/LanguageProvider";
+import {format} from "@/locales";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 import {cn} from "@/lib/utils";
-import type {ServiceItem} from "@/types";
 import Image from "next/image";
 
-function ServiceCard({service, index}: { service: ServiceItem; index: number }) {
-    const Icon = service.icon;
+interface ServiceView {
+    id: string;
+    title: string;
+    description: string;
+    logo?: string;
+    layout: "stacked" | "inline" | "framed" | "overlap";
+}
+
+function ServiceCard({service, index}: { service: ServiceView; index: number }) {
+    const {t} = useLang();
 
     return (
         <RevealOnScroll
@@ -36,7 +45,7 @@ function ServiceCard({service, index}: { service: ServiceItem; index: number }) 
                         className="relative z-10 mb-5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-cream/10 bg-white p-2">
                         <Image
                             src={service.logo}
-                            alt={`لوگوی ${service.title}`}
+                            alt={format(t.services.logoAlt, {title: service.title})}
                             width={64}
                             height={64}
                             className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
@@ -120,22 +129,29 @@ function ServiceCard({service, index}: { service: ServiceItem; index: number }) 
 }
 
 export default function Services() {
+    const {t} = useLang();
+
+    const items = t.services.items.flatMap((item) => {
+        const meta = serviceMeta[item.id];
+        return meta ? [{...item, logo: meta.logo, layout: meta.layout}] : [];
+    });
+
     return (
-        <section id="services" dir="rtl" className="relative px-6 py-28 md:px-10 lg:px-16">
+        <section id="services" className="relative px-6 py-28 md:px-10 lg:px-16">
             <div className="mx-auto max-w-7xl">
-                <div className="flex flex-col items-end text-right">
+                <div className="flex flex-col items-end text-start">
                     <RevealOnScroll direction="right">
-                        <span className="text-caption font-semibold text-gold">خدمات تخصصی</span>
+                        <span className="text-caption font-semibold text-gold">{t.services.eyebrow}</span>
                     </RevealOnScroll>
                     <RevealOnScroll direction="right" delay={0.08}>
                         <h2 className="mt-4 max-w-2xl text-h2 font-extrabold text-cream">
-                            مسیری متناسب با رشته، هدف و شخصیت ورزشی شما
+                            {t.services.title}
                         </h2>
                     </RevealOnScroll>
                 </div>
 
                 <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {services.map((service, index) => (
+                    {items.map((service, index) => (
                         <ServiceCard key={service.id} service={service} index={index}/>
                     ))}
                 </div>

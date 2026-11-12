@@ -5,6 +5,7 @@ import Link from "next/link";
 import {AnimatePresence, motion} from "framer-motion";
 import {FiChevronDown, FiCornerDownLeft, FiLayers} from "react-icons/fi";
 import {usePublicLines} from "@/hooks/useLines";
+import {useLang} from "@/components/providers/LanguageProvider";
 
 /* ------------------------------------------------------------------ */
 /* ساخت درخت والد/فرزند از روی لیست فلتی که usePublicLines برمی‌گرداند */
@@ -82,6 +83,7 @@ function LineNode({
 /* خود دراپ‌داون — با هاور باز می‌شود                                   */
 /* ------------------------------------------------------------------ */
 export default function LinesNavDropdown({label}: { label: string }) {
+    const {t} = useLang();
     const [open, setOpen] = useState(false);
     const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -123,7 +125,7 @@ export default function LinesNavDropdown({label}: { label: string }) {
                     >
                         <div className="mb-3 flex items-center gap-2 px-1 text-[11px] font-medium text-gold/70">
                             <FiLayers size={13}/>
-                            بخش‌های تخصصی
+                            {t.nav.linesMenuTitle}
                         </div>
 
                         <div className="max-h-[24rem] space-y-1 overflow-y-auto pl-1 pr-1">
