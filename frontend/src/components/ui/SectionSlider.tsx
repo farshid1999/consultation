@@ -5,6 +5,8 @@ import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { PublicSliderImage } from "@/types";
+import { useLang } from "@/components/providers/LanguageProvider";
+import { format } from "@/locales";
 
 interface ImageSliderProps {
   images: PublicSliderImage[];
@@ -20,6 +22,7 @@ export default function SectionSlider({
   intervalSeconds,
 }: ImageSliderProps) {
   const reduced = useReducedMotion();
+  const { lang, isRtl, t } = useLang();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -42,15 +45,24 @@ export default function SectionSlider({
   }, [count, paused, reduced, intervalSeconds, current, goTo]);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
-    // سایت RTL است: کشیدن به راست = اسلاید بعدی
-    if (info.offset.x > 50) goTo(current + 1);
-    else if (info.offset.x < -50) goTo(current - 1);
+    // RTL: کشیدن به راست = اسلاید بعدی | LTR: کشیدن به چپ = اسلاید بعدی
+    const forward = isRtl ? info.offset.x > 50 : info.offset.x < -50;
+    const backward = isRtl ? info.offset.x < -50 : info.offset.x > 50;
+    if (forward) goTo(current + 1);
+    else if (backward) goTo(current - 1);
   };
 
   const active = images[current];
   if (!active) return null;
 
-  const hasCaption = Boolean(active.caption_title || active.caption_text);
+  // کپشن انگلیسی از فیلدهای *_en می‌آید؛ اگر ادمین هنوز پر نکرده باشد، کپشن نمایش داده نمی‌شود
+  const captionOf = (img: PublicSliderImage) =>
+    lang === "en"
+      ? { title: img.caption_title_en ?? "", text: img.caption_text_en ?? "" }
+      : { title: img.caption_title, text: img.caption_text };
+
+  const caption = captionOf(active);
+  const hasCaption = Boolean(caption.title || caption.text);
 
   return (
     <div
@@ -65,7 +77,7 @@ export default function SectionSlider({
         <motion.img
           key={img.id}
           src={img.image}
-          alt={img.caption_title || ""}
+          alt={captionOf(img).title}
           aria-hidden={i !== current}
           draggable={false}
           loading={i === 0 ? "eager" : "lazy"}
@@ -103,14 +115,14 @@ export default function SectionSlider({
               transition={{ duration: reduced ? 0 : 0.4 }}
               className="rounded-2xl border border-white/25 bg-white/10 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.25)] backdrop-blur-md"
             >
-              {active.caption_title && (
+              {caption.title && (
                 <p className="text-caption font-semibold text-gold [text-shadow:0_1px_6px_rgba(0,0,0,0.55)]">
-                  {active.caption_title}
+                  {caption.title}
                 </p>
               )}
-              {active.caption_text && (
+              {caption.text && (
                 <p className="mt-1 text-body text-cream [text-shadow:0_1px_6px_rgba(0,0,0,0.55)]">
-                  {active.caption_text}
+                  {caption.text}
                 </p>
               )}
             </motion.div>
@@ -126,7 +138,7 @@ export default function SectionSlider({
               key={img.id}
               type="button"
               onClick={() => goTo(i)}
-              aria-label={`اسلاید ${i + 1}`}
+              aria-label={format(t.slider.slideLabel, { n: i + 1 })}
               aria-current={i === current}
               className={cn(
                 "h-1.5 rounded-full transition-all",

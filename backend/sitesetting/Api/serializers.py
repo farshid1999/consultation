@@ -1,3 +1,5 @@
+import ipaddress
+
 from rest_framework import serializers
 from sitesetting.models import (
     BackgroundMusic,
@@ -65,7 +67,15 @@ class BackgroundMusicSerializer(serializers.ModelSerializer):
 class SliderImagePublicSerializer(serializers.ModelSerializer):
     class Meta:
         model = SliderImage
-        fields = ["id", "image", "caption_title", "caption_text", "order"]
+        fields = [
+            "id",
+            "image",
+            "caption_title",
+            "caption_text",
+            "caption_title_en",
+            "caption_text_en",
+            "order",
+        ]
 
 
 class SliderPublicSerializer(serializers.ModelSerializer):
@@ -85,6 +95,8 @@ class SliderImageAdminSerializer(serializers.ModelSerializer):
             "image",
             "caption_title",
             "caption_text",
+            "caption_title_en",
+            "caption_text_en",
             "order",
             "is_active",
         ]
@@ -157,11 +169,21 @@ class SiteViewSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_client_ip(request):
+        candidates = []
+
         forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-
         if forwarded_for:
-            return forwarded_for.split(',')[0].strip()
+            candidates.append(forwarded_for.split(',')[0].strip())
 
-        return request.META.get('REMOTE_ADDR')
+        candidates.append(request.META.get('REMOTE_ADDR', ''))
+
+        # فقط IP معتبر (IPv4 یا IPv6) قبول می‌شود؛ مقدار خراب باعث خطای دیتابیس می‌شد
+        for candidate in candidates:
+            try:
+                return str(ipaddress.ip_address(candidate))
+            except ValueError:
+                continue
+
+        return '0.0.0.0'
 
 

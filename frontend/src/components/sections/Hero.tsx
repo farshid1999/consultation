@@ -2,7 +2,7 @@
 
 import {useEffect, useRef, useState} from "react";
 import {motion} from "framer-motion";
-import {FiArrowLeft, FiCheck} from "react-icons/fi";
+import {FiArrowLeft, FiArrowRight, FiCheck} from "react-icons/fi";
 import {
     PiBrainDuotone,
     PiHeartbeatDuotone,
@@ -12,12 +12,8 @@ import Button from "@/components/ui/Button";
 import GlassCard from "@/components/ui/GlassCard";
 import {toPersianDigits} from "@/lib/utils";
 import {usePublicSlider} from "@/hooks/useSliders";
-
-const featureList = [
-    "طراحی برنامه عمومی و تخصصی به صورت مستقل و با توجه به نیاز های هر ورزشکار",
-    "همراهی مستمر در طول دوران فعالیت ورزشی",
-    "پشتیبانی دائمی متخصصان در طول دوره",
-];
+import {useLang} from "@/components/providers/LanguageProvider";
+import {format} from "@/locales";
 
 // const cubeImages = ["/test2.webp", "/logo.webp", "/test3.webp", "/logo.webp"];
 const SLIDER_KEY = "hero-cube";
@@ -70,6 +66,7 @@ function MobileSlider({
     images: string[];
     intervalSeconds: number;
 }) {
+    const {t} = useLang();
     const [index, setIndex] = useState(0);
     const current = index < images.length ? index : 0;
 
@@ -91,7 +88,7 @@ function MobileSlider({
                 <img
                     key={src + i}
                     src={src}
-                    alt="روان‌شناسی ورزشی"
+                    alt={t.hero.imageAlt}
                     style={{
                         position: "absolute",
                         inset: 0,
@@ -109,7 +106,7 @@ function MobileSlider({
                         <button
                             key={i}
                             onClick={() => setIndex(i)}
-                            aria-label={`تصویر ${i + 1}`}
+                            aria-label={format(t.hero.slideLabel, {n: i + 1})}
                             style={{
                                 width: i === current ? 20 : 6,
                                 height: 6,
@@ -209,6 +206,7 @@ interface CubeFaceProps {
 }
 
 function CubeFace({transform, src, decorative}: CubeFaceProps) {
+    const {t} = useLang();
     return (
         <div
             style={{
@@ -229,7 +227,7 @@ function CubeFace({transform, src, decorative}: CubeFaceProps) {
             {src && (
                 <img
                     src={src}
-                    alt="روان‌شناسی ورزشی"
+                    alt={t.hero.imageAlt}
                     style={{
                         width: "100%",
                         height: "100%",
@@ -244,6 +242,8 @@ function CubeFace({transform, src, decorative}: CubeFaceProps) {
 
 export default function Hero() {
     const {images, intervalSeconds} = useHeroImages();
+    const {t, isRtl} = useLang();
+    const ArrowIcon = isRtl ? FiArrowLeft : FiArrowRight;
 
     return (
         <>
@@ -262,7 +262,6 @@ export default function Hero() {
 
             <section
                 id="hero"
-                dir="rtl"
                 className="relative isolate flex min-h-screen items-center overflow-hidden px-6 pt-32 pb-20 md:px-10 lg:px-16"
             >
                 <div
@@ -272,25 +271,25 @@ export default function Hero() {
                         variants={container}
                         initial="hidden"
                         animate="show"
-                        className="order-1 text-right"
+                        className="order-1 text-start"
                     >
                         <motion.div
                             variants={fadeUp}
                             className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/25 bg-gold/[0.08] px-4 py-1.5 text-caption font-medium text-gold"
                         >
-                            یوگبال
+                            {t.hero.badge}
                         </motion.div>
 
                         <motion.h1
                             variants={fadeUp}
                             className="text-4xl font-extrabold text-cream"
                         >
-                            <span className="sr-only">یوگبال، </span>
-                            ذهنی آرام به سوی{" "}
+                            <span className="sr-only">{t.hero.srPrefix}</span>
+                            {t.hero.titleBefore}{" "}
                             <span className="relative inline-block text-gold">
-                قهرمانی
+                {t.hero.titleHighlight}
                 <svg
-                    className="absolute -bottom-2 right-0 w-full"
+                    className="absolute -bottom-2 start-0 w-full"
                     height="10"
                     viewBox="0 0 200 10"
                     fill="none"
@@ -315,8 +314,7 @@ export default function Hero() {
                             variants={fadeUp}
                             className="mt-6 max-w-md text-body text-cream/65"
                         >
-                            یوگبال متدی جامع و تخصصی برای ورزشکاران با رویکردی متفاوت از روز
-                            نخست تا آخرین روز فعالیت حرفه ای
+                            {t.hero.subtitle}
                         </motion.p>
                         <motion.div
                             variants={fadeUp}
@@ -324,7 +322,7 @@ export default function Hero() {
                         >
                             <Button
                                 variant="primary"
-                                icon={<FiArrowLeft aria-hidden="true"/>}
+                                icon={<ArrowIcon aria-hidden="true"/>}
                                 onClick={() => {
                                     document.getElementById("contactForm")?.scrollIntoView({
                                         behavior: "smooth",
@@ -332,13 +330,13 @@ export default function Hero() {
                                     });
                                 }}
                             >
-                                رزرو جلسه‌ی مشاوره
+                                {t.hero.ctaPrimary}
                             </Button>
-                            <Button variant="secondary">آشنایی با فرآیند</Button>
+                            <Button variant="secondary">{t.hero.ctaSecondary}</Button>
                         </motion.div>
 
                         <motion.ul variants={fadeUp} className="mt-10 flex flex-col gap-3">
-                            {featureList.map((feature) => (
+                            {t.hero.features.map((feature) => (
                                 <li
                                     key={feature}
                                     className="flex items-center gap-2.5 text-sm text-cream/55"

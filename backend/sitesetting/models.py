@@ -1,7 +1,6 @@
 import os
 import uuid
 
-from click import Choice
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
@@ -112,6 +111,10 @@ class SliderImage(BaseModel):
     caption_title = models.CharField(max_length=100, blank=True)
     caption_text = models.TextField(blank=True)
 
+    # نسخه‌ی انگلیسی کپشن (لندینگ دو زبانه)
+    caption_title_en = models.CharField(max_length=100, blank=True)
+    caption_text_en = models.TextField(blank=True)
+
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -128,5 +131,6 @@ class SiteView(BaseModel):
         PERSIAN = 'fa', 'فارسی'
         ENGLISH = 'en', 'انگلیسی'
 
-    ip = models.CharField(max_length=15)
+    # GenericIPAddressField هم IPv4 و هم IPv6 (تا ۴۵ کاراکتر) را پوشش می‌دهد
+    ip = models.GenericIPAddressField(unique=True)
     language = models.CharField(max_length=10, choices=LanguageType.choices, default=LanguageType.PERSIAN)

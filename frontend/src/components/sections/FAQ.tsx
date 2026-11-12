@@ -3,24 +3,26 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useId, useState } from "react";
 import { FiPlus } from "react-icons/fi";
-import { faqs } from "@/data/content";
+import { useLang } from "@/components/providers/LanguageProvider";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 import { cn } from "@/lib/utils";
 
 export default function FAQ() {
+  const { t } = useLang();
+  const faqs = t.faq.items;
   const [openId, setOpenId] = useState<string | null>(faqs[0]?.id ?? null);
   const baseId = useId();
 
   return (
-    <section id="faq" dir="rtl" className="relative px-6 py-28 md:px-10 lg:px-16">
+    <section id="faq" className="relative px-6 py-28 md:px-10 lg:px-16">
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <RevealOnScroll direction="fade">
-            <span className="text-caption font-semibold text-gold">پرسش‌های متداول</span>
+            <span className="text-caption font-semibold text-gold">{t.faq.eyebrow}</span>
           </RevealOnScroll>
           <RevealOnScroll direction="up" delay={0.08}>
             <h2 className="mx-auto mt-4 max-w-lg text-h2 font-extrabold text-cream">
-              پاسخ به پرسش‌هایی که پیش از شروع دارید
+              {t.faq.title}
             </h2>
           </RevealOnScroll>
         </div>
@@ -43,7 +45,7 @@ export default function FAQ() {
                     aria-expanded={isOpen}
                     aria-controls={panelId}
                     onClick={() => setOpenId(isOpen ? null : faq.id)}
-                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-right focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                   >
                     <span className="text-base font-bold text-cream">{faq.question}</span>
                     <motion.span

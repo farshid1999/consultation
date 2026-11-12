@@ -11,10 +11,13 @@ import {useCurrentUser} from "@/hooks/useCurrentUser";
 import Link from "next/link";
 import {useUserPath} from "@/hooks/useUserPath";
 import {useLogout} from "@/hooks/useAuth";
+import {useLang} from "@/components/providers/LanguageProvider";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const {t} = useLang();
 
     const {role, basePath} = useUserPath();
     const { mutate: logout } = useLogout();
@@ -71,24 +74,24 @@ export default function Navbar() {
                     {/* اضافه کردن flex-nowrap برای اطمینان از افقی ماندن آیتم‌ها */}
                     <nav
                         className="hidden flex-nowrap items-center gap-6 lg:flex xl:gap-8"
-                        aria-label="ناوبری اصلی"
+                        aria-label={t.nav.ariaMain}
                     >
                         <img
                             src="/logo.webp"
-                            alt="لوگو سفیران اوج آرامش"
+                            alt={t.common.logoAlt}
                             className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-gold/30 md:h-14 md:w-14"
                         />
                         {navLinks.map((link) =>
                             link.id === "lines" ? (
-                                <LinesNavDropdown key={link.id} label={link.label}/>
+                                <LinesNavDropdown key={link.id} label={t.nav.links.lines}/>
                             ) : (
                                 <a
                                     key={link.id}
                                     href={link.href}
                                     // اضافه کردن whitespace-nowrap برای جلوگیری از شکستن متن
-                                    className="relative whitespace-nowrap text-caption font-medium text-cream/70 transition-colors duration-300 hover:text-gold focus-visible:outline-none focus-visible:text-gold after:absolute after:-bottom-1.5 after:right-0 after:h-px after:w-0 after:bg-gold after:transition-all after:duration-300 hover:after:w-full"
+                                    className="relative whitespace-nowrap text-caption font-medium text-cream/70 transition-colors duration-300 hover:text-gold focus-visible:outline-none focus-visible:text-gold after:absolute after:-bottom-1.5 after:start-0 after:h-px after:w-0 after:bg-gold after:transition-all after:duration-300 hover:after:w-full"
                                 >
-                                    {link.label}
+                                    {t.nav.links[link.id as keyof typeof t.nav.links]}
                                 </a>
                             )
                         )}
@@ -96,12 +99,13 @@ export default function Navbar() {
 
 
                     {/* Action Area: Login or Profile */}
-                    <div className="relative shrink-0">
+                    <div className="relative flex shrink-0 items-center gap-3">
+                        <LanguageSwitcher/>
                         {!user ? (
                             // حالت لاگین نبودن
                             <Link href="/login">
                                 <Button variant="primary" className="px-4 py-2 text-xs lg:px-6 lg:py-2.5 lg:text-sm">
-                                    ورود / ثبت‌نام
+                                    {t.nav.login}
                                 </Button>
                             </Link>
                         ) : (
@@ -109,7 +113,7 @@ export default function Navbar() {
                             <button
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                                 onBlur={() => setTimeout(() => setIsProfileOpen(false), 200)}
-                                className="group flex max-w-[200px] items-center gap-2 rounded-full bg-cream/5 px-2 py-1.5 pr-3 transition-all hover:bg-cream/10 focus:outline-none focus:ring-2 focus:ring-gold/50 md:max-w-none"
+                                className="group flex max-w-[200px] items-center gap-2 rounded-full bg-cream/5 px-2 py-1.5 ps-3 transition-all hover:bg-cream/10 focus:outline-none focus:ring-2 focus:ring-gold/50 md:max-w-none"
                             >
                                 <div className="flex flex-col items-end leading-tight">
                   <span className="truncate text-sm font-bold text-gold">
@@ -129,25 +133,25 @@ export default function Navbar() {
                                 initial={{opacity: 0, y: 10}}
                                 animate={{opacity: 1, y: 0}}
                                 exit={{opacity: 0, y: 10}}
-                                className="absolute left-0 top-full mt-2 w-48 rounded-2xl border border-cream/10 bg-deep/95 p-2 shadow-xl backdrop-blur-xl"
+                                className="absolute end-0 top-full mt-2 w-48 rounded-2xl border border-cream/10 bg-deep/95 p-2 shadow-xl backdrop-blur-xl"
                             >
                                 <Link
                                     href="/profile"
                                     className="block rounded-xl px-4 py-2 text-sm text-cream/80 hover:bg-gold/10 hover:text-gold"
                                 >
-                                    پروفایل من
+                                    {t.nav.profile}
                                 </Link>
                                 <Link
                                     href={`${basePath}/`}
                                     className="block rounded-xl px-4 py-2 text-sm text-cream/80 hover:bg-gold/10 hover:text-gold"
                                 >
-                                    داشبورد
+                                    {t.nav.dashboard}
                                 </Link>
                                 <button
                                     onClick={() => logout()}
-                                    className="w-full rounded-xl px-4 py-2 text-right text-sm text-red-400 hover:bg-red-500/10"
+                                    className="w-full rounded-xl px-4 py-2 text-start text-sm text-red-400 hover:bg-red-500/10"
                                 >
-                                    خروج
+                                    {t.nav.logout}
                                 </button>
                             </motion.div>
                         )}
@@ -162,8 +166,7 @@ export default function Navbar() {
 
             {/* ── Mobile Bottom Nav ────────────────────────────────────────── */}
             <nav
-                dir="rtl"
-                aria-label="ناوبری موبایل"
+                aria-label={t.nav.ariaMobile}
                 className="fixed bottom-0 inset-x-0 z-50 lg:hidden border-t border-cream/10 bg-deep/90 backdrop-blur-xl"
             >
                 <ul className="flex items-center justify-around px-1 py-2 pb-safe">
@@ -173,7 +176,7 @@ export default function Navbar() {
                                 href={link.href}
                                 className="flex items-center justify-center px-3 py-2 rounded-xl text-[11px] font-medium text-cream/55 hover:text-gold hover:bg-gold/[0.07] transition-all duration-200"
                             >
-                                {link.label}
+                                {t.nav.links[link.id as keyof typeof t.nav.links]}
                             </a>
                         </li>
                     ))}
